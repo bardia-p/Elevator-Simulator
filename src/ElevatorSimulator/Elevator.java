@@ -9,18 +9,18 @@ package ElevatorSimulator;
  *
  */
 public class Elevator implements Runnable {
-	Scheduler messageQueue; 
+	Scheduler scheduler; 
 	
-	Elevator(Scheduler messageQueue){
-		this.messageQueue = messageQueue;
+	Elevator(Scheduler scheduler){
+		this.scheduler = scheduler;
 	}
 	
 	@Override
 	public void run() {
-		/* while true
-			messageQueue.send()
-			messageQueue.receive()
-		*/
+		while(true) {
+			Message reply = this.scheduler.receive();
+			Message message = new Message(SenderType.ELEVATOR, "<timestamp>", reply.floorNumber, "HI", MessageType.READY_TO_MOVE);
+			this.scheduler.send(message);
+		}
 	}
-
 }
