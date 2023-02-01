@@ -19,6 +19,7 @@ public class Elevator implements Runnable {
 	public void run() {
 		while(true) {
 			Message reply = this.scheduler.receive();
+			System.out.println("Elevator ARRIVED");
 			Message message = new Message(SenderType.ELEVATOR, "<timestamp>", reply.floorNumber, "HI", MessageType.READY_TO_MOVE);
 			this.scheduler.send(message);
 		}
