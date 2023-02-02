@@ -1,5 +1,7 @@
 package ElevatorSimulator;
 
+import ElevatorSimulator.Messages.*;
+
 /**
  * The scheduler subsystem:
  * - Removes a message from the elevator and sends to the floor.
@@ -72,7 +74,7 @@ public class Scheduler implements Runnable{
 	 * @param m the message to forward to the appropriate buffer.
 	 */
 	private void forwardMessage(Message m) {		
-		if (m.sender == SenderType.ELEVATOR) {
+		if (m.getSender() == SenderType.ELEVATOR) {
 			toFloor.put(m);
 		} else {
 			toElevator.put(m);;

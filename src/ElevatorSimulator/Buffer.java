@@ -2,6 +2,8 @@ package ElevatorSimulator;
 
 import java.util.ArrayDeque;
 
+import ElevatorSimulator.Messages.*;
+
 /**
  * An implementation of a simple blocking queue.
  * 
