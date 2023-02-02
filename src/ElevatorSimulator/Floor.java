@@ -11,6 +11,7 @@ import java.util.Scanner;
 import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messages.SenderType;
 
 /**
  * @author Guy Morgenshtern
@@ -69,7 +70,7 @@ public class Floor implements Runnable {
 			Message request = elevatorRequests.poll();
 			scheduler.send(request);
 			
-//			Message receive = scheduler.receive();
+			Message receive = scheduler.receive();
 			
 			try {
 				Thread.sleep(2000);
@@ -80,7 +81,7 @@ public class Floor implements Runnable {
 			
 		}
 		
-		scheduler.send(new KillMessage("No more floor requests remaining"));
+		scheduler.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));
 	}
 
 }

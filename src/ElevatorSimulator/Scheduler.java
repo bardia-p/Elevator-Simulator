@@ -21,6 +21,8 @@ public class Scheduler implements Runnable{
 	// All the messages sent to the floor.
 	private Buffer toFloor;
 	
+	private boolean shouldRun;
+	
 	/**
 	 * Default constructor for the Scheduler.
 	 * Initializes all the appropriate buffer.
@@ -30,6 +32,7 @@ public class Scheduler implements Runnable{
 		this.newMessages = new Buffer();
 		this.toElevator = new Buffer();
 		this.toFloor = new Buffer();
+		this.shouldRun = true;
 	}
 	
 	/**
@@ -87,9 +90,14 @@ public class Scheduler implements Runnable{
 	 */
 	@Override
 	public void run() {
-		while(true) {
+		while(this.shouldRun) {
 			Message newMessage = checkForNewMessages();
-			forwardMessage(newMessage);
+			
+			if (newMessage.getType() == MessageType.KILL && newMessage.getSender() == SenderType.ELEVATOR){
+				this.shouldRun = false;
+			} else {
+				forwardMessage(newMessage);
+			}
 		}
 	}
 	
