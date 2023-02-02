@@ -16,5 +16,9 @@ public class RequestElevatorMessage extends Message {
 	String getDescription() {
 		return super.getDescription() + floorNumber + "\n" + destination + "\n" + direction + "\n";
 	}
+	
+	public int getDestination() {
+		return this.destination;
+	}
 
 }

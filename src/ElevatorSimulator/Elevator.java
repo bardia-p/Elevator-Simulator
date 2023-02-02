@@ -18,9 +18,8 @@ public class Elevator implements Runnable {
 	@Override
 	public void run() {
 		while(true) {
-			Message reply = this.scheduler.receive();
-			System.out.println("Elevator ARRIVED");
-			Message message = new Message(SenderType.ELEVATOR, "<timestamp>", reply.floorNumber, "HI", MessageType.READY_TO_MOVE);
+			RequestElevatorMessage reply = (RequestElevatorMessage) this.scheduler.receive();
+			ArrivedElevatorMessage message = new ArrivedElevatorMessage("<timestamp>", reply.getDestination());
 			this.scheduler.send(message);
 		}
 	}
