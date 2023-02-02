@@ -19,12 +19,7 @@ public class RequestElevatorMessage extends Message {
 		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction + " ";
 	}
 	
-<<<<<<< HEAD:src/ElevatorSimulator/RequestElevatorMessage.java
 	public int getDestination() {
 		return this.destination;
-	}
-
-=======
-	
->>>>>>> 68f26bcd99a2450ba25164f5becac837046c48fe:src/ElevatorSimulator/Messages/RequestElevatorMessage.java
+	}	
 }
