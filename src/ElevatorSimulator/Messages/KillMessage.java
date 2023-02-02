@@ -8,6 +8,9 @@ public class KillMessage extends Message{
 		this.message = message;
 	}
 	
+	/**
+	 * @return String - description
+	 */
 	public String getDescription() {
 		return super.getDescription() + "\n" + message;
 	}
