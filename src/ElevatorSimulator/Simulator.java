@@ -20,11 +20,14 @@ public class Simulator {
 		
 		schedulerThread = new Thread(scheduler, "Scheduler");
 		elevatorThread = new Thread(new Elevator(scheduler), "ELEVATOR");
-		floorThread = new Thread(new Floor(scheduler), "FLOOR");
+		floorThread = new Thread( new Floor(scheduler, "src/ElevatorSimulator/resources/elevator_input.csv"), "FLOOR");
+		
+		
 		
 		schedulerThread.start();
 		elevatorThread.start();
 		floorThread.start();
+		
 	}
 
 }
