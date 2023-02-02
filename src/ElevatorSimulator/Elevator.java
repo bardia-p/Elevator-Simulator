@@ -3,6 +3,8 @@
  */
 package ElevatorSimulator;
 
+import ElevatorSimulator.Messages.*;
+
 /**
  * @author Andre Hazim
  * @author Kyra Lothrop
@@ -19,7 +21,7 @@ public class Elevator implements Runnable {
 	public void run() {
 		while(true) {
 			RequestElevatorMessage reply = (RequestElevatorMessage) this.scheduler.receive();
-			ArrivedElevatorMessage message = new ArrivedElevatorMessage("<timestamp>", reply.getDestination());
+			ArrivedElevatorMessage message = new ArrivedElevatorMessage(reply.getTimestamp(), reply.getDestination());
 			this.scheduler.send(message);
 		}
 	}
