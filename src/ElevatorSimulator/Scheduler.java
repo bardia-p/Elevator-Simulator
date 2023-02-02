@@ -1,158 +1,93 @@
-/**
- * 
- */
 package ElevatorSimulator;
 
 /**
+ * The scheduler subsystem:
+ * - Removes a message from the elevator and sends to the floor.
+ * - Removes a message from the floor and sends to the elevator.
+ * 
  * @author Andre Hazim
  * @author Bardia Parmoun
- * @author Guy Morgenshtern
- * @author Kyra Lothrop
- * @author Sarah Chow
  *
  */
 public class Scheduler implements Runnable{
-	// The queue used to receive messages from the elevator.
-	private MessageQueue fromElevator;
-	// The queue used to send messages to the elevator
-	private MessageQueue toElevator;
+	// All the new messages for the scheduler.
+	private Buffer newMessages;
+	
+	// All the messages sent to the elevator.
+	private Buffer toElevator;
 
-	// The queue used to receive messages from the floor.
-	private MessageQueue fromFloor;	
-	// The queue used to send messages to the floor.
-	private MessageQueue toFloor;
+	// All the messages sent to the floor.
+	private Buffer toFloor;
 	
 	/**
 	 * Default constructor for the Scheduler.
+	 * Initializes all the appropriate buffer.
 	 * 
-	 * Initializes all the appropriate queues.
 	 */
 	public Scheduler() {
-		this.fromElevator = new MessageQueue();
-		this.fromFloor = new MessageQueue();
-		
-		this.toElevator = new MessageQueue();
-		this.toFloor = new MessageQueue();
+		this.newMessages = new Buffer();
+		this.toElevator = new Buffer();
+		this.toFloor = new Buffer();
 	}
 	
 	/**
-	 * Sends a message to the message queue.
+	 * Adds a message to the newMessages buffer.
 	 * 
-	 * @param m the message to send to the queue.
+	 * @param m the message to send to the buffer.
 	 */
-	public synchronized void send(Message m) {
-		// Finds which queue to include the message to.
-		MessageQueue activeQueue;
-		if (m.sender == SenderType.ELEVATOR) {
-			activeQueue = fromElevator;
-		} else {
-			activeQueue = fromFloor;
-		}
-		
-		// Ensures the queue is empty.
-		while(!activeQueue.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				System.err.println(e);
-			}
-		}
-		
-		activeQueue.tryPut(m);
-		
-		notifyAll();
+	public void send(Message m) {		
+		newMessages.put(m);
 	}
 	
 	/**
-	 * Receives a message from the message queue.
+	 * Receives a message from the message buffer.
 	 * Decides the appropriate queue to choose from based on thread name.
 	 *
-	 * @return the message within the queue.
+	 * @return the message within the buffer.
 	 */
-	public synchronized Message receive() {
-		// Finds the appropriate the caller based on the thread name.
-		SenderType caller;
+	public Message receive() {
+		Message received;
+		
 		if (Thread.currentThread().getName().equals("ELEVATOR")) {
-			caller = SenderType.ELEVATOR;
-		} else if (Thread.currentThread().getName().equals("FLOOR")){
-			caller = SenderType.FLOOR;
+			received = toElevator.get();
 		} else {
-			caller = null;
-		}
-
-		// Ensures the queue is empty.
-		while ((toFloor.isEmpty() && caller == SenderType.FLOOR) || 
-				(toElevator.isEmpty() && caller == SenderType.ELEVATOR)){
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				System.err.println(e);
-			}
+			received = toFloor.get();
 		}
 		
-		// Finds the reply message.
-		Message reply;
-		
-		if (!toFloor.isEmpty() && caller == SenderType.FLOOR){
-			reply = toFloor.tryGet();
-		} else {
-			reply = toElevator.tryGet();
-		}
-		
-		notifyAll();
-		
-		return reply;
+		return received;		
 	}
 	
 	/**
-	 * Polls its receive queues to see if a new message is out.
+	 * Polls its newMessages buffer to see if a new message is sent.
+	 * 
+	 * @return the new message.
 	 */
-	private synchronized void poll() {
-		// Polling both input queues.
-		while (fromElevator.isEmpty() && fromFloor.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				System.err.println(e);
-			}
-		}
-		
-		// Receives the message from the appropriate queue.
-		Message received;
-		if (!fromElevator.isEmpty()) {
-			received = fromElevator.tryGet();
-		} else {
-			received = fromFloor.tryGet();
-		}
-		
-		/*Message reply = received;
-		
-		switch(received.type) {
-		case REQUEST_ELEVATOR, ADD_STOP:
-			reply.type = MessageType.MOVE_TO;
-			break;
-		case READY_TO_MOVE:
-			reply.type = MessageType.ARRIVED;
-			break;
-		default:
-			break;
-		}*/
-		
-		
-		// Puts the message in the respective send queue.
-		if (received.sender == SenderType.ELEVATOR) {
-			toFloor.tryPut(received);
-		} else {
-			toElevator.tryPut(received);
-		}
-		
-		notifyAll();
+	private Message checkForNewMessages() {
+		return newMessages.get();		
 	}
 	
+	/**
+	 * Forwards the new message to the proper receiving buffer.
+	 * 
+	 * @param m the message to forward to the appropriate buffer.
+	 */
+	private void forwardMessage(Message m) {		
+		if (m.sender == SenderType.ELEVATOR) {
+			toFloor.put(m);
+		} else {
+			toElevator.put(m);;
+		}
+	}
+	
+	
+	/**
+	 * The run method for the main logic of the scheduler.
+	 */
 	@Override
 	public void run() {
 		while(true) {
-			this.poll();
+			Message newMessage = checkForNewMessages();
+			forwardMessage(newMessage);
 		}
 	}
 	

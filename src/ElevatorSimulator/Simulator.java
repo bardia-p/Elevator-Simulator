@@ -18,13 +18,16 @@ public class Simulator {
 		
 		scheduler = new Scheduler();
 		
-		schedulerThread = new Thread(scheduler, "Scheduler");
+		schedulerThread = new Thread(scheduler, "SCHEDULER");
 		elevatorThread = new Thread(new Elevator(scheduler), "ELEVATOR");
-		floorThread = new Thread(new Floor(scheduler), "FLOOR");
+		floorThread = new Thread( new Floor(scheduler, "src/ElevatorSimulator/resources/elevator_input.csv"), "FLOOR");
+		
+		
 		
 		schedulerThread.start();
 		elevatorThread.start();
 		floorThread.start();
+		
 	}
 
 }
