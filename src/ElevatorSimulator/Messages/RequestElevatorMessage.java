@@ -1,4 +1,6 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Messages;
+
+import ElevatorSimulator.DirectionType;
 
 public class RequestElevatorMessage extends Message {
 	private int floorNumber;
@@ -6,15 +8,16 @@ public class RequestElevatorMessage extends Message {
 	private DirectionType direction;
 	
 	public RequestElevatorMessage(String timestamp, int floorNumber,  DirectionType direction, int destination) {
-		super(SenderType.FLOOR, timestamp);
+		super(SenderType.FLOOR, timestamp, MessageType.REQUEST);
 		this.floorNumber = floorNumber;
 		this.destination = destination;
 		this.direction = direction;
 	}
 	
 	@Override
-	String getDescription() {
-		return super.getDescription() + floorNumber + "\n" + destination + "\n" + direction + "\n";
+	public String getDescription() {
+		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction + " ";
 	}
-
+	
+	
 }

@@ -5,9 +5,12 @@ package ElevatorSimulator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Scanner;
+
+import ElevatorSimulator.Messages.KillMessage;
+import ElevatorSimulator.Messages.Message;
+import ElevatorSimulator.Messages.RequestElevatorMessage;
 
 /**
  * @author Guy Morgenshtern
@@ -16,11 +19,11 @@ import java.util.Scanner;
  */
 public class Floor implements Runnable {
 	private Scheduler scheduler;
-	private Deque<Message> elevatorRequests;
+	private ArrayDeque<Message> elevatorRequests;
 	
 	Floor(Scheduler scheduler, String fileName){
 		this.scheduler = scheduler;
-		elevatorRequests = new LinkedList<Message>();
+		elevatorRequests = new ArrayDeque<Message>();
 		readInElevatorRequests(fileName);
 		
 	}
@@ -64,11 +67,9 @@ public class Floor implements Runnable {
 		while (!elevatorRequests.isEmpty()) { // more conditions in the future to ensure all receive messages are accounted for
 			
 			Message request = elevatorRequests.poll();
-			System.out.println("IN FLOOR SENT: \n" + request.getDescription());
 			scheduler.send(request);
 			
 //			Message receive = scheduler.receive();
-//			System.out.println("FLOOR RECEIVED: \n" + receive.getDescription());
 			
 			try {
 				Thread.sleep(2000);
@@ -78,6 +79,8 @@ public class Floor implements Runnable {
 			}
 			
 		}
+		
+		scheduler.send(new KillMessage("No more floor requests remaining"));
 	}
 
 }
