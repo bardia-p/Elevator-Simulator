@@ -1,7 +1,5 @@
 package ElevatorSimulator.Messages;
 
-import ElevatorSimulator.DirectionType;
-
 public class RequestElevatorMessage extends Message {
 	private int floorNumber;
 	private int destination;

@@ -1,7 +1,6 @@
 package ElevatorSimulatorTest;
 
 import ElevatorSimulator.Buffer;
-import ElevatorSimulator.DirectionType;
 import ElevatorSimulator.Scheduler;
 import ElevatorSimulator.Messages.*;
 
