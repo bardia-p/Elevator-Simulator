@@ -8,10 +8,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.Scanner;
 
-import ElevatorSimulator.Messages.KillMessage;
-import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.RequestElevatorMessage;
-import ElevatorSimulator.Messages.SenderType;
+import ElevatorSimulator.Messages.*;
 
 /**
  * @author Guy Morgenshtern
@@ -22,7 +19,7 @@ public class Floor implements Runnable {
 	private Scheduler scheduler;
 	private ArrayDeque<Message> elevatorRequests;
 	
-	Floor(Scheduler scheduler, String fileName){
+	public Floor(Scheduler scheduler, String fileName){
 		this.scheduler = scheduler;
 		elevatorRequests = new ArrayDeque<Message>();
 		readInElevatorRequests(fileName);
@@ -51,7 +48,7 @@ public class Floor implements Runnable {
 			sc.nextLine();
 			
 			while (sc.hasNextLine()) {
-				elevatorRequests.offer(buildRequestFromCSV(sc.nextLine()));
+				addRequest(buildRequestFromCSV(sc.nextLine()));
 			}
 			
 			sc.close();
@@ -62,26 +59,39 @@ public class Floor implements Runnable {
 			
 	}
 	
+	private void addRequest(RequestElevatorMessage request) {
+		this.elevatorRequests.offer(request);
+	}
+	
+	private void requestElevator() {
+		Message request = elevatorRequests.poll();
+		scheduler.send(request);	
+	}
+	
+	private Message requestUpdate() {
+		return scheduler.receive(SenderType.FLOOR);
+	}
+	
+	public void kill() {
+		scheduler.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
+	}
+	
 	@Override
 	public void run() {
-		
 		while (!elevatorRequests.isEmpty()) { // more conditions in the future to ensure all receive messages are accounted for
+			requestElevator();
+
+			requestUpdate();
 			
-			Message request = elevatorRequests.poll();
-			scheduler.send(request);
-			
-			Message receive = scheduler.receive();
-			
-			try {
+			/*try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 			
 		}
 		
-		scheduler.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));
+		kill();
 	}
 
 }

@@ -16,7 +16,7 @@ public class RequestElevatorMessage extends Message {
 	
 	@Override
 	public String getDescription() {
-		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction + " ";
+		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction;
 	}
 	
 	public int getDestination() {

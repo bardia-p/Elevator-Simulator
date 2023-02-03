@@ -17,7 +17,7 @@ public class Buffer {
 	/**
 	 * The main controller for the buffer.
 	 */
-	Buffer(){
+	public Buffer(){
 		this.messages = new ArrayDeque<>();
 	}
 	

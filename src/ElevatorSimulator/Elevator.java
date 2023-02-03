@@ -15,26 +15,40 @@ public class Elevator implements Runnable {
 	private boolean shouldRun;
 	
 	
-	Elevator(Scheduler scheduler){
+	public Elevator(Scheduler scheduler){
 		this.scheduler = scheduler;
 		this.shouldRun = true;
 	}
 	
+	private Message requestUpdate() {
+		return scheduler.receive(SenderType.ELEVATOR);
+	}
+	
+	private void processMessage(Message message) {
+		if (message.getType() == MessageType.KILL){
+			kill();
+		} else {
+			RequestElevatorMessage request = (RequestElevatorMessage) message;
+			moveTo(request.getDestination());
+		}
+	}
+	
+	private void moveTo(int floor) {
+		Message reply = new ArrivedElevatorMessage("<TIMESTAMP>", floor);
+		scheduler.send(reply);
+	}
+	
+	public void kill() {
+		this.shouldRun = false;
+	}
+
+	
 	@Override
 	public void run() {
 		while(this.shouldRun) {
-			Message received = this.scheduler.receive();
+			Message received = requestUpdate();
 			
-			Message reply;
-			if (received.getType() == MessageType.KILL){
-				this.shouldRun = false;
-				reply = new KillMessage(SenderType.ELEVATOR, "No more floor requests remaining");
-			} else {
-				RequestElevatorMessage request = (RequestElevatorMessage) received;
-				reply = new ArrivedElevatorMessage(request.getTimestamp(), request.getDestination());
-			}
-			
-			scheduler.send(reply);
+			processMessage(received);		
 		}
 	}
 }

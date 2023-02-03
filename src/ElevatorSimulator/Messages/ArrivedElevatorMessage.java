@@ -10,6 +10,6 @@ public class ArrivedElevatorMessage extends Message {
 		
 	@Override
 	public String getDescription() {
-		return super.getDescription() + floorNumber + "\n";
+		return super.getDescription() + "to: " + floorNumber;
 	}
 }

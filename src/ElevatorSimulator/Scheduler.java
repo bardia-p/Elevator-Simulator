@@ -48,12 +48,14 @@ public class Scheduler implements Runnable{
 	 * Receives a message from the message buffer.
 	 * Decides the appropriate queue to choose from based on thread name.
 	 *
+	 * @param sender the thread requesting the message.
+	 * 
 	 * @return the message within the buffer.
 	 */
-	public Message receive() {
+	public Message receive(SenderType sender) {
 		Message received;
 		
-		if (Thread.currentThread().getName().equals("ELEVATOR")) {
+		if (sender == SenderType.ELEVATOR) {
 			received = toElevator.get();
 		} else {
 			received = toFloor.get();
@@ -93,11 +95,11 @@ public class Scheduler implements Runnable{
 		while(this.shouldRun) {
 			Message newMessage = checkForNewMessages();
 			
-			if (newMessage.getType() == MessageType.KILL && newMessage.getSender() == SenderType.ELEVATOR){
+			if (newMessage.getType() == MessageType.KILL){
 				this.shouldRun = false;
-			} else {
-				forwardMessage(newMessage);
 			}
+			
+			forwardMessage(newMessage);
 		}
 	}
 	
