@@ -12,6 +12,7 @@ package ElevatorSimulator;
  *
  */
 public class Simulator {
+	private static final String INPUT = "elevator_input.csv";
 	public static void main(String[] args) {
 		Scheduler scheduler;
 		Thread schedulerThread, elevatorThread, floorThread;
@@ -20,7 +21,7 @@ public class Simulator {
 		
 		schedulerThread = new Thread(scheduler, "SCHEDULER");
 		elevatorThread = new Thread(new Elevator(scheduler), "ELEVATOR");
-		floorThread = new Thread( new Floor(scheduler, "src/ElevatorSimulator/resources/elevator_input.csv"), "FLOOR");
+		floorThread = new Thread( new Floor(scheduler, INPUT), "FLOOR");
 		
 		
 		

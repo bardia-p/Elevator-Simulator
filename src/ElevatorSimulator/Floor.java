@@ -25,10 +25,15 @@ public class Floor implements Runnable {
 	Floor(Scheduler scheduler, String fileName){
 		this.scheduler = scheduler;
 		elevatorRequests = new ArrayDeque<Message>();
-		readInElevatorRequests(fileName);
+		readInElevatorRequests("src/ElevatorSimulator/resources/" + fileName);
 		
 	}
 	
+	/**
+	 * gets a comma separated string and builds an ElevatorRequestMessage
+	 * @param line - comma separated string
+	 * @return - ElevatorRequestMessage
+	 */
 	private RequestElevatorMessage buildRequestFromCSV(String line) {
 		String[] entry = line.split(",");
 		
@@ -41,7 +46,10 @@ public class Floor implements Runnable {
 		return new RequestElevatorMessage(entry[0], floor, direction, destination);
 	}
 	
-	//possibly refactor to readLine from csv then call method to build message
+	/**
+	 * given a file path, adds request to queue for each line
+	 * @param fileName
+	 */
 	private void readInElevatorRequests(String fileName) {
 		Scanner sc;
 		try {
