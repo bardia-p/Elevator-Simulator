@@ -14,7 +14,7 @@ public class Message {
 	private String timestamp;
 	private MessageType type;
 
-	Message(SenderType sender, String timestamp, MessageType type){
+	public Message(SenderType sender, String timestamp, MessageType type){
 		this.sender = sender;
 		this.timestamp = timestamp;
 		this.type = type;
