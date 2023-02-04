@@ -45,7 +45,12 @@ Setup instructions:
 
 Authors (Group L1G3)
  - Andre Hazim - 101141843
+	- Iteration 1: Elevator subsystem and test cases simulator test.
  - Bardia Parmoun - 101143006
+	- Iteration 1: Scheduler subsystem and test cases elevator test, floor test, mock scheduler, scheduler test and simulator test.
  - Guy Morgenshtern - 101151430
+	- Iteration 1: Floor subsystem and test cases buffer test.
  - Kyra Lothrop - 101145872
+	- Iteration 1: Elevator subsystem and test cases buffer test.
  - Sarah Chow - 101143033
+	- Iteration 1: Floor subsystem and test cases elevator test, floor test, mock scheduler, scheduler test.
