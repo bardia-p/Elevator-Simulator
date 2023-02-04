@@ -16,9 +16,7 @@ public class SimulatorTest {
 	 * 
 	 */
 	@Test
-	public void testSimulatorDefaultFile() {
-		Simulator.INPUT = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
-		
+	public void testSimulatorDefaultFile() {		
 		Simulator.main(null);
 	}
 	
