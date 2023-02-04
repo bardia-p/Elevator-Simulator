@@ -15,11 +15,10 @@ import ElevatorSimulator.Messages.*;
  * @author Bardia Parmoun
  *
  */
-
-class ElevatorTest {
+public class ElevatorTest {
 	
 	// Mock scheduler object.
-	MockScheduler scheduler;
+	private MockScheduler scheduler;
 	
 	/**
 	 * Creating a new instance of the mock scheduler before

@@ -15,8 +15,7 @@ import ElevatorSimulator.Messages.*;
  * @author Bardia Parmoun
  *
  */
-
-class SchedulerTest {
+public class SchedulerTest {
 	
 	private Scheduler scheduler;
 	

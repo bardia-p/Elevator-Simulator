@@ -17,7 +17,7 @@ import ElevatorSimulator.Floor;
 public class FloorTest {
 	
 	// Mock scheduler object.
-	MockScheduler scheduler;
+	private MockScheduler scheduler;
 	
 	/**
 	 * Creating a new instance of the mock scheduler before
