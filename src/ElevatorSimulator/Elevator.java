@@ -22,7 +22,7 @@ public class Elevator implements Runnable {
 	 * 
 	 * @param scheduler, the scheduler
 	 */
-	Elevator(Scheduler scheduler){
+	public Elevator(Scheduler scheduler){
 		this.scheduler = scheduler;
 		this.shouldRun = true;
 	}
