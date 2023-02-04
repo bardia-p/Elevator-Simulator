@@ -86,6 +86,12 @@ public class Scheduler implements Runnable{
 		}
 	}
 	
+	/**
+	 * Stops the scheduler thread from running.
+	 */
+	private void kill() {
+		this.shouldRun = false;
+	}
 	
 	/**
 	 * The run method for the main logic of the scheduler.
@@ -96,7 +102,7 @@ public class Scheduler implements Runnable{
 			Message newMessage = checkForNewMessages();
 			
 			if (newMessage.getType() == MessageType.KILL){
-				this.shouldRun = false;
+				kill();
 			}
 			
 			forwardMessage(newMessage);

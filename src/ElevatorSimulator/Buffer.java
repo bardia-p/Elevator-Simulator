@@ -62,4 +62,13 @@ public class Buffer {
 		
 		return received;
 	}
+	
+	/**
+	 * Returns whether the buffer is empty or not.
+	 * 
+	 * @return true if the buffer is empty false otherwise.
+	 */
+	public boolean isEmpty() {
+		return messages.isEmpty();
+	}
 }

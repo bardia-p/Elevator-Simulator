@@ -1,15 +1,12 @@
 package ElevatorSimulatorTest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ElevatorSimulator.Elevator;
-import ElevatorSimulator.Messages.DirectionType;
-import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messages.*;
 
 /**
  * The unit tests for the elevator subsystem.

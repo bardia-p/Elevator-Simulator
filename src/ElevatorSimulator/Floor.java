@@ -82,13 +82,6 @@ public class Floor implements Runnable {
 			requestElevator();
 
 			requestUpdate();
-			
-			/*try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}*/
-			
 		}
 		
 		kill();

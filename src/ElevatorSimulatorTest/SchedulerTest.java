@@ -6,9 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ElevatorSimulator.Scheduler;
-import ElevatorSimulator.Messages.KillMessage;
-import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.SenderType;
+import ElevatorSimulator.Messages.*;
 
 /**
  * The unit tests for the scheduler subsystem.

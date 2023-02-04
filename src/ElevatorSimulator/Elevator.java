@@ -38,7 +38,7 @@ public class Elevator implements Runnable {
 		scheduler.send(reply);
 	}
 	
-	public void kill() {
+	private void kill() {
 		this.shouldRun = false;
 	}
 
