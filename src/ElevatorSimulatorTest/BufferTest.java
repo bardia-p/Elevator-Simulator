@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,8 +10,8 @@ import ElevatorSimulator.Messages.*;
 /**
  * The unit tests for the buffer class.
  * 
- * @author Sarah Chow
- * @author Bardia Parmoun
+ * @author Guy Morgenshtern
+ * @author Kyra Lothrop
  *
  */
 public class BufferTest {

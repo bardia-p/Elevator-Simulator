@@ -1,21 +1,15 @@
-/**
- * 
- */
 package ElevatorSimulator;
 
 /**
- * The class in charge of starting up the subsystem.
+ * The class in charge of starting up the subsystems.
  * 
- * @author Andre Hazim
- * @author Bardia Parmoun
  * @author Guy Morgenshtern
- * @author Kyra Lothrop
  * @author Sarah Chow
  *
  */
 public class Simulator {
 	// Keeps track of the input file name for the simulator.
-	public static String fileName = "src/ElevatorSimulator/Resources/elevator_input.csv";
+	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input.csv";
 	
 	/**
 	 * The main method and the starting point for the program.
@@ -30,8 +24,8 @@ public class Simulator {
 		
 		schedulerThread = new Thread(scheduler, "SCHEDULER");
 		elevatorThread = new Thread(new Elevator(scheduler), "ELEVATOR");
-		floorThread = new Thread( new Floor(scheduler, fileName), "FLOOR");
-		
+		floorThread = new Thread( new Floor(scheduler, INPUT), "FLOOR");
+				
 		schedulerThread.start();
 		elevatorThread.start();
 		floorThread.start();

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ElevatorSimulatorTest;
 
 import org.junit.jupiter.api.Test;
@@ -9,7 +6,7 @@ import ElevatorSimulator.Simulator;
 
 /**
  * @author Bardia Parmoun
- * @author Sarah Chow
+ * @author Andre Hazim
  *
  */
 public class SimulatorTest {
@@ -20,7 +17,7 @@ public class SimulatorTest {
 	 */
 	@Test
 	public void testSimulatorDefaultFile() {
-		Simulator.fileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
+		Simulator.INPUT = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
 		
 		Simulator.main(null);
 	}
@@ -32,7 +29,7 @@ public class SimulatorTest {
 	 */
 	@Test
 	public void testSimulatorTestFile() {
-		Simulator.fileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
+		Simulator.INPUT = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
 		
 		Simulator.main(null);
 	}

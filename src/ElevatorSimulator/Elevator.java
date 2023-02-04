@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ElevatorSimulator;
 
 import ElevatorSimulator.Messages.*;
@@ -29,12 +26,12 @@ public class Elevator implements Runnable {
 			kill();
 		} else {
 			RequestElevatorMessage request = (RequestElevatorMessage) message;
-			moveTo(request.getDestination());
+			moveTo(request.getTimestamp(), request.getDestination());
 		}
 	}
 	
-	private void moveTo(int floor) {
-		Message reply = new ArrivedElevatorMessage("<TIMESTAMP>", floor);
+	private void moveTo(String timestamp, int floor) {
+		Message reply = new ArrivedElevatorMessage(timestamp, floor);
 		scheduler.send(reply);
 	}
 	

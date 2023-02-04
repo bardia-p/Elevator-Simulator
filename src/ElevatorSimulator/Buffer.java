@@ -7,7 +7,8 @@ import ElevatorSimulator.Messages.*;
 /**
  * An implementation of a simple blocking queue.
  * 
- * @author bardiaparmoun
+ * @author Bardia Parmoun
+ * @author Kyra Lothrop
  *
  */
 public class Buffer {

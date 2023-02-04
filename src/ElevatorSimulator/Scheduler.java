@@ -21,6 +21,7 @@ public class Scheduler implements Runnable{
 	// All the messages sent to the floor.
 	private Buffer toFloor;
 	
+	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
 	
 	/**
