@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author bardiaparmoun
- *
- */
-module ElevatorSimulator {
-}

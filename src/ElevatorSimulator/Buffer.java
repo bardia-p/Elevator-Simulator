@@ -7,7 +7,8 @@ import ElevatorSimulator.Messages.*;
 /**
  * An implementation of a simple blocking queue.
  * 
- * @author bardiaparmoun
+ * @author Bardia Parmoun
+ * @author Kyra Lothrop
  *
  */
 public class Buffer {
@@ -17,7 +18,7 @@ public class Buffer {
 	/**
 	 * The main controller for the buffer.
 	 */
-	Buffer(){
+	public Buffer(){
 		this.messages = new ArrayDeque<>();
 	}
 	
@@ -61,5 +62,14 @@ public class Buffer {
 		notifyAll();
 		
 		return received;
+	}
+	
+	/**
+	 * Returns whether the buffer is empty or not.
+	 * 
+	 * @return true if the buffer is empty false otherwise.
+	 */
+	public boolean isEmpty() {
+		return messages.isEmpty();
 	}
 }

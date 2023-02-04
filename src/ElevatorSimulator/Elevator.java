@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ElevatorSimulator;
 
 import ElevatorSimulator.Messages.*;
@@ -25,10 +22,52 @@ public class Elevator implements Runnable {
 	 * 
 	 * @param scheduler, the scheduler
 	 */
-	Elevator(Scheduler scheduler){
+	public Elevator(Scheduler scheduler){
 		this.scheduler = scheduler;
 		this.shouldRun = true;
 	}
+	
+	/**
+	 * Requests an update from the scheduler.
+	 * 
+	 * @return the update received from the scheduler.
+	 */
+	private Message requestUpdate() {
+		return scheduler.receive(SenderType.ELEVATOR);
+	}
+	
+	/**
+	 * Processes the received message and to send a proper reply.
+	 * 
+	 * @param message the message to process.
+	 */
+	private void processMessage(Message message) {
+		if (message.getType() == MessageType.KILL){
+			kill();
+		} else {
+			RequestElevatorMessage request = (RequestElevatorMessage) message;
+			moveTo(request.getTimestamp(), request.getDestination());
+		}
+	}
+	
+	/**
+	 * Moves the elevator to the appropriate floor.
+	 * 
+	 * @param timestamp the timestamp for the event.
+	 * @param floor the floor to move the elevator to.
+	 */
+	private void moveTo(String timestamp, int floor) {
+		Message reply = new ArrivedElevatorMessage(timestamp, floor);
+		scheduler.send(reply);
+	}
+	
+	/**
+	 * Kills the elevator subsystem.
+	 */
+	private void kill() {
+		this.shouldRun = false;
+	}
+
 	
 	/**
 	 * The run method for the main logic of the elevator.
@@ -36,18 +75,9 @@ public class Elevator implements Runnable {
 	@Override
 	public void run() {
 		while(this.shouldRun) {
-			Message received = this.scheduler.receive();
+			Message received = requestUpdate();
 			
-			Message reply;
-			if (received.getType() == MessageType.KILL){
-				this.shouldRun = false;
-				reply = new KillMessage(SenderType.ELEVATOR, "No more floor requests remaining");
-			} else {
-				RequestElevatorMessage request = (RequestElevatorMessage) received;
-				reply = new ArrivedElevatorMessage(request.getTimestamp(), request.getDestination());
-			}
-			
-			scheduler.send(reply);
+			processMessage(received);		
 		}
 	}
 }

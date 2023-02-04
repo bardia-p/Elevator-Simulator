@@ -21,6 +21,7 @@ public class Scheduler implements Runnable{
 	// All the messages sent to the floor.
 	private Buffer toFloor;
 	
+	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
 	
 	/**
@@ -48,12 +49,14 @@ public class Scheduler implements Runnable{
 	 * Receives a message from the message buffer.
 	 * Decides the appropriate queue to choose from based on thread name.
 	 *
+	 * @param sender the thread requesting the message.
+	 * 
 	 * @return the message within the buffer.
 	 */
-	public Message receive() {
+	public Message receive(SenderType sender) {
 		Message received;
 		
-		if (Thread.currentThread().getName().equals("ELEVATOR")) {
+		if (sender == SenderType.ELEVATOR) {
 			received = toElevator.get();
 		} else {
 			received = toFloor.get();
@@ -84,6 +87,12 @@ public class Scheduler implements Runnable{
 		}
 	}
 	
+	/**
+	 * Stops the scheduler thread from running.
+	 */
+	private void kill() {
+		this.shouldRun = false;
+	}
 	
 	/**
 	 * The run method for the main logic of the scheduler.
@@ -93,11 +102,11 @@ public class Scheduler implements Runnable{
 		while(this.shouldRun) {
 			Message newMessage = checkForNewMessages();
 			
-			if (newMessage.getType() == MessageType.KILL && newMessage.getSender() == SenderType.ELEVATOR){
-				this.shouldRun = false;
-			} else {
-				forwardMessage(newMessage);
+			if (newMessage.getType() == MessageType.KILL){
+				kill();
 			}
+			
+			forwardMessage(newMessage);
 		}
 	}
 	
