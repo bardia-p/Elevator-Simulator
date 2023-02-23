@@ -7,7 +7,7 @@ package ElevatorSimulator;
  * @author Andre Hazim
  *
  */
-public enum ElevatorStates {
+public enum ElevatorState {
 	POLL,
 	CLOSE,
 	BOARDING,
