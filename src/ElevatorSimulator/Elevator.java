@@ -113,9 +113,22 @@ public class Elevator implements Runnable {
 	 * @return int - final destination floor number
 	 */
 	public int getFinalDestination() {
-		return direction.equals(DirectionType.UP) ? Collections.max(destinations) :  Collections.min(destinations);
+		int floor;
+		
+		if (destinations.size() == 0) {
+			floor = -1;
+		} else if (direction.equals(DirectionType.UP)) {
+			floor = Collections.max(destinations);
+		} else {
+			floor = Collections.min(destinations);
+		}
+		
+		return floor;
 	}
 	
+	/**
+	 * 
+	 */
 	private void toggleDirection() {
 		this.direction = (this.direction == DirectionType.UP) ? DirectionType.DOWN : DirectionType.UP;
 	}
