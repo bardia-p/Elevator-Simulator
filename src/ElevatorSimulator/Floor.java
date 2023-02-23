@@ -13,8 +13,8 @@ import ElevatorSimulator.Messages.*;
  *
  */
 public class Floor implements Runnable {
-	// The scheduler used to get new messages and reply with updates.
-	private Scheduler scheduler;
+	// The message queue.
+	private MessageQueue queue;
 	
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
@@ -22,11 +22,11 @@ public class Floor implements Runnable {
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
-	 * @param scheduler the shared scheduler instance.
+	 * @param queue, the message queue to communicate with the scheduler.
 	 * @param fileName the name of the input file.
 	 */
-	public Floor(Scheduler scheduler, String fileName){
-		this.scheduler = scheduler;
+	public Floor(MessageQueue queue, String fileName){
+		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
 		readInElevatorRequests(fileName);
 	}
@@ -88,7 +88,7 @@ public class Floor implements Runnable {
 	 */
 	private void requestElevator() {
 		Message request = elevatorRequests.poll();
-		scheduler.send(request);	
+		queue.send(request);	
 	}
 	
 	/**
@@ -97,14 +97,14 @@ public class Floor implements Runnable {
 	 * @return the updated message.
 	 */
 	private Message requestUpdate() {
-		return scheduler.receive(SenderType.FLOOR);
+		return queue.receive(SenderType.FLOOR);
 	}
 	
 	/**
 	 * Kills the current running instance of the floor.
 	 */
 	private void kill() {
-		scheduler.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
+		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
 	}
 	
 	/**

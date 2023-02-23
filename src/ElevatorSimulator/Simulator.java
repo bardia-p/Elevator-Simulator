@@ -17,14 +17,13 @@ public class Simulator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Scheduler scheduler;
+		MessageQueue queue = new MessageQueue();
+		
 		Thread schedulerThread, elevatorThread, floorThread;
-		
-		scheduler = new Scheduler();
-		
-		schedulerThread = new Thread(scheduler, "SCHEDULER");
-		elevatorThread = new Thread(new Elevator(scheduler), "ELEVATOR");
-		floorThread = new Thread( new Floor(scheduler, INPUT), "FLOOR");
+				
+		schedulerThread = new Thread(new Scheduler(queue), "SCHEDULER");
+		elevatorThread = new Thread(new Elevator(queue), "ELEVATOR");
+		floorThread = new Thread(new Floor(queue, INPUT), "FLOOR");
 				
 		schedulerThread.start();
 		elevatorThread.start();

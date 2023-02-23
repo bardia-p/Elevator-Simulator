@@ -11,8 +11,8 @@ import ElevatorSimulator.Messages.*;
  *
  */
 public class Elevator implements Runnable {
-	// The scheduler.
-	Scheduler scheduler; 
+	// The message queue.
+	private MessageQueue queue;
 	
 	// Check if the elevator is to continue running.
 	private boolean shouldRun;
@@ -20,10 +20,10 @@ public class Elevator implements Runnable {
 	/**
 	 * Constructor for the elevator.
 	 * 
-	 * @param scheduler, the scheduler
+	 * @param queue, the message queue.
 	 */
-	public Elevator(Scheduler scheduler){
-		this.scheduler = scheduler;
+	public Elevator(MessageQueue queue){
+		this.queue = queue;
 		this.shouldRun = true;
 	}
 	
@@ -33,7 +33,7 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		return scheduler.receive(SenderType.ELEVATOR);
+		return queue.receive(SenderType.ELEVATOR);
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class Elevator implements Runnable {
 	 */
 	private void moveTo(String timestamp, int floor) {
 		Message reply = new ArrivedElevatorMessage(timestamp, floor);
-		scheduler.send(reply);
+		queue.send(reply);
 	}
 	
 	/**
