@@ -1,6 +1,7 @@
 package ElevatorSimulator;
 
-import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import ElevatorSimulator.Messages.*;
 
@@ -33,7 +34,7 @@ public class Elevator implements Runnable {
 	private Message currentRequest;
 	
 	// destination queue
-	private ArrayDeque<Integer> destinations;
+	private ArrayList<Integer> destinations;
 
 	/**
 	 * Constructor for the elevator.
@@ -49,7 +50,7 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = 1; // in future iterations pass in number
 		this.currentRequest = null;
 		
-		this.destinations = new ArrayDeque<>();
+		this.destinations = new ArrayList<>();
 	}
 
 	/**
@@ -81,6 +82,13 @@ public class Elevator implements Runnable {
 	 * @param floor     the floor to move the elevator to.
 	 */
 	private void arrived() {
+		
+		if (this.direction == DirectionType.UP) {
+			this.floor++;
+		} else {
+			this.floor--;
+		}
+		
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		queue.send(reply);
 	}
@@ -98,6 +106,18 @@ public class Elevator implements Runnable {
 	private void moveTo() {
 		Message reply = new MovingMessage(currentRequest.getTimestamp(), this.direction);
 		queue.send(reply); 
+	}
+	
+	/**
+	 * returns the final destination of the elevator based on it's current direction
+	 * @return int - final destination floor number
+	 */
+	public int getFinalDestination() {
+		return direction.equals(DirectionType.UP) ? Collections.max(destinations) :  Collections.min(destinations);
+	}
+	
+	private void toggleDirection() {
+		this.direction = (this.direction == DirectionType.UP) ? DirectionType.DOWN : DirectionType.UP;
 	}
 
 	/**
@@ -118,11 +138,15 @@ public class Elevator implements Runnable {
 
 			} else if (state.equals(ElevatorState.ARRIVED)) {
 				arrived();
-				if (this.floor != destinations.peek()) {
+				
+				if (!destinations.contains(this.floor)) {
 					this.state = ElevatorState.POLL;
 				} else {
-					destinations.pop();
+					destinations.remove(this.floor);
 					this.state = ElevatorState.OPEN;
+					if (destinations.size() == 0) {
+						toggleDirection();
+					}
 				}
 			
 			} else if (state.equals(ElevatorState.OPEN)) {
