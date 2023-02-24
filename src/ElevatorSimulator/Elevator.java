@@ -82,7 +82,6 @@ public class Elevator implements Runnable {
 	 * @param floor     the floor to move the elevator to.
 	 */
 	private void arrived() {
-		
 		if (this.direction == DirectionType.UP) {
 			this.floor++;
 		} else {
