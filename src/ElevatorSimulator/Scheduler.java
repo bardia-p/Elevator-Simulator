@@ -1,5 +1,7 @@
 package ElevatorSimulator;
 
+import java.util.ArrayList;
+
 import ElevatorSimulator.Messages.*;
 
 /**
@@ -13,7 +15,13 @@ import ElevatorSimulator.Messages.*;
  */
 public class Scheduler implements Runnable{
 	private MessageQueue queue;
+	private SchedulerState state;
 	
+	private Message currentRequest;
+
+	private ElevatorController elevatorController;
+
+
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
 	
@@ -21,9 +29,12 @@ public class Scheduler implements Runnable{
 	 * Default constructor for the Scheduler.
 	 * 
 	 */
-	public Scheduler(MessageQueue queue) {
+	public Scheduler(MessageQueue queue, ElevatorController elevatorController) {
 		this.queue = queue;
 		this.shouldRun = true;
+		this.currentRequest = null;
+		this.state = SchedulerState.POLL;
+		this.elevatorController = elevatorController;
 	}
 	
 	
@@ -36,24 +47,71 @@ public class Scheduler implements Runnable{
 		return queue.pop();	
 	}
 	
-	/**
-	 * Forwards the new message to the proper receiving buffer.
-	 * 
-	 * @param m the message to forward to the appropriate buffer.
-	 */
-	private void forwardMessage(Message m) {		
-		if (m.getSender() == SenderType.ELEVATOR) {
-			queue.reply(m, SenderType.FLOOR);
-		} else {
-			queue.reply(m, SenderType.ELEVATOR);
+	public int getClosestElevator(RequestElevatorMessage requestMessage) {
+		ArrayList<Elevator> availableElevators = elevatorController.getAvailableElevators(requestMessage);
+		
+		if (availableElevators.size() == 0) {
+			return -1;
 		}
+			for (Elevator elevator : availableElevators) {
+	
+				if (elevator.getState() == ElevatorState.POLL) {
+					if (elevator.getFloorNumber() == requestMessage.getFloor()) {
+						// Same floor
+						return elevator.getID();
+					}
+					else if (elevator.getDirection() == requestMessage.getDirection()) {
+						
+						if ((elevator.getDirection() == DirectionType.UP &&
+								elevator.getFloorNumber() < requestMessage.getFloor()) ||
+								
+								(elevator.getDirection() == DirectionType.DOWN &&
+								elevator.getFloorNumber() > requestMessage.getFloor())) {
+							// Going up and elevator is below request floor OR
+							// Going down and elevator is above request floor
+							
+							return elevator.getID();
+						}
+					}
+				}
+			}
+			
+			return availableElevators.get(0).getID();
+	}
+	
+	private void processMessage() {
+		
+		if (currentRequest.getType() == MessageType.KILL){
+			kill((KillMessage) currentRequest);
+		}
+		else if (currentRequest.getType() == MessageType.REQUEST) {
+			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
+
+			if (id != -1) {
+				queue.replyToElevator(currentRequest, id);
+			} else {
+				queue.send(currentRequest);
+			}
+			
+		} else if (currentRequest.getType() == MessageType.ARRIVE) {
+			ArrivedElevatorMessage message = (ArrivedElevatorMessage) currentRequest;
+		} else if (currentRequest.getType() == MessageType.DOORS_CLOSED) {
+			DoorClosed request = (DoorClosed) currentRequest;
+			if (request.getStopType() == STOP_TYPE.DROPOFF) {
+				queue.replyToFloor(request);
+			}
+		}
+		
+		changeState(SchedulerState.POLL);
+
 	}
 	
 	/**
 	 * Stops the scheduler thread from running.
 	 */
-	private void kill() {
+	private void kill(KillMessage message) {
 		this.shouldRun = false;
+		elevatorController.kill(message);
 	}
 	
 	/**
@@ -62,14 +120,26 @@ public class Scheduler implements Runnable{
 	@Override
 	public void run() {
 		while(this.shouldRun) {
-			Message newMessage = checkForNewMessages();
-			
-			if (newMessage.getType() == MessageType.KILL){
-				kill();
+			if (state == SchedulerState.POLL) {
+				currentRequest = checkForNewMessages();
+				changeState(SchedulerState.PROCESSING);
+			} else {
+				processMessage();
 			}
 			
-			forwardMessage(newMessage);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	private void changeState(SchedulerState newState) {
+		System.out.println("SCHEDULER STATE: --------- " + this.state + " ---------");
+		state = newState;
+
 	}
 	
 }

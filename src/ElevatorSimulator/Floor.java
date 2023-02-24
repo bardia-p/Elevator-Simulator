@@ -97,7 +97,7 @@ public class Floor implements Runnable {
 	 * @return the updated message.
 	 */
 	private Message requestUpdate() {
-		return queue.receive(SenderType.FLOOR);
+		return queue.receiveFromFloor();
 	}
 	
 	/**

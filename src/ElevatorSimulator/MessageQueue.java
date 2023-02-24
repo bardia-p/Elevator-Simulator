@@ -1,5 +1,7 @@
 package ElevatorSimulator;
 
+import java.util.ArrayList;
+
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.SenderType;
 
@@ -8,15 +10,19 @@ public class MessageQueue {
 	private Buffer newMessages;
 	
 	// All the messages sent to the elevator.
-	private Buffer toElevator;
+	private ArrayList<Buffer> toElevator;
 
 	// All the messages sent to the floor.
 	private Buffer toFloor;
 	
 	public MessageQueue() {
 		this.newMessages = new Buffer();
-		this.toElevator = new Buffer();
+		this.toElevator = new ArrayList<Buffer>();
 		this.toFloor = new Buffer();
+	}
+	
+	public void addElevator() {
+		this.toElevator.add(new Buffer());
 	}
 	
 	/**
@@ -34,33 +40,23 @@ public class MessageQueue {
 	 * @param m the message to send to the subsystem.
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
-	public void reply(Message m, SenderType receiver) {
-		if (receiver == SenderType.ELEVATOR) {
-			toElevator.put(m);
-		} else if (receiver == SenderType.FLOOR) {
-			toFloor.put(m);
-		}
+	public void replyToFloor(Message m) {
+		toFloor.put(m);
 	}
 	
-	/**
-	 * Receives a message from the message buffer.
-	 * Decides the appropriate queue to choose from based on thread name.
-	 *
-	 * @param sender the thread requesting the message.
-	 * 
-	 * @return the message within the buffer.
-	 */
-	public Message receive(SenderType sender) {
-		Message received;
-		
-		if (sender == SenderType.ELEVATOR) {
-			received = toElevator.get();
-		} else {
-			received = toFloor.get();
-		}
-		
-		return received;		
+	public void replyToElevator(Message m, int id) {
+		toElevator.get(id).put(m);
 	}
+	
+	public Message receiveFromFloor() {
+		
+		return toFloor.get();
+	}
+	
+	public Message receiveFromElevator(int id) {
+		return toElevator.get(id).get();
+	}
+	
 	
 	/**
 	 * Returns a message from the message queue.
@@ -70,5 +66,9 @@ public class MessageQueue {
 	 */
 	public Message pop() {
 		return newMessages.get();
+	}
+	
+	public boolean elevatorHasRequest(int id) {
+		return !toElevator.get(id).isEmpty();
 	}
 }

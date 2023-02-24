@@ -47,5 +47,13 @@ public class RequestElevatorMessage extends Message {
 	 */
 	public int getDestination() {
 		return this.destination;
-	}	
+	}
+	
+	public int getFloor() {
+		return floorNumber;
+	}
+	
+	public DirectionType getDirection() {
+		return direction;
+	}
 }
