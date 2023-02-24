@@ -33,14 +33,10 @@ public class Elevator implements Runnable {
 // current request being fulfilled
 	private Message currentRequest;
 	
-	// destination queue
-	private ArrayList<Message> pickup;
-
-	// destination queue
-	private ArrayList<Message> dropoff;
+	private ArrayList<Integer> destinations;
 	
 	private STOP_TYPE stopType;
-	
+		
 	/**
 	 * Constructor for the elevator.
 	 * 
@@ -55,8 +51,7 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = id;
 		this.currentRequest = null;
 		
-		this.pickup = new ArrayList<>();
-		this.dropoff = new ArrayList<>();
+		this.destinations = new ArrayList<>();
 		
 		this.stopType = null;
 	}
@@ -67,9 +62,7 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		if (queue.elevatorHasRequest(elevatorNumber)) {
-			return queue.receiveFromElevator(elevatorNumber);
-		} else if (pickup.size() != 0 || dropoff.size() != 0) {
+		if (destinations.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
 			return null;
 		}
 		return queue.receiveFromElevator(elevatorNumber);
@@ -85,8 +78,15 @@ public class Elevator implements Runnable {
 			kill(); 
 		} else {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
-			pickup.add(requestElevatorMessage);
-			this.direction = ((requestElevatorMessage.getFloor() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
+			destinations.add(requestElevatorMessage.getFloor());
+			destinations.add(requestElevatorMessage.getDestination());
+			
+			if (requestElevatorMessage.getFloor() != floor) {
+				this.direction = ((requestElevatorMessage.getFloor() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
+				this.state = ElevatorState.MOVING;
+			} else {
+				this.state = ElevatorState.ARRIVED;
+			}
 		}
 	}
 
@@ -97,16 +97,6 @@ public class Elevator implements Runnable {
 	 * @param floor     the floor to move the elevator to.
 	 */
 	private void arrived() {
-		if (this.direction == DirectionType.UP) {
-			this.floor++;
-		} else {
-			this.floor--;
-		}
-		
-		if (floor == 1 || floor == 4) {
-			//toggleDirection();
-		}
-		
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		queue.send(reply);
 	}
@@ -133,29 +123,6 @@ public class Elevator implements Runnable {
 		this.direction = (this.direction == DirectionType.UP) ? DirectionType.DOWN : DirectionType.UP;
 	}
 	
-	private STOP_TYPE canStop() {
-		for (Message r : dropoff) {
-			if (((RequestElevatorMessage)r).getDestination() == this.floor) {
-				dropoff.remove(r);
-				return STOP_TYPE.DROPOFF;
-			}
-		}
-		
-		for (Message r : pickup) {
-			if (((RequestElevatorMessage)r).getFloor() == this.floor) {
-				pickup.remove(r);
-				dropoff.add(r);
-				this.direction = ((RequestElevatorMessage)r).getDirection();
-				return STOP_TYPE.PICKUP;
-			}
-		}
-		
-
-		
-		return null;
-	}
-	
-	
 	public ElevatorState getState() {
 		return state;
 	}
@@ -181,6 +148,12 @@ public class Elevator implements Runnable {
 		while (this.shouldRun) {
 			System.out.println("ELEVATOR STATE: --------- " + this.state + " ---------");
 			if (state.equals(ElevatorState.MOVING)) {
+				if (this.direction == DirectionType.UP) {
+					this.floor++;
+				} else {
+					this.floor--;
+				}
+				
 				try {
 					Thread.sleep(5000); // change to calculated time
 					this.state = ElevatorState.ARRIVED;
@@ -191,12 +164,18 @@ public class Elevator implements Runnable {
 
 			} else if (state.equals(ElevatorState.ARRIVED)) {
 				arrived();
-				
-				stopType = canStop();
-				
-				if (stopType == null) {
+								
+				if (!destinations.contains(floor)) {
 					this.state = ElevatorState.POLL;
 				} else {
+					destinations.remove((Integer) floor);
+					
+					if (destinations.size() == 1) {
+						this.direction = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
+						this.stopType = STOP_TYPE.PICKUP;
+					} else {
+						this.stopType = STOP_TYPE.DROPOFF;
+					}
 					this.state = ElevatorState.OPEN;
 				}
 			
@@ -238,9 +217,9 @@ public class Elevator implements Runnable {
 				if (incoming != null) {
 					currentRequest = incoming;
 					processMessage(incoming);
+				} else {
+					this.state = ElevatorState.MOVING;
 				}
-				
-				this.state = ElevatorState.MOVING;
 			}
 		}
 	}
