@@ -50,42 +50,51 @@ class ElevatorTest {
 	@Test
 	void testElevatorReceiveOneRequest() throws InterruptedException {
 		Elevator elevator = new Elevator(queue, ELEVATOR_ID, NUM_FLOORS);
-		Thread elevatorThread = new Thread(elevator);
+		Thread elevatorThread = new Thread(elevator, "ELEVATOR");
 		queue.addElevator();
 		
 		Message message = new RequestElevatorMessage("timestamp", 4, DirectionType.DOWN, 1);
-		//queue.send(message);
 		queue.replyToElevator(message, ELEVATOR_ID);
-		
-		elevatorThread.start();
-		elevatorThread.join();
-		
-		shouldRun = true;
 		
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
 		assertEquals(ElevatorState.POLL, elevator.getState());
 		
-		System.out.println(queue.elevatorHasRequest(ELEVATOR_ID));
+		elevatorThread.start();
+		
+		shouldRun = true;
+		
+		assertTrue(queue.elevatorHasRequest(ELEVATOR_ID));
+		
+		int expectedFloor = 1;
 		
 		while(this.shouldRun) {
-			//queue.pop();
+			Message newMessage = queue.pop();
 			
-			System.out.println(elevator.getFloorNumber() + " " + elevator.getState() + "ABC");
-			
-			if(elevator.getFloorNumber() != 4 && elevator.getState() != ElevatorState.POLL) {
-				System.out.println("here1");
-				assertEquals(elevator.getState(), ElevatorState.MOVING);
-			}
-			else if(elevator.getFloorNumber() != 4 && elevator.getState() != ElevatorState.MOVING){
-				System.out.println("here2");
-				assertEquals(elevator.getState(), ElevatorState.POLL);
-			}
-			else {
-				System.out.println("here3");
-				assertEquals(elevator.getState(), ElevatorState.ARRIVED);
-				this.shouldRun = false;
+			if (newMessage.getType() == MessageType.DOORS_OPENED) {
+				DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
+				
+				if (doorsOpenMessage.getStopType() == StopType.PICKUP) {
+					assertEquals(ElevatorState.OPEN, elevator.getState());
+					assertEquals(DirectionType.UP, doorsOpenMessage.getDirection());
+					assertEquals(4, doorsOpenMessage.getArrivedFloor());
+				} else {
+					assertEquals(ElevatorState.OPEN, elevator.getState());
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(1, doorsOpenMessage.getArrivedFloor());
+					
+					shouldRun = false;
+				}
+			} else if (newMessage.getType() == MessageType.ARRIVE) {
+				if (elevator.getDirection() == DirectionType.UP) {
+					expectedFloor++;
+				} else {
+					expectedFloor--;
+				}
+				assertEquals(expectedFloor, ((ArrivedElevatorMessage)newMessage).getArrivedFloor());
 			}
 		}
+		
+		queue.replyToElevator(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"), ELEVATOR_ID);	
 	}
 }

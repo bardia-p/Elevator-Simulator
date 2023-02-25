@@ -170,6 +170,8 @@ public class Elevator implements Runnable {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		queue.send(reply);
 		
+		DirectionType newDirection = direction;
+		
 		if (!destinations.contains(floor)) {
 			changeState(ElevatorState.POLL);
 		} else {
@@ -177,7 +179,7 @@ public class Elevator implements Runnable {
 			this.floorLights[floor-1] = false;
 			
 			if (destinations.size() == 1) {
-				this.direction = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
+				newDirection = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
 				this.stopType = StopType.PICKUP;
 			} else {
 				this.stopType = StopType.DROPOFF;
@@ -187,6 +189,8 @@ public class Elevator implements Runnable {
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
 			queue.send(doorOpen);
+			
+			this.direction = newDirection;
 		}
 	}
 	
