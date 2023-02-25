@@ -1,9 +1,10 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
  * 

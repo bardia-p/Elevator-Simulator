@@ -1,4 +1,4 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Scheduler;
 
 /**
  * 

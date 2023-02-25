@@ -1,9 +1,10 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
  * The elevator - Receives and replies to messages.

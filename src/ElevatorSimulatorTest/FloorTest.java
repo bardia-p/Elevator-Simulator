@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ElevatorSimulator.Floor;
+import ElevatorSimulator.Floor.Floor;
 
 /**
  * The unit tests for the floor subsystem.

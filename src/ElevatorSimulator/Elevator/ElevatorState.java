@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ElevatorSimulator;
+package ElevatorSimulator.Elevator;
 
 /**
  * @author Andre Hazim

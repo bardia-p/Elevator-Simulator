@@ -1,4 +1,4 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Floor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.Scanner;
 
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
  * @author Guy Morgenshtern

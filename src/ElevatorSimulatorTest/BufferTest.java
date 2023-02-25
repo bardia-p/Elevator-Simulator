@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import ElevatorSimulator.Buffer;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.Buffer;
 
 /**
  * The unit tests for the buffer class.

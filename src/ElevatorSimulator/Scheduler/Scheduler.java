@@ -1,8 +1,12 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Scheduler;
 
 import java.util.ArrayList;
 
+import ElevatorSimulator.Elevator.Elevator;
+import ElevatorSimulator.Elevator.ElevatorController;
+import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
  * The scheduler subsystem:

@@ -1,8 +1,8 @@
 package ElevatorSimulatorTest;
 
-import ElevatorSimulator.Buffer;
-import ElevatorSimulator.Scheduler;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.Buffer;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * A mock version of the Scheduler class simulating its behaviour for testing.
