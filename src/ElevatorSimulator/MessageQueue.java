@@ -44,15 +44,29 @@ public class MessageQueue {
 		toFloor.put(m);
 	}
 	
+	/**
+	 * Sends a reply to the elevator 
+	 * 
+	 * @param m the message 
+	 * @param id the elevator id
+	 */
 	public void replyToElevator(Message m, int id) {
 		toElevator.get(id).put(m);
 	}
 	
+	/**
+	 * Receive message from floor 
+	 * @return The message in the floor queue
+	 */
 	public Message receiveFromFloor() {
 		
 		return toFloor.get();
 	}
 	
+	/**
+	 * Receive message from elevator 
+	 * @return The message in the elevator queue
+	 */
 	public Message receiveFromElevator(int id) {
 		return toElevator.get(id).get();
 	}
@@ -68,6 +82,11 @@ public class MessageQueue {
 		return newMessages.get();
 	}
 	
+	/**
+	 * Checks if the elevator has a request
+	 * @param id the id of the elevator
+	 * @return a boolean if the elevator has a request
+	 */
 	public boolean elevatorHasRequest(int id) {
 		return !toElevator.get(id).isEmpty();
 	}

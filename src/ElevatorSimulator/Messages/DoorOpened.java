@@ -20,18 +20,34 @@ public class DoorOpened extends Message{
 	}
 	/**
 	 * Gets the stop type
+	 * 
 	 * @return the stop type
 	 */
 	public STOP_TYPE getStopType() {
 		return type;
 	}
-	
+	/**
+	 * Gets the arrived floor number
+	 * 
+	 * @return The arrived floor number
+	 */
 	public int getArrivedFloor() {
 		return arrivedFloor;
 	}
 	
+	/**
+	 * Gets the direction of the elevator 
+	 * 
+	 * @return the direction
+	 */
 	public DirectionType getDirection() {
 		return direction;
 	}
+	/**
+     * @Override
+     */
+    public String getDescription() {
+        return super.getDescription() + "Stop Type: " + this.type;
+    }
 
 }

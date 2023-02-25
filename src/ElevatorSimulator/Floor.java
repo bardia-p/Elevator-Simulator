@@ -158,6 +158,10 @@ public class Floor implements Runnable {
 		}
 	}
 	
+	
+	/**
+	 * A display of the light status
+	 */
 	private void getLightStatus() {
 		String floorLightsDisplay = "FLOOR LIGHTS STATUS\n---------------------------------------";
 		for(int i = 0; i<this.upLights.length;i++) {

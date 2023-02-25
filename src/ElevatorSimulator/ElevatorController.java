@@ -5,6 +5,14 @@ import java.util.ArrayList;
 import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
 
+/**
+ * 
+ * @author Andre Hazim, 
+ * @author Bardia Parmoun
+ * 
+ * The Elevator controller class responsible for controlling the multiple elevators 
+ *
+ */
 public class ElevatorController implements Runnable {
 	
 	private ArrayList<Elevator> elevators;
@@ -12,6 +20,13 @@ public class ElevatorController implements Runnable {
 	private int numFloors;
 	private MessageQueue queue;
 	
+	/**
+	 * The constructor of the Elevator Controller 
+	 * 
+	 * @param queue The message queue of the system
+	 * @param numElevators The number of Elevators
+	 * @param numFloors The number of Floors 
+	 */
 	public ElevatorController(MessageQueue queue, int numElevators, int numFloors) {
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
@@ -19,6 +34,9 @@ public class ElevatorController implements Runnable {
 		this.numFloors = numFloors;
 	}
 	
+	/**
+	 * Starts the number of elevator threads specified in the constructor
+	 */
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
 			Elevator elevator = new Elevator(queue, i, this.numFloors);
@@ -29,6 +47,13 @@ public class ElevatorController implements Runnable {
 		}
 	}
 	
+	/**
+	 * Checks to see if the elevator is in a valid state
+	 * 
+	 * @param elevator The elevator you want to check
+	 * 
+	 * @return Boolean true of false
+	 */
 	private boolean checkElevatorValid(Elevator elevator) {
 		
 		if (elevator.getState() == ElevatorState.POLL) {
@@ -39,6 +64,13 @@ public class ElevatorController implements Runnable {
 		
 	}
 	
+	/**
+	 * Gets all the available elevators 
+	 * 
+	 * @param message A request elevator message 
+	 * 
+	 * @return A list of availble elevators 
+	 */
 	public ArrayList<Elevator> getAvailableElevators(RequestElevatorMessage message){
 		ArrayList<Elevator> availableElevators = new ArrayList<>();
 
@@ -51,6 +83,11 @@ public class ElevatorController implements Runnable {
 		return availableElevators;
 	}
 	
+	/**
+	 * kills all the elevators
+	 * 
+	 * @param message a kill message
+	 */
 	public void kill(KillMessage message) {
 		for (int i =0; i < elevators.size(); i++) {
 			queue.replyToElevator(message, i);
@@ -58,6 +95,9 @@ public class ElevatorController implements Runnable {
 	}
 
 	@Override
+	/**
+	 * starts all the elevator threads
+	 */
 	public void run() {
 		initializeElevators();
 	}

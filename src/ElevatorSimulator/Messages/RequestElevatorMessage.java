@@ -49,10 +49,20 @@ public class RequestElevatorMessage extends Message {
 		return this.destination;
 	}
 	
+	/**
+	 * Gets the floor from the request
+	 * 
+	 * @return floor number
+	 */
 	public int getFloor() {
 		return floorNumber;
 	}
 	
+	/**
+	 * Gets the direction of the elevator 
+	 * 
+	 * @return the direction
+	 */
 	public DirectionType getDirection() {
 		return direction;
 	}

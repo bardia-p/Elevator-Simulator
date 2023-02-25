@@ -47,6 +47,11 @@ public class Scheduler implements Runnable{
 		return queue.pop();	
 	}
 	
+	/**
+	 * Checks to see the closest elevator and adds it to the list 
+	 * @param requestMessage the request messsage
+	 * @return the id of the closest elevator 
+	 */
 	public int getClosestElevator(RequestElevatorMessage requestMessage) {
 		ArrayList<Elevator> availableElevators = elevatorController.getAvailableElevators(requestMessage);
 		
@@ -79,6 +84,9 @@ public class Scheduler implements Runnable{
 			return availableElevators.get(0).getID();
 	}
 	
+	/**
+	 * processes the message
+	 */
 	private void processMessage() {
 		
 		if (currentRequest.getType() == MessageType.KILL){
