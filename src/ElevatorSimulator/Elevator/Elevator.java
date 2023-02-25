@@ -1,7 +1,6 @@
 package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
@@ -16,24 +15,25 @@ import ElevatorSimulator.Messaging.MessageQueue;
  *
  */
 public class Elevator implements Runnable {
-// The message queue.
+	// The message queue.
 	private MessageQueue queue;
 
-// Elevator's current state
+	// Elevator's current state
 	private ElevatorState state;
-// Check if the elevator is to continue running.
+	
+	// Check if the elevator is to continue running.
 	private boolean shouldRun;
 
-// elevator's current floor
+	// elevator's current floor
 	private int floor;
 
-// direction of movement
+	// direction of movement
 	private DirectionType direction;
 
-// elevator designation number
+	// elevator designation number
 	private int elevatorNumber;
 
-// current request being fulfilled
+	// current request being fulfilled
 	private Message currentRequest;
 	
 	// list of destination floors
@@ -53,7 +53,7 @@ public class Elevator implements Runnable {
 	public Elevator(MessageQueue queue, int id, int numFloors) {
 		this.queue = queue;
 		this.shouldRun = true;
-		this.state = ElevatorState.POLL;
+		this.state = null;
 		this.floor = 1; // not sure if we should pass in start position
 		this.direction = DirectionType.UP;
 		this.elevatorNumber = id;
@@ -63,6 +63,8 @@ public class Elevator implements Runnable {
 		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
+		
+		changeState(ElevatorState.POLL);
 	}
 
 	/**
@@ -104,21 +106,6 @@ public class Elevator implements Runnable {
 	 */
 	private void kill() {
 		this.shouldRun = false;
-	}
-
-	/**
-	 * sends moving message to scheduler
-	 */
-	private void moveTo() {
-		Message reply = new MovingMessage(currentRequest.getTimestamp(), this.direction);
-		queue.send(reply); 
-	}
-	
-	/**
-	 * toggles the direction of the elevator
-	 */
-	private void toggleDirection() {
-		this.direction = (this.direction == DirectionType.UP) ? DirectionType.DOWN : DirectionType.UP;
 	}
 	
 	/**
@@ -309,7 +296,7 @@ public class Elevator implements Runnable {
 	 * @param newState
 	 */
 	private void changeState(ElevatorState newState) {
-		System.out.println("\nSCHEDULER STATE: --------- " + this.state + " ---------");
+		System.out.println("\nELEVATOR STATE: --------- " + newState + " ---------");
 		state = newState;
 
 	}

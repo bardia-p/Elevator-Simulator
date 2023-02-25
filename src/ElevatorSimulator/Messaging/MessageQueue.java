@@ -3,7 +3,6 @@ package ElevatorSimulator.Messaging;
 import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.SenderType;
 
 public class MessageQueue {
 	// All the new messages for the scheduler.

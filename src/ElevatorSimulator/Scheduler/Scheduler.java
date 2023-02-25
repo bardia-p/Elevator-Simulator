@@ -20,7 +20,6 @@ import ElevatorSimulator.Messaging.MessageQueue;
 public class Scheduler implements Runnable{
 	private MessageQueue queue;
 	private SchedulerState state;
-	
 	private Message currentRequest;
 
 	private ElevatorController elevatorController;
@@ -37,8 +36,10 @@ public class Scheduler implements Runnable{
 		this.queue = queue;
 		this.shouldRun = true;
 		this.currentRequest = null;
-		this.state = SchedulerState.POLL;
+		this.state = null;
 		this.elevatorController = elevatorController;
+		
+		changeState(SchedulerState.POLL);
 	}
 	
 	
@@ -105,8 +106,6 @@ public class Scheduler implements Runnable{
 				queue.send(currentRequest);
 			}
 			
-		} else if (currentRequest.getType() == MessageType.ARRIVE) {
-			ArrivedElevatorMessage message = (ArrivedElevatorMessage) currentRequest;
 		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
 			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
 			queue.replyToFloor(request);
@@ -151,7 +150,7 @@ public class Scheduler implements Runnable{
 	 * @param newState
 	 */
 	private void changeState(SchedulerState newState) {
-		System.out.println("SCHEDULER STATE: --------- " + this.state + " ---------");
+		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
 		state = newState;
 
 	}

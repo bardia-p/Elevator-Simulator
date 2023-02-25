@@ -37,7 +37,7 @@ public class Buffer {
 		}
 		
 		messages.offer(m);
-		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent:" + m.getDescription() + "\n------------------------\n");
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent: " + m.getDescription() + "\n------------------------\n");
 
 		notifyAll();
 	}
