@@ -13,6 +13,8 @@ public class Simulator {
 	
 	public static int NUM_ELEVATORS = 1;
 	
+	public static int NUM_FLOORS = 4;
+	
 	/**
 	 * The main method and the starting point for the program.
 	 * 
@@ -23,11 +25,11 @@ public class Simulator {
 		
 		Thread schedulerThread, elevatorControlThread, floorThread;
 				
-		ElevatorController elevatorController = new ElevatorController(queue, NUM_ELEVATORS);
+		ElevatorController elevatorController = new ElevatorController(queue, NUM_ELEVATORS, NUM_FLOORS);
 		
 		schedulerThread = new Thread(new Scheduler(queue, elevatorController), "SCHEDULER");
 		elevatorControlThread = new Thread(elevatorController, "ELEVATOR");
-		floorThread = new Thread(new Floor(queue, INPUT), "FLOOR");
+		floorThread = new Thread(new Floor(queue, INPUT,NUM_FLOORS), "FLOOR");
 				
 		schedulerThread.start();
 		elevatorControlThread.start();

@@ -9,17 +9,19 @@ public class ElevatorController implements Runnable {
 	
 	private ArrayList<Elevator> elevators;
 	private int numElevators;
+	private int numFloors;
 	private MessageQueue queue;
 	
-	public ElevatorController(MessageQueue queue, int numElevators) {
+	public ElevatorController(MessageQueue queue, int numElevators, int numFloors) {
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
 		this.queue = queue;		
+		this.numFloors = numFloors;
 	}
 	
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
-			Elevator elevator = new Elevator(queue, i);
+			Elevator elevator = new Elevator(queue, i, this.numFloors);
 			elevators.add(elevator);
 			queue.addElevator();
 			Thread elevatorThread = new Thread(elevator, "ELEVATOR " + (i+1));

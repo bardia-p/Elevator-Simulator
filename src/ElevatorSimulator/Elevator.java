@@ -36,13 +36,15 @@ public class Elevator implements Runnable {
 	private ArrayList<Integer> destinations;
 	
 	private STOP_TYPE stopType;
+	
+	private boolean[] floorLights;
 		
 	/**
 	 * Constructor for the elevator.
 	 * 
 	 * @param queue, the message queue.
 	 */
-	public Elevator(MessageQueue queue, int id) {
+	public Elevator(MessageQueue queue, int id, int numFloors) {
 		this.queue = queue;
 		this.shouldRun = true;
 		this.state = ElevatorState.POLL;
@@ -52,6 +54,7 @@ public class Elevator implements Runnable {
 		this.currentRequest = null;
 		
 		this.destinations = new ArrayList<>();
+		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
 	}
@@ -80,7 +83,7 @@ public class Elevator implements Runnable {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
 			destinations.add(requestElevatorMessage.getFloor());
 			destinations.add(requestElevatorMessage.getDestination());
-			
+			this.floorLights[requestElevatorMessage.getDestination()-1] = true;
 			if (requestElevatorMessage.getFloor() != floor) {
 				this.direction = ((requestElevatorMessage.getFloor() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
 				this.state = ElevatorState.MOVING;
@@ -97,7 +100,7 @@ public class Elevator implements Runnable {
 	 * @param floor     the floor to move the elevator to.
 	 */
 	private void arrived() {
-		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
+		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor,this.direction);
 		queue.send(reply);
 	}
 
@@ -164,11 +167,19 @@ public class Elevator implements Runnable {
 
 			} else if (state.equals(ElevatorState.ARRIVED)) {
 				arrived();
-								
+				
+				String elevatorLights = "------------------------------------------------";
+				for (int i = 0; i < this.floorLights.length; i++) {
+					elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
+					
+				}
+				elevatorLights += "\n------------------------------------------------\n";
+				System.out.println(elevatorLights);
 				if (!destinations.contains(floor)) {
 					this.state = ElevatorState.POLL;
 				} else {
 					destinations.remove((Integer) floor);
+					this.floorLights[floor-1] = false;
 					
 					if (destinations.size() == 1) {
 						this.direction = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
@@ -194,7 +205,7 @@ public class Elevator implements Runnable {
 					Thread.sleep(1000); // change to calculated time
 					this.state = ElevatorState.CLOSE;
 					
-					DoorClosed reply = new DoorClosed(currentRequest.getTimestamp(), floor, stopType);
+					DoorClosed reply = new DoorClosed(currentRequest.getTimestamp(), floor, stopType, this.direction);
 					
 					queue.send(reply);
 					

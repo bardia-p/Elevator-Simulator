@@ -95,6 +95,7 @@ public class Scheduler implements Runnable{
 			
 		} else if (currentRequest.getType() == MessageType.ARRIVE) {
 			ArrivedElevatorMessage message = (ArrivedElevatorMessage) currentRequest;
+			queue.replyToFloor(message);
 		} else if (currentRequest.getType() == MessageType.DOORS_CLOSED) {
 			DoorClosed request = (DoorClosed) currentRequest;
 			if (request.getStopType() == STOP_TYPE.DROPOFF) {
