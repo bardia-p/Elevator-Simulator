@@ -100,7 +100,7 @@ public class Elevator implements Runnable {
 	 * @param floor     the floor to move the elevator to.
 	 */
 	private void arrived() {
-		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor,this.direction);
+		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		queue.send(reply);
 	}
 
@@ -168,13 +168,6 @@ public class Elevator implements Runnable {
 			} else if (state.equals(ElevatorState.ARRIVED)) {
 				arrived();
 				
-				String elevatorLights = "------------------------------------------------";
-				for (int i = 0; i < this.floorLights.length; i++) {
-					elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
-					
-				}
-				elevatorLights += "\n------------------------------------------------\n";
-				System.out.println(elevatorLights);
 				if (!destinations.contains(floor)) {
 					this.state = ElevatorState.POLL;
 				} else {
@@ -188,9 +181,12 @@ public class Elevator implements Runnable {
 						this.stopType = STOP_TYPE.DROPOFF;
 					}
 					this.state = ElevatorState.OPEN;
+					DoorOpened reply = new DoorOpened(currentRequest.getTimestamp(), floor, stopType, this.direction);
+					queue.send(reply);
 				}
 			
 			} else if (state.equals(ElevatorState.OPEN)) {
+				
 				try {
 					Thread.sleep(1000); // change to calculated time
 					this.state = ElevatorState.BOARDING;
@@ -205,16 +201,14 @@ public class Elevator implements Runnable {
 					Thread.sleep(1000); // change to calculated time
 					this.state = ElevatorState.CLOSE;
 					
-					DoorClosed reply = new DoorClosed(currentRequest.getTimestamp(), floor, stopType, this.direction);
-					
-					queue.send(reply);
-					
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			
 			} else if (state.equals(ElevatorState.CLOSE)) {
+				printFloorLightStatus();
+				
 				try {
 					Thread.sleep(1000); // change to calculated time
 					this.state = ElevatorState.POLL;
@@ -233,6 +227,19 @@ public class Elevator implements Runnable {
 				}
 			}
 		}
+	}
+
+	/**
+	 * prints floor light statuses
+	 */
+	private void printFloorLightStatus() {
+		String elevatorLights = "\nELEVATOR LIGHTS STATUS\n------------------------------------------------";
+		for (int i = 0; i < this.floorLights.length; i++) {
+			elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
+			
+		}
+		elevatorLights += "\n------------------------------------------------\n";
+		System.out.println(elevatorLights);
 	}
 }
 

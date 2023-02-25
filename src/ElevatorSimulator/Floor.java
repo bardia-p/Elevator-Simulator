@@ -23,6 +23,10 @@ public class Floor implements Runnable {
 	
 	private boolean[] downLights; 
 	
+	private boolean canSendRequest;
+	
+	private boolean shouldRun;
+	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
@@ -35,6 +39,8 @@ public class Floor implements Runnable {
 		readInElevatorRequests(fileName);
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
+		this.canSendRequest = true;
+		this.shouldRun = true;
 	}
 	
 	/**
@@ -93,8 +99,14 @@ public class Floor implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
+		
+		if (!this.canSendRequest || this.elevatorRequests.isEmpty()) {
+			return;
+		}
+		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
+		this.canSendRequest = false;
 		queue.send(request);	
 	}
 	
@@ -118,34 +130,36 @@ public class Floor implements Runnable {
 	private void updateLights(Message message) {
 		int floorNum;
 		DirectionType direction;
-		if(message.getType().equals(MessageType.ARRIVE)) {
-			ArrivedElevatorMessage arrived = (ArrivedElevatorMessage) message;
+		if(message.getType().equals(MessageType.DOORS_OPENED)) {
+			DoorOpened doorOpened = (DoorOpened) message;
 			
-			floorNum = arrived.getArrivedFloor();
-			System.out.println("WE HAVE GOTTEN A DOORS CLOSED MESSAGE!!!!!!!!!!! on floor "+ floorNum);
-			direction = arrived.getDirection();
+			if (doorOpened.getStopType() == STOP_TYPE.DROPOFF) {
+				this.canSendRequest = true;
+			}
+			
+			floorNum = doorOpened.getArrivedFloor();
+
+			direction = doorOpened.getDirection();
 			if ( direction == DirectionType.UP) {
 				this.upLights[floorNum-1] = false;
-			}else {
+			} else {
 				this.downLights[floorNum-1] = false;
 			}
 			
-		}else if(message.getType().equals(MessageType.REQUEST)) {
+		} else {
 			RequestElevatorMessage request = (RequestElevatorMessage) message;
 			floorNum = request.getFloor();
 			direction = request.getDirection();
 			if (direction == DirectionType.UP) {
 				this.upLights[floorNum-1] = true;
-			}else {
+			} else {
 				this.downLights[floorNum-1] = true;
 			}
 		}
-		
-		
 	}
 	
 	private void getLightStatus() {
-		String floorLightsDisplay = "---------------------------------------";
+		String floorLightsDisplay = "FLOOR LIGHTS STATUS\n---------------------------------------";
 		for(int i = 0; i<this.upLights.length;i++) {
 			floorLightsDisplay += "\n| Floor " + (i+1) + " up light on :" + this.upLights[i] + " ";
 			floorLightsDisplay += " down light on :" + this.downLights[i] + " |";
@@ -157,6 +171,10 @@ public class Floor implements Runnable {
 	 * Kills the current running instance of the floor.
 	 */
 	private void kill() {
+		if (!this.canSendRequest) {
+			return;
+		}
+		this.shouldRun = false;
 		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
 	}
 	
@@ -165,18 +183,18 @@ public class Floor implements Runnable {
 	 */
 	@Override
 	public void run() {
-		while (!elevatorRequests.isEmpty()) { // more conditions in the future to ensure all receive messages are accounted for
+		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
 			
 			getLightStatus();
 			
 			requestUpdate();
 			
-			getLightStatus();
-			
+			if (this.elevatorRequests.isEmpty()) {
+				kill();
+			}
 		}
 		
-		kill();
 	}
 
 	

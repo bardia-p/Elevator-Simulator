@@ -95,12 +95,9 @@ public class Scheduler implements Runnable{
 			
 		} else if (currentRequest.getType() == MessageType.ARRIVE) {
 			ArrivedElevatorMessage message = (ArrivedElevatorMessage) currentRequest;
-			queue.replyToFloor(message);
-		} else if (currentRequest.getType() == MessageType.DOORS_CLOSED) {
-			DoorClosed request = (DoorClosed) currentRequest;
-			if (request.getStopType() == STOP_TYPE.DROPOFF) {
-				queue.replyToFloor(request);
-			}
+		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
+			DoorOpened request = (DoorOpened) currentRequest;
+			queue.replyToFloor(request);
 		}
 		
 		changeState(SchedulerState.POLL);
@@ -137,6 +134,10 @@ public class Scheduler implements Runnable{
 		}
 	}
 	
+	/**
+	 * change and print state
+	 * @param newState
+	 */
 	private void changeState(SchedulerState newState) {
 		System.out.println("SCHEDULER STATE: --------- " + this.state + " ---------");
 		state = newState;

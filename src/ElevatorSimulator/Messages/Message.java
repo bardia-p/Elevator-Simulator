@@ -63,7 +63,7 @@ public class Message {
 	 * @return String - message description
 	 */
 	public String getDescription() {
-		return type.toString() + " " + timestamp + " " + sender + "\n";
+		return type.toString() + " " + timestamp + " " + sender + " ";
 	}
 	
 	

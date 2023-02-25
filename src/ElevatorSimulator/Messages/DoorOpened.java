@@ -1,6 +1,6 @@
 package ElevatorSimulator.Messages;
 
-public class DoorClosed extends Message{
+public class DoorOpened extends Message{
 	private STOP_TYPE type;
 	
 	private int arrivedFloor;
@@ -11,8 +11,8 @@ public class DoorClosed extends Message{
 	 * @param arrivedFloor the floor it arrived at
 	 * @param type the type of message
 	 */
-	public DoorClosed(String timestamp, int arrivedFloor, STOP_TYPE type, DirectionType direction){
-		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_CLOSED);
+	public DoorOpened(String timestamp, int arrivedFloor, STOP_TYPE type, DirectionType direction){
+		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;
 		this.direction = direction;
@@ -26,6 +26,12 @@ public class DoorClosed extends Message{
 		return type;
 	}
 	
+	public int getArrivedFloor() {
+		return arrivedFloor;
+	}
 	
-	
+	public DirectionType getDirection() {
+		return direction;
+	}
+
 }

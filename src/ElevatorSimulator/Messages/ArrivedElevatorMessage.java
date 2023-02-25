@@ -10,8 +10,6 @@ package ElevatorSimulator.Messages;
 public class ArrivedElevatorMessage extends Message {
 	// The floor number the elevator arrived at.
 	private int floorNumber;
-	private DirectionType direction;
-	private STOP_TYPE type;
 	
 	/**
 	 * The constructor for the arrived elevator message.
@@ -19,10 +17,9 @@ public class ArrivedElevatorMessage extends Message {
 	 * @param timestamp the message timestamp.
 	 * @param arrivedFloor the floor at which the elevator arrived at.
 	 */
-	public ArrivedElevatorMessage(String timestamp, int arrivedFloor,STOP_TYPE type, DirectionType direction) {
+	public ArrivedElevatorMessage(String timestamp, int arrivedFloor) {
 		super(SenderType.ELEVATOR, timestamp, MessageType.ARRIVE);
 		this.floorNumber = arrivedFloor;
-		this.direction =direction;
 	}
 		
 	/**
@@ -42,18 +39,4 @@ public class ArrivedElevatorMessage extends Message {
 		return floorNumber;
 	}
 
-	/**
-	 * gets the direction
-	 * @return direction
-	 */
-	public DirectionType getDirection() {
-		return direction;
-	}
-	/**
-	 * Gets the stop type
-	 * @return the stop type
-	 */
-	public STOP_TYPE getStopType() {
-		return type;
-	}
 }
