@@ -108,7 +108,7 @@ public class Scheduler implements Runnable{
 		} else if (currentRequest.getType() == MessageType.ARRIVE) {
 			ArrivedElevatorMessage message = (ArrivedElevatorMessage) currentRequest;
 		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
-			DoorOpened request = (DoorOpened) currentRequest;
+			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
 			queue.replyToFloor(request);
 		}
 		

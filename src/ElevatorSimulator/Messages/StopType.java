@@ -7,7 +7,7 @@ package ElevatorSimulator.Messages;
  * The reason the doors have opened
  *
  */
-public enum STOP_TYPE {
+public enum StopType {
 	PICKUP,
 	DROPOFF
 }

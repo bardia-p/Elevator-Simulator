@@ -132,9 +132,9 @@ public class Floor implements Runnable {
 		int floorNum;
 		DirectionType direction;
 		if(message.getType().equals(MessageType.DOORS_OPENED)) {
-			DoorOpened doorOpened = (DoorOpened) message;
+			DoorOpenedMessage doorOpened = (DoorOpenedMessage) message;
 			
-			if (doorOpened.getStopType() == STOP_TYPE.DROPOFF) {
+			if (doorOpened.getStopType() == StopType.DROPOFF) {
 				this.canSendRequest = true;
 			}
 			

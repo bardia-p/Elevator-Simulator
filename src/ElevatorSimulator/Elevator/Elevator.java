@@ -40,7 +40,7 @@ public class Elevator implements Runnable {
 	private ArrayList<Integer> destinations;
 	
 	// stop type of an arrived
-	private STOP_TYPE stopType;
+	private StopType stopType;
 	
 	// list of lights corresponding to active request for each floor
 	private boolean[] floorLights;
@@ -191,14 +191,14 @@ public class Elevator implements Runnable {
 			
 			if (destinations.size() == 1) {
 				this.direction = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
-				this.stopType = STOP_TYPE.PICKUP;
+				this.stopType = StopType.PICKUP;
 			} else {
-				this.stopType = STOP_TYPE.DROPOFF;
+				this.stopType = StopType.DROPOFF;
 			}
 			
 			changeState(ElevatorState.OPEN);
 
-			DoorOpened doorOpen = new DoorOpened(currentRequest.getTimestamp(), floor, stopType, this.direction);
+			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
 			queue.send(doorOpen);
 		}
 	}
