@@ -96,5 +96,7 @@ class ElevatorTest {
 		}
 		
 		queue.replyToElevator(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"), ELEVATOR_ID);	
+		
+		elevatorThread.join();
 	}
 }
