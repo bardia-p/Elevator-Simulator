@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ElevatorSimulator.Scheduler;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * The unit tests for the scheduler subsystem.

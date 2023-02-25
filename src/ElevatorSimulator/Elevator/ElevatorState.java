@@ -1,11 +1,12 @@
 /**
  * 
  */
-package ElevatorSimulator;
+package ElevatorSimulator.Elevator;
 
 /**
  * @author Andre Hazim
  *
+ * The states of the elevators
  */
 public enum ElevatorState {
 	POLL,
