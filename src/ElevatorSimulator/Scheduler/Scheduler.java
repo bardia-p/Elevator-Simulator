@@ -103,7 +103,7 @@ public class Scheduler implements Runnable{
 			if (id != -1) {
 				queue.replyToElevator(currentRequest, id);
 			} else {
-				queue.send(currentRequest);
+				return;
 			}
 			
 		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
@@ -134,13 +134,6 @@ public class Scheduler implements Runnable{
 				changeState(SchedulerState.PROCESSING);
 			} else {
 				processMessage();
-			}
-			
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}
