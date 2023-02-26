@@ -21,6 +21,8 @@ public class BufferTest {
 	 */
 	@Test
 	public void testBuffer() {	
+		System.out.println("\n----------testBuffer----------\n");
+
 		Buffer buffer = new Buffer();
 		
 		assertTrue(buffer.isEmpty());

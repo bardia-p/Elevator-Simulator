@@ -19,7 +19,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
 /**
  * The unit tests for the floor subsystem.
  * 
- * @author Bardia Parmoun
+ * @author Kyra Lothrop
  * @author Sarah Chow
  *
  */
@@ -52,6 +52,9 @@ public class FloorTest {
 	 */
 	@Test
 	void testOneFloorRequest() {
+		
+		System.out.println("\n----------testOneFloorRequest----------\n");
+
 		
 		Floor floor = new Floor(queue, FILEPATH, NUM_FLOORS);
 		
