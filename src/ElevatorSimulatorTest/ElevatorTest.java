@@ -15,13 +15,11 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * 
  * @author Sarah Chow
  * @author Bardia Parmoun
+ * @author Kyra Lothrop
  *
  */
 
 class ElevatorTest {
-	
-	// Mock scheduler object.
-	//MockScheduler scheduler;
 	
 	MessageQueue queue;
 	
@@ -32,19 +30,20 @@ class ElevatorTest {
 	public boolean shouldRun;
 	
 	/**
-	 * Creating a new instance of the mock scheduler before
-	 * each new test.
+	 * Creating a new instance of the MessageQueue
+	 * before each test.
 	 */
 	@BeforeEach
 	void init() {
-		//scheduler = new MockScheduler();
 		queue = new MessageQueue();
 	}
 
 	/**
-	 * The unit test depicts the sending of a message from the
-	 * scheduler to the elevator and the confirmation message
-	 * from the elevator to the scheduler.
+	 * The unit test depicts the receiving of a message from the
+	 * scheduler to the elevator to move from floor 4 to 1.
+	 * Confirms the expected environments of each 
+	 * state (DOORS_OPENED, PICKUP, ARRIVE). Sends kill message
+	 * at the end to terminate thread.
 	 * @throws InterruptedException 
 	 */
 	@Test

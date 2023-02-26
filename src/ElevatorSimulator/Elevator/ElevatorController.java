@@ -7,12 +7,9 @@ import ElevatorSimulator.Messages.RequestElevatorMessage;
 import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
- * 
+ * The Elevator controller class responsible for controlling the multiple elevators 
  * @author Andre Hazim, 
  * @author Bardia Parmoun
- * 
- * The Elevator controller class responsible for controlling the multiple elevators 
- *
  */
 public class ElevatorController implements Runnable {
 	
@@ -85,7 +82,7 @@ public class ElevatorController implements Runnable {
 	}
 	
 	/**
-	 * kills all the elevators
+	 * Kills all the elevators
 	 * 
 	 * @param message a kill message
 	 */
@@ -97,7 +94,7 @@ public class ElevatorController implements Runnable {
 
 	@Override
 	/**
-	 * starts all the elevator threads
+	 * Starts all the elevator threads
 	 */
 	public void run() {
 		initializeElevators();

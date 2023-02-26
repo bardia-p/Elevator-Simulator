@@ -18,6 +18,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * 
  * @author Kyra Lothrop
  * @author Sarah Chow
+ * @author Bardia Parmoun
  *
  */
 public class FloorTest {
@@ -34,8 +35,8 @@ public class FloorTest {
 
 	
 	/**
-	 * Creating a new instance of the mock scheduler before
-	 * each new test.
+	 * Creating a new instance of the queue and shouldRun 
+	 * before each test.
 	 */
 	@BeforeEach
 	void init() {
@@ -44,8 +45,10 @@ public class FloorTest {
 	}
 	
 	/**
-	 * The unit test depicts the sending of a message and a 
-	 * kill message from the floor to the scheduler.
+	 * The unit test depicts the sending of a message from the
+	 * floor to the scheduler and back from the scheduler to floor
+	 * as a confirmation message. Sends kill message at the end 
+	 * to terminate thread.
 	 */
 	@Test
 	void testOneFloorRequest() {

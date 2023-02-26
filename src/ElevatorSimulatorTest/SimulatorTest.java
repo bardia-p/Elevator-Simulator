@@ -8,8 +8,12 @@ import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
+ * File to test the Simulator Class. Tests the completion of the system
+ * using the default input file and the test file.
+ * 
  * @author Bardia Parmoun
  * @author Andre Hazim
+ * @author Sarah Chow
  *
  */
 public class SimulatorTest {
@@ -22,7 +26,6 @@ public class SimulatorTest {
 	/**
 	 * Starts the simulator with the default filename.
 	 * Validates that the simulator fully runs and does not get stuck.
-	 * 
 	 */
 	@Test
 	public void testSimulatorDefaultFile() throws Exception {
@@ -53,7 +56,6 @@ public class SimulatorTest {
 	/**
 	 * Starts the simulator with a custom filename.
 	 * Validates that the simulator fully runs and does not get stuck.
-	 * 
 	 */
 	@Test
 	public void testSimulatorTestFile() throws Exception {

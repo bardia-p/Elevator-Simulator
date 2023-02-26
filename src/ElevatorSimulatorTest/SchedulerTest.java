@@ -10,7 +10,8 @@ import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
- * The unit tests for the scheduler subsystem.
+ * The unit tests for the scheduler subsystem using the
+ * Mock ElevatorController class.
  * 
  * @author Sarah Chow
  * @author Kyra Lothrop
@@ -27,6 +28,9 @@ class SchedulerTest {
 	
 	RequestElevatorMessage message;
 	
+	/**
+	 * Initializes new queue and message before each test.
+	 */
 	@BeforeEach
 	void init() {
 		queue = new MessageQueue();
@@ -34,6 +38,11 @@ class SchedulerTest {
 
 	}
 	
+	/**
+	 * Test to check the behaviour of the system when there is at least
+	 * one available elevator in the ArrayList. Should return the ID of
+	 * the available elevator.
+	 */
 	@Test
 	void testAvailElevator() {
 		System.out.println("\n----------testAvailElevator----------\n");
@@ -46,6 +55,10 @@ class SchedulerTest {
 		assertEquals(0, scheduler.getClosestElevator(message));
 	}
 	
+	/**
+	 * Test to check the behaviour of the system when there is are no
+	 * available elevators in the ArrayList. Should return -1.
+	 */
 	@Test
 	void testZeroElevator() {
 		System.out.println("\n----------testZeroElevator----------\n");
