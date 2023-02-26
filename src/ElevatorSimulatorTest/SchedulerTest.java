@@ -5,66 +5,69 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ElevatorSimulator.Scheduler;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
- * The unit tests for the scheduler subsystem.
+ * The unit tests for the scheduler subsystem using the
+ * Mock ElevatorController class.
  * 
  * @author Sarah Chow
- * @author Bardia Parmoun
+ * @author Kyra Lothrop
  *
  */
 public class SchedulerTest {
 	
 	private Scheduler scheduler;
 	
+	private MockElevatorController mockEC;
+	
+	private MessageQueue queue;
+	
+	RequestElevatorMessage message;
+	
 	/**
-	 * Creates an instance of the scheduler before each test.
-	 * 
+	 * Initializes new queue and message before each test.
 	 */
 	@BeforeEach
 	void init() {
-		scheduler = new Scheduler();
-	}
+		queue = new MessageQueue();
+		message = new RequestElevatorMessage("timestamp", 4, DirectionType.DOWN, 1);
 
-	/**
-	 * This unit test depicts the transmission of a kill message from 
-	 * the floor through the scheduler to the elevator. Ensures the 
-	 * message sent from the floor and received by the elevator 
-	 * contain equivalent data.
-	 */
-	@Test
-	void testFloorToElevator() {
-		
-		Message message = new KillMessage(SenderType.FLOOR, "kill message from floor");
-		
-		scheduler.send(message);
-		scheduler.run();
-		
-		Message result = scheduler.receive(SenderType.ELEVATOR);
-		
-		assertNotNull(result);
-		assertEquals(result, message);
 	}
 	
 	/**
-	 * This unit test depicts the transmission of a kill message from
-	 * the elevator through the scheduler to the floor. Ensures the
-	 * message sent from the elevator and received by the floor 
-	 * contain equivalent data.
+	 * Test to check the behaviour of the system when there is at least
+	 * one available elevator in the ArrayList. Should return the ID of
+	 * the available elevator.
 	 */
 	@Test
-	void testElevatorToFloor() {
-		Message message = new KillMessage(SenderType.ELEVATOR, "kill message from elevator");
+	void testAvailElevator() {
+		System.out.println("\n----------testAvailElevator----------\n");
+
+		mockEC = new MockElevatorController(queue, 1);
+		scheduler = new Scheduler(queue, mockEC);
+						
+		queue.send(message);	
 		
-		scheduler.send(message);
-		scheduler.run();
+		assertEquals(0, scheduler.getClosestElevator(message));
+	}
+	
+	/**
+	 * Test to check the behaviour of the system when there is are no
+	 * available elevators in the ArrayList. Should return -1.
+	 */
+	@Test
+	void testZeroElevator() {
+		System.out.println("\n----------testZeroElevator----------\n");
+
+		mockEC = new MockElevatorController(queue, 0);
+		scheduler = new Scheduler(queue, mockEC);
+						
+		queue.send(message);	
 		
-		Message result = scheduler.receive(SenderType.FLOOR);
-		
-		assertNotNull(result);
-		assertEquals(result, message);
+		assertEquals(-1, scheduler.getClosestElevator(message));
 	}
 
 }

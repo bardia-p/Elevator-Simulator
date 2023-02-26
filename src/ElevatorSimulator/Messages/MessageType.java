@@ -7,5 +7,7 @@ package ElevatorSimulator.Messages;
 public enum MessageType {
 	ARRIVE,
 	REQUEST,
-	KILL
+	MOVING,
+	KILL,
+	DOORS_OPENED
 }

@@ -1,4 +1,4 @@
-package ElevatorSimulator;
+package ElevatorSimulator.Messaging;
 
 import java.util.ArrayDeque;
 
@@ -27,7 +27,7 @@ public class Buffer {
 	 * 
 	 * @param m the message to add to the buffer.
 	 */
-	public synchronized  void put(Message m) {
+	public synchronized void put(Message m) {
 		while(!messages.isEmpty()) {
 			try {
 				wait();
@@ -37,7 +37,7 @@ public class Buffer {
 		}
 		
 		messages.offer(m);
-		System.out.println(Thread.currentThread().getName() + " sent\n" + m.getDescription() + "\n");
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent: " + m.getDescription() + "\n------------------------\n");
 
 		notifyAll();
 	}
@@ -57,7 +57,7 @@ public class Buffer {
 		}
 		
 		Message received = messages.poll();
-		System.out.println(Thread.currentThread().getName() + " received\n" + received.getDescription() + "\n");
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " received: " + received.getDescription() + "\n------------------------\n");
 
 		notifyAll();
 		

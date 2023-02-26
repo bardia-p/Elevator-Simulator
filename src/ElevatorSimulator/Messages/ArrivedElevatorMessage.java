@@ -31,4 +31,12 @@ public class ArrivedElevatorMessage extends Message {
 	public String getDescription() {
 		return super.getDescription() + "at: " + floorNumber;
 	}
+	/**
+	 * gets the arrived floor number
+	 * @return arrived floor number
+	 */
+	public int getArrivedFloor() {
+		return floorNumber;
+	}
+
 }
