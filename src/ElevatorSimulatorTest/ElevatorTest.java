@@ -48,7 +48,7 @@ class ElevatorTest {
 	 * @throws InterruptedException 
 	 */
 	@Test
-	void testElevatorReceiveOneRequest() throws InterruptedException {
+	void testOneElevatorRequest() throws InterruptedException {
 		Elevator elevator = new Elevator(queue, ELEVATOR_ID, NUM_FLOORS);
 		Thread elevatorThread = new Thread(elevator, "ELEVATOR");
 		queue.addElevator();
