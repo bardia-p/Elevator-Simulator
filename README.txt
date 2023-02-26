@@ -7,11 +7,11 @@ Authors (Group L1G3)
  - Kyra Lothrop - 101145872
  - Sarah Chow - 101143033
 
-Description
+Description:
 The purpose of this project is to simulate the behaviour of an elevator system in real time. 
 The Elevator Simulator is composed of the Scheduler, Elevator, and Floor subsystems, that are constantly interacting with each other.
 
-Deliverables
+Deliverables:
 Iteration 0: Measure a Real Elevator (completed)
 Iteration 1: Establish Connections between the three subsystems (current version)
  - Development for the three threads of Floor, Elevator and Scheduler.
@@ -27,7 +27,7 @@ For better understanding the design of the project please navigate to the "./dia
 	- "elevator_to_floor.png"
 	- "floor_to_elevator.png"
 
-Contents:
+Contents of src:
 - Package ElevatorSimulator
 	- Buffer.java : An implementation of a simple blocking queue.
 	- Elevator.java : The elevator subsystem.
@@ -74,7 +74,7 @@ Iteration 1:
 	- ElevatorSimulator: Floor.java, Simulator.java, RequestElevatorMessage.java
 	- ElevatorSimulatorTest: ElevatorTest.java, FloorTest.java, MockScheduler.java, SchedulerTest.java
 
-Setup instructions:
+Setup Instructions:
 1. Unzip the submission file.
 2. Navigate the eclipse IDE.
 3. Navigate the File menu.
@@ -84,6 +84,22 @@ Setup instructions:
 7. Select the project folder. 
 8. Once the project folder is open navigate to the "./src/ElevatorSimulator/Simulator.java" file to run the main file and start the program.
 
+Test Instructions:
+The ElevatorSimulator.Test package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
+
+For each subsystem there is a dedicated test class to test them separately.
+- FloorTest: testing the floor subsystem alone.
+- ElevatorTest: testing the elevator subsystem alone.
+- SchedulerTest: testing the scheduler subsystem alone.
+- BufferTest: testing the blocking message queue.
+- SimulatorTest: testing the simulator system.
+
+To help isolate the floor and elevator subsystems from each other, the scheduler subsystem was mocked and labeled as "MockScheduler".
+This allows the scheduler to behave synchronously and avoid having the any of the tests be blocked waiting for the response of the other subsystem.
+
+Navigate to any of these class and run them as a JUnit test to confirm that the system is working as expected. 
+
+Expected Output:
 Expected output of the simulator after running the project with the default test file "elevator_input.csv":
 '''
 FLOOR sent

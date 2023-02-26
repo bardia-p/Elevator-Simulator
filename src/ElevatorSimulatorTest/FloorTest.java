@@ -32,7 +32,6 @@ public class FloorTest {
 	private boolean shouldRun;
 	
 	private int DESTINATION_FLOOR = 4;
-
 	
 	/**
 	 * Creating a new instance of the queue and shouldRun 

@@ -18,8 +18,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Kyra Lothrop
  *
  */
-
-class ElevatorTest {
+public class ElevatorTest {
 	
 	MessageQueue queue;
 	

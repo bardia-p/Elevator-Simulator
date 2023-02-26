@@ -17,8 +17,7 @@ import ElevatorSimulator.Scheduler.Scheduler;
  * @author Kyra Lothrop
  *
  */
-
-class SchedulerTest {
+public class SchedulerTest {
 	
 	private Scheduler scheduler;
 	
