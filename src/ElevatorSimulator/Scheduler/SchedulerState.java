@@ -1,10 +1,9 @@
 package ElevatorSimulator.Scheduler;
 
 /**
- * 
+ * The scheduler states.
  * @author Andre Hazim
  * @author Bardia Parmoun
- * The scheduler states
  */
 public enum SchedulerState {
 	POLL,

@@ -4,6 +4,12 @@ import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.Message;
 
+/**
+ * File representing the MessageQueue class.
+ * @author Bardia Parmoun
+ * @author Andre Hazim
+ *
+ */
 public class MessageQueue {
 	// All the new messages for the scheduler.
 	private Buffer newMessages;
@@ -14,12 +20,21 @@ public class MessageQueue {
 	// All the messages sent to the floor.
 	private Buffer toFloor;
 	
+	/**
+	 * Constructor for the class. Initialzies
+	 * the newMessages Buffer object, toElevator ArrayList,
+	 * and the toFloor Buffer object.
+	 */
 	public MessageQueue() {
 		this.newMessages = new Buffer();
 		this.toElevator = new ArrayList<Buffer>();
 		this.toFloor = new Buffer();
 	}
 	
+	/**
+	 * Method to add a new Buffer object to the
+	 * toElevator ArrayList.
+	 */
 	public void addElevator() {
 		this.toElevator.add(new Buffer());
 	}

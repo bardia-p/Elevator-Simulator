@@ -150,7 +150,7 @@ public class Floor implements Runnable {
 		} else {
 			RequestElevatorMessage request = (RequestElevatorMessage) message;
 			floorNum = request.getFloor();
-			direction = request.getDirection();
+			direction = request.getDirection();			
 			if (direction == DirectionType.UP) {
 				this.upLights[floorNum-1] = true;
 			} else {
@@ -159,11 +159,10 @@ public class Floor implements Runnable {
 		}
 	}
 	
-	
 	/**
 	 * A display of the light status
 	 */
-	private void getLightStatus() {
+	private void printLightStatus() {
 		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n---------------------------------------";
 		for(int i = 0; i<this.upLights.length;i++) {
 			floorLightsDisplay += "\n| Floor " + (i+1) + " up light on :" + this.upLights[i] + " ";
@@ -183,6 +182,10 @@ public class Floor implements Runnable {
 		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
 	}
 	
+	public boolean getCanSendRequest() {
+		return this.canSendRequest;
+	}
+	
 	/**
 	 * The run function used to logic of the floor.
 	 */
@@ -191,7 +194,7 @@ public class Floor implements Runnable {
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
 			
-			getLightStatus();
+			printLightStatus();
 			
 			requestUpdate();
 			

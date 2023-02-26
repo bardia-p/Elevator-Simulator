@@ -27,7 +27,7 @@ public class Scheduler implements Runnable{
 
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
-	
+
 	/**
 	 * Default constructor for the Scheduler.
 	 * 
@@ -38,11 +38,11 @@ public class Scheduler implements Runnable{
 		this.currentRequest = null;
 		this.state = null;
 		this.elevatorController = elevatorController;
-		
+
 		changeState(SchedulerState.POLL);
 	}
-	
-	
+
+
 	/**
 	 * Polls its newMessages buffer to see if a new message is sent.
 	 * 
@@ -51,7 +51,7 @@ public class Scheduler implements Runnable{
 	private Message checkForNewMessages() {
 		return queue.pop();	
 	}
-	
+
 	/**
 	 * Checks to see the closest elevator and adds it to the list 
 	 * @param requestMessage the request messsage
@@ -59,41 +59,41 @@ public class Scheduler implements Runnable{
 	 */
 	public int getClosestElevator(RequestElevatorMessage requestMessage) {
 		ArrayList<Elevator> availableElevators = elevatorController.getAvailableElevators(requestMessage);
-		
+
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
-			for (Elevator elevator : availableElevators) {
-	
-				if (elevator.getState() == ElevatorState.POLL) {
-					if (elevator.getFloorNumber() == requestMessage.getFloor()) {
-						// Same floor
+		for (Elevator elevator : availableElevators) {
+
+			if (elevator.getState() == ElevatorState.POLL) {
+				if (elevator.getFloorNumber() == requestMessage.getFloor()) {
+					// Same floor
+					return elevator.getID();
+				}
+				else if (elevator.getDirection() == requestMessage.getDirection()) {
+
+					if ((elevator.getDirection() == DirectionType.UP &&
+							elevator.getFloorNumber() < requestMessage.getFloor()) ||
+
+							(elevator.getDirection() == DirectionType.DOWN &&
+							elevator.getFloorNumber() > requestMessage.getFloor())) {
+						// Going up and elevator is below request floor OR
+						// Going down and elevator is above request floor
+
 						return elevator.getID();
-					}
-					else if (elevator.getDirection() == requestMessage.getDirection()) {
-						
-						if ((elevator.getDirection() == DirectionType.UP &&
-								elevator.getFloorNumber() < requestMessage.getFloor()) ||
-								
-								(elevator.getDirection() == DirectionType.DOWN &&
-								elevator.getFloorNumber() > requestMessage.getFloor())) {
-							// Going up and elevator is below request floor OR
-							// Going down and elevator is above request floor
-							
-							return elevator.getID();
-						}
 					}
 				}
 			}
-			
-			return availableElevators.get(0).getID();
+		}
+
+		return availableElevators.get(0).getID();
 	}
-	
+
 	/**
 	 * processes the message
 	 */
 	private void processMessage() {
-		
+
 		if (currentRequest.getType() == MessageType.KILL){
 			kill((KillMessage) currentRequest);
 		}
@@ -105,16 +105,16 @@ public class Scheduler implements Runnable{
 			} else {
 				return;
 			}
-			
+
 		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
 			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
 			queue.replyToFloor(request);
 		}
-		
+
 		changeState(SchedulerState.POLL);
 
 	}
-	
+
 	/**
 	 * Stops the scheduler thread from running.
 	 */
@@ -122,7 +122,7 @@ public class Scheduler implements Runnable{
 		this.shouldRun = false;
 		elevatorController.kill(message);
 	}
-	
+
 	/**
 	 * The run method for the main logic of the scheduler.
 	 */
@@ -137,7 +137,7 @@ public class Scheduler implements Runnable{
 			}
 		}
 	}
-	
+
 	/**
 	 * change and print state
 	 * @param newState
@@ -147,5 +147,5 @@ public class Scheduler implements Runnable{
 		state = newState;
 
 	}
-	
+
 }
