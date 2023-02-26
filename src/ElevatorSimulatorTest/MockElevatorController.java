@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorController;
 import ElevatorSimulator.Messages.*;
-import ElevatorSimulator.Messaging.Buffer;
 import ElevatorSimulator.Messaging.MessageQueue;
-import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
 
@@ -40,7 +38,6 @@ public class MockElevatorController extends ElevatorController{
 		
 	}
 	
-
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
 			Elevator elevator = new Elevator(queue, i, this.numFloors);
@@ -49,9 +46,8 @@ public class MockElevatorController extends ElevatorController{
 		}
 	}
 	
-	public ArrayList<Elevator> getAvailableElevators(RequestElevatorMessage message){
-		
-		System.out.println(elevators.size());
+	@Override
+	public ArrayList<Elevator> getAvailableElevators(RequestElevatorMessage message){		
 		return this.elevators;
 	}
 	

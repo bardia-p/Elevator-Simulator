@@ -28,9 +28,6 @@ public class Floor implements Runnable {
 	
 	private boolean shouldRun;
 	
-	private String UP_LIGHTS = "UP";
-	private String DOWN_LIGHTS = "DOWN";
-	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 

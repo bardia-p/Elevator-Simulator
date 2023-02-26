@@ -8,11 +8,8 @@ import org.junit.jupiter.api.Test;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
-import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
-import ElevatorSimulator.Messages.RequestElevatorMessage;
-import ElevatorSimulator.Messages.SenderType;
 import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messaging.MessageQueue;
 
@@ -58,38 +55,29 @@ public class FloorTest {
 		
 		Floor floor = new Floor(queue, FILEPATH, NUM_FLOORS);
 		
-		Thread floorThread = new Thread(floor, "FLOOR");
+		assertTrue(floor.getCanSendRequest());
 
-		Message message = new DoorOpenedMessage("timestamp", DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.DOWN);
-		
-		queue.replyToFloor(message);
-		
-		assertNotNull(floor);
+		Thread floorThread = new Thread(floor, "FLOOR");
 		
 		floorThread.start();		
 		
-		
+			
 		while(this.shouldRun) {
+			Message newMessage = queue.pop();
 			
-			Message newMessage = message;
-			
-			if (newMessage.getType() == MessageType.DOORS_OPENED) {
-				DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
+			if (newMessage.getType() == MessageType.REQUEST) {
+				DoorOpenedMessage pickupMessage = new DoorOpenedMessage("timestamp", DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP);
 				
-				if (doorsOpenMessage.getStopType() == StopType.DROPOFF) {
-					System.out.println("herehere");
-					assertTrue(floor.getCanSendRequest());
-					assertEquals(doorsOpenMessage.getArrivedFloor(), DESTINATION_FLOOR);
-					assertEquals(doorsOpenMessage.getDirection(), DirectionType.DOWN);
-					shouldRun = false;
-				}
+				queue.replyToFloor(pickupMessage);
+				
+				assertFalse(floor.getCanSendRequest());
+
+				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage("timestamp", DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP);
+
+				queue.replyToFloor(dropoffMessage);
+			} else if (newMessage.getType() == MessageType.KILL) {
+				shouldRun = false;
 			}
-			
 		}
-		
-		queue.replyToFloor(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
-
 	}
-	
-
 }

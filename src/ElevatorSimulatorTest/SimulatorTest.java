@@ -2,7 +2,6 @@ package ElevatorSimulatorTest;
 
 import org.junit.jupiter.api.Test;
 
-import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorController;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messaging.MessageQueue;
