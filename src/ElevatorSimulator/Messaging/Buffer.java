@@ -27,7 +27,7 @@ public class Buffer {
 	 * 
 	 * @param m the message to add to the buffer.
 	 */
-	public synchronized  void put(Message m) {
+	public synchronized void put(Message m) {
 		while(!messages.isEmpty()) {
 			try {
 				wait();
