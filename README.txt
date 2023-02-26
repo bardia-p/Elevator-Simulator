@@ -113,6 +113,20 @@ Setup instructions:
 7. Select the project folder. 
 8. Once the project folder is open navigate to the "./src/ElevatorSimulator/Simulator.java" file to run the main file and start the program.
 
+Test Instructions:
+The ElevatorSimulator.Test package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
+
+For each subsystem there is a dedicated test class to test them separately.
+- FloorTest: testing the floor subsystem alone.
+- ElevatorTest: testing the elevator subsystem alone.
+- SchedulerTest: testing the scheduler subsystem alone.
+- BufferTest: testing the blocking message queue.
+- SimulatorTest: testing the simulator system.
+
+The ElevatorController was mocked and labeled as "MockElevatorController".
+This allows the ElevatorController to behave synchronously and avoid blocking the tests.
+
+
 Expected output of the simulator after running the project with the default test file "elevator_input.csv":
 '''
 SCHEDULER STATE: --------- POLL ---------
