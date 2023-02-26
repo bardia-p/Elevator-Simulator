@@ -126,7 +126,10 @@ For each subsystem there is a dedicated test class to test them separately.
 The ElevatorController was mocked and labeled as "MockElevatorController".
 This allows the ElevatorController to behave synchronously and avoid blocking the tests.
 
+Navigate to any of these classes and run them as a JUnit test to confirm that the system is
+working as expected. 
 
+Expected Output:
 Expected output of the simulator after running the project with the default test file "elevator_input.csv":
 '''
 SCHEDULER STATE: --------- POLL ---------
