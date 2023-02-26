@@ -1,4 +1,4 @@
-Elevator Simulator Project - Iteration 1
+Elevator Simulator Project - Iteration 2
 
 Authors (Group L1G3)
  - Andre Hazim - 101141843
@@ -13,46 +13,60 @@ The Elevator Simulator is composed of the Scheduler, Elevator, and Floor subsyst
 
 Deliverables:
 Iteration 0: Measure a Real Elevator (completed)
-Iteration 1: Establish Connections between the three subsystems (current version)
- - Development for the three threads of Floor, Elevator and Scheduler.
-Iteration 2: Adding the scheduler and Elevator Subsystem
+Iteration 1: Establish Connections between the three subsystems (completed)
+Iteration 2: Adding the scheduler and Elevator Subsystem (current version)
+ - Addition of state machines for the scheduler and elevator subsystems.
 Iteration 3: Multiple Cars and System Distribution
 Iteration 4: Adding Error detection and correction
 Iteration 5: Measuring the Scheduler and predicting the performance
 
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
-- The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labelled "class_diagram_iter1.png".
-- The sequence diagrams are located in "./diagrams/sequence_diagrams/Iteration1" as follows:
+ - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labelled "class_diagram_iter2.png".
+ - The sequence diagrams are located in "./diagrams/sequence_diagrams/Iteration2" as follows:
 	- "elevator_to_floor.png"
 	- "floor_to_elevator.png"
+ - The state diagrams are located in "./diagrams/state_diagrams" as follows:
+      - "elevator_state_machine.jpg"
+      - "scheduler_state_machine.jpg"
 
-Contents of src:
-- Package ElevatorSimulator
-	- Buffer.java : An implementation of a simple blocking queue.
-	- Elevator.java : The elevator subsystem.
-	- Floor.java : The floor subsystem.
-	- Scheduler.java : The scheduler subsystem.
-	- Simulator.java : Starting point for the program.
-- Package ElevatorSimulator.Messages
-	- ArrivedElevatorMessage.java : Message for elevator arriving.
-	- DirectionType.java : Enum for the direction of travel of the elevator.
-	- KillMessage.java : Specific message for killing the system.
-	- Message.java : The default messages that are passed in the buffers.
-	- MessageType.java : Enum for message types.
-	- RequestElevatorMessage.java : Message for elevator requests.
-	- SenderType.java : Enum for types of senders.
-- Package ElevatorSimulator.resources
-	- elevator_input.csv : csv file containing commands that the simulator takes in.
-- Package ElevatorSimulatorTest
-	- BufferTest.java : Tests for the buffer class.
-	- ElevatorTest.java : Tests for the elevator subsystem.
-	- FloorTest.java : Tests for the floor subsystem.
-	- MockSheduler.java : A mock version of the Scheduler class for testing purposes.
-	- SchedulerTest.java : Tests for the scheduler system.
-	 - SimulatorTest.java : Tests for the simulator.
-- Package ElevatorSimulatorTest.TestFiles
-	- elevator_test-1.csv : csv file with commands for testing purposes.
+Contents:
+ - Package ElevatorSimulator
+      - Simulator.java : The class in charge of starting up the subsystems.
+ - Package ElevatorSimulator.Elevator
+      - Elevator.java : The elevator subsystem, receives and replies to messages.
+      - ElevatorController.java : Responsible for controlling the multiple elevators.
+      - ElevatorState.java : Enum for The possible states of the elevator
+ - Package ElevatorSimulator.Floor
+      - Floor.java : The floor subsystem.
+ - Package ElevatorSimulator.Messages
+      - ArrivedElevatorMessage.java : Message to indicate the elevator has arrived.
+      - DirectionType.java : Enum for the possible directions of the elevator.
+      - DoorOpenedMessage.java : Message to indicate that the doors have opened.
+      - KillMessage.java : Message used to kill the system.
+      - Message.java : The default message class for holding the information that is passed to the buffers.
+      - MessageType.java : Enum for the possible message types passed in the buffer. 
+      - RequestElevatorMessage.java : Message for requesting the elevator.
+      - SenderType.java : Enum for the subsystems that can send messages.
+      - StopType.java : Enum for the possible reasons that the doors have opened.
+ - Package ElevatorSimulator.Messaging
+      - Buffer.java : A implementation of a simple blocking queue.
+      - MessageQueue.java : File representing the MessageQueue class.
+ - Package ElevatorSimulator.Scheduler
+      - Scheduler.java : The scheduler subsystem that removes a message from the elevator and sends it to the floor and removes a message from the floor and sends it to the elevator.
+      - SchedulerState.java : Enum for the possible scheduler states.
+ - Package ElevatorSimulator.resources
+      - elevator_input.csv : csv file containing commands.
+ - Package ElevatorSimulatorTest
+      - BufferTest.java : The unit tests for the buffer class.
+      - ElevatorTest.java : The unit tests for the elevator subsystem.
+      - FloorTest.java : The unit tests for the floor subsystem.
+      - MockElevatorController.java : Class to mock the ElevatorController class for testing purposes.
+      - SchedulerTest.java : The unit tests for the scheduler subsystem using the mock ElevatorController class.
+      - SimulatorTest.java : File to test the Simulator class and tests the completion of the system using the default input file and the test file.
+ - Package ElevatorSimulator.TestFiles
+      - elevator_test-1.csv : csv file with commands for testing purposes.
+
 
 * Note: if you notice any ".DS_STORE" files, they are automatically created and are related to the internal file structure of macOS. 
 
@@ -74,7 +88,22 @@ Iteration 1:
 	- ElevatorSimulator: Floor.java, Simulator.java, RequestElevatorMessage.java
 	- ElevatorSimulatorTest: ElevatorTest.java, FloorTest.java, MockScheduler.java, SchedulerTest.java
 
-Setup Instructions:
+Iteration 2:
+ - Andre Hazim:
+	- ElevatorSimulator: Elevator.java, OpenDoorsMessage.java, MessageQueue.java
+ - Bardia Parmoun:
+	- ElevatorSimulator: MessageQueue.java, Scheduler.java, ElevatorController.java
+	- ElevatorSimulatorTest: ElevatorTest.java
+ - Guy Morgenshtern:
+	- ElevatorSimulator: Elevator.java, OpenDoorsMessage.java, MessageQueue.java
+ - Kyra Lothrop:
+	- ElevatorSimulator: MessageQueue.java, Scheduler.java, ElevatorController.java
+	- ElevatorSimulatorTest: FloorTest.java, SchedulerTest.java
+ - Sarah Chow:
+	- ElevatorSimulator: MessageQueue.java, Scheduler.java, ElevatorController.java
+	- ElevatorSimulatorTest: ElevatorTest.java, FloorTest.java, SchedulerTest.java
+
+Setup instructions:
 1. Unzip the submission file.
 2. Navigate the eclipse IDE.
 3. Navigate the File menu.
@@ -94,193 +123,897 @@ For each subsystem there is a dedicated test class to test them separately.
 - BufferTest: testing the blocking message queue.
 - SimulatorTest: testing the simulator system.
 
-To help isolate the floor and elevator subsystems from each other, the scheduler subsystem was mocked and labeled as "MockScheduler".
-This allows the scheduler to behave synchronously and avoid having the any of the tests be blocked waiting for the response of the other subsystem.
+The ElevatorController was mocked and labeled as "MockElevatorController".
+This allows the ElevatorController to behave synchronously and avoid blocking the tests.
 
-Navigate to any of these class and run them as a JUnit test to confirm that the system is working as expected. 
+Navigate to any of these classes and run them as a JUnit test to confirm that the system is
+working as expected. 
 
 Expected Output:
 Expected output of the simulator after running the project with the default test file "elevator_input.csv":
 '''
-FLOOR sent
-REQUEST 14:33:44.5 FLOOR
-from: 2 to: 4 UP
+SCHEDULER STATE: --------- POLL ---------
 
-SCHEDULER received
-REQUEST 14:33:44.5 FLOOR
-from: 2 to: 4 UP
+------------------------
+FLOOR sent: REQUEST 14:33:44.5 FLOOR from: 2 to: 4 UP
+------------------------
 
-SCHEDULER sent
-REQUEST 14:33:44.5 FLOOR
-from: 2 to: 4 UP
 
-ELEVATOR received
-REQUEST 14:33:44.5 FLOOR
-from: 2 to: 4 UP
+------------------------
+SCHEDULER received: REQUEST 14:33:44.5 FLOOR from: 2 to: 4 UP
+------------------------
 
-ELEVATOR sent
-ARRIVE 14:33:44.5 ELEVATOR
-at: 4
 
-SCHEDULER received
-ARRIVE 14:33:44.5 ELEVATOR
-at: 4
+SCHEDULER STATE: --------- PROCESSING ---------
 
-SCHEDULER sent
-ARRIVE 14:33:44.5 ELEVATOR
-at: 4
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :true  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :false |
+---------------------------------------
 
-FLOOR received
-ARRIVE 14:33:44.5 ELEVATOR
-at: 4
 
-FLOOR sent
-REQUEST 16:42:21.2 FLOOR
-from: 4 to: 3 DOWN
+ELEVATOR STATE: --------- POLL ---------
 
-SCHEDULER received
-REQUEST 16:42:21.2 FLOOR
-from: 4 to: 3 DOWN
+------------------------
+SCHEDULER sent: REQUEST 14:33:44.5 FLOOR from: 2 to: 4 UP
+------------------------
 
-SCHEDULER sent
-REQUEST 16:42:21.2 FLOOR
-from: 4 to: 3 DOWN
 
-ELEVATOR received
-REQUEST 16:42:21.2 FLOOR
-from: 4 to: 3 DOWN
+SCHEDULER STATE: --------- POLL ---------
 
-ELEVATOR sent
-ARRIVE 16:42:21.2 ELEVATOR
-at: 3
+------------------------
+ELEVATOR 1 received: REQUEST 14:33:44.5 FLOOR from: 2 to: 4 UP
+------------------------
 
-SCHEDULER received
-ARRIVE 16:42:21.2 ELEVATOR
-at: 3
 
-SCHEDULER sent
-ARRIVE 16:42:21.2 ELEVATOR
-at: 3
+ELEVATOR STATE: --------- MOVING ---------
 
-FLOOR received
-ARRIVE 16:42:21.2 ELEVATOR
-at: 3
+ELEVATOR STATE: --------- ARRIVED ---------
 
-FLOOR sent
-REQUEST 24:11:07.0 FLOOR
-from: 3 to: 1 DOWN
+------------------------
+ELEVATOR 1 sent: ARRIVE 14:33:44.5 ELEVATOR at: 2
+------------------------
 
-SCHEDULER received
-REQUEST 24:11:07.0 FLOOR
-from: 3 to: 1 DOWN
 
-SCHEDULER sent
-REQUEST 24:11:07.0 FLOOR
-from: 3 to: 1 DOWN
+------------------------
+SCHEDULER received: ARRIVE 14:33:44.5 ELEVATOR at: 2
+------------------------
 
-ELEVATOR received
-REQUEST 24:11:07.0 FLOOR
-from: 3 to: 1 DOWN
 
-ELEVATOR sent
-ARRIVE 24:11:07.0 ELEVATOR
-at: 1
+SCHEDULER STATE: --------- PROCESSING ---------
 
-SCHEDULER received
-ARRIVE 24:11:07.0 ELEVATOR
-at: 1
+SCHEDULER STATE: --------- POLL ---------
 
-SCHEDULER sent
-ARRIVE 24:11:07.0 ELEVATOR
-at: 1
+ELEVATOR STATE: --------- OPEN ---------
 
-FLOOR received
-ARRIVE 24:11:07.0 ELEVATOR
-at: 1
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: PICKUP
+------------------------
 
-FLOOR sent
-REQUEST 00:32:14.8 FLOOR
-from: 1 to: 3 UP
 
-SCHEDULER received
-REQUEST 00:32:14.8 FLOOR
-from: 1 to: 3 UP
+------------------------
+SCHEDULER received: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: PICKUP
+------------------------
 
-SCHEDULER sent
-REQUEST 00:32:14.8 FLOOR
-from: 1 to: 3 UP
 
-ELEVATOR received
-REQUEST 00:32:14.8 FLOOR
-from: 1 to: 3 UP
+SCHEDULER STATE: --------- PROCESSING ---------
 
-ELEVATOR sent
-ARRIVE 00:32:14.8 ELEVATOR
-at: 3
+------------------------
+SCHEDULER sent: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: PICKUP
+------------------------
 
-SCHEDULER received
-ARRIVE 00:32:14.8 ELEVATOR
-at: 3
 
-SCHEDULER sent
-ARRIVE 00:32:14.8 ELEVATOR
-at: 3
+SCHEDULER STATE: --------- POLL ---------
 
-FLOOR received
-ARRIVE 00:32:14.8 ELEVATOR
-at: 3
+------------------------
+FLOOR received: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: PICKUP
+------------------------
 
-FLOOR sent
-REQUEST 01:29:00.6 FLOOR
-from: 3 to: 4 UP
 
-SCHEDULER received
-REQUEST 01:29:00.6 FLOOR
-from: 3 to: 4 UP
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :false |
+---------------------------------------
 
-SCHEDULER sent
-REQUEST 01:29:00.6 FLOOR
-from: 3 to: 4 UP
 
-ELEVATOR received
-REQUEST 01:29:00.6 FLOOR
-from: 3 to: 4 UP
+ELEVATOR STATE: --------- BOARDING ---------
 
-ELEVATOR sent
-ARRIVE 01:29:00.6 ELEVATOR
-at: 4
+ELEVATOR STATE: --------- CLOSE ---------
 
-SCHEDULER received
-ARRIVE 01:29:00.6 ELEVATOR
-at: 4
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: true |
+------------------------------------------------
 
-SCHEDULER sent
-ARRIVE 01:29:00.6 ELEVATOR
-at: 4
 
-FLOOR received
-ARRIVE 01:29:00.6 ELEVATOR
-at: 4
+ELEVATOR STATE: --------- POLL ---------
 
-FLOOR sent
-KILL 00:00:00 FLOOR
+ELEVATOR STATE: --------- MOVING ---------
 
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 14:33:44.5 ELEVATOR at: 3
+------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+------------------------
+SCHEDULER received: ARRIVE 14:33:44.5 ELEVATOR at: 3
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 14:33:44.5 ELEVATOR at: 4
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 14:33:44.5 ELEVATOR at: 4
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 14:33:44.5 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+FLOOR sent: REQUEST 16:42:21.2 FLOOR from: 4 to: 3 DOWN
+------------------------
+
+
+------------------------
+SCHEDULER received: REQUEST 16:42:21.2 FLOOR from: 4 to: 3 DOWN
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER sent: REQUEST 16:42:21.2 FLOOR from: 4 to: 3 DOWN
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 received: REQUEST 16:42:21.2 FLOOR from: 4 to: 3 DOWN
+------------------------
+
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 16:42:21.2 ELEVATOR at: 4
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 16:42:21.2 ELEVATOR at: 4
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: true |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 16:42:21.2 ELEVATOR at: 3
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 16:42:21.2 ELEVATOR at: 3
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 16:42:21.2 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+FLOOR sent: REQUEST 24:11:07.0 FLOOR from: 3 to: 1 DOWN
+------------------------
+
+
+------------------------
+SCHEDULER received: REQUEST 24:11:07.0 FLOOR from: 3 to: 1 DOWN
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :true |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER sent: REQUEST 24:11:07.0 FLOOR from: 3 to: 1 DOWN
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 received: REQUEST 24:11:07.0 FLOOR from: 3 to: 1 DOWN
+------------------------
+
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 24:11:07.0 ELEVATOR at: 3
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 24:11:07.0 ELEVATOR at: 3
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER received: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :false  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: true |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 24:11:07.0 ELEVATOR at: 2
+------------------------
+
+
+------------------------
+SCHEDULER received: ARRIVE 24:11:07.0 ELEVATOR at: 2
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+ELEVATOR STATE: --------- POLL ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 24:11:07.0 ELEVATOR at: 1
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 24:11:07.0 ELEVATOR at: 1
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 24:11:07.0 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+FLOOR sent: REQUEST 00:32:14.8 FLOOR from: 1 to: 3 UP
+------------------------
+
+
+------------------------
+SCHEDULER received: REQUEST 00:32:14.8 FLOOR from: 1 to: 3 UP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :true  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER sent: REQUEST 00:32:14.8 FLOOR from: 1 to: 3 UP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 received: REQUEST 00:32:14.8 FLOOR from: 1 to: 3 UP
+------------------------
+
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 00:32:14.8 ELEVATOR at: 1
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 00:32:14.8 ELEVATOR at: 1
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER received: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :true  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: true |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 00:32:14.8 ELEVATOR at: 2
+------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER received: ARRIVE 00:32:14.8 ELEVATOR at: 2
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 00:32:14.8 ELEVATOR at: 3
+------------------------
+
+
+------------------------
+SCHEDULER received: ARRIVE 00:32:14.8 ELEVATOR at: 3
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 00:32:14.8 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+FLOOR sent: REQUEST 01:29:00.6 FLOOR from: 3 to: 4 UP
+------------------------
+
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :true  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :true  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+------------------------
+SCHEDULER received: REQUEST 01:29:00.6 FLOOR from: 3 to: 4 UP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER sent: REQUEST 01:29:00.6 FLOOR from: 3 to: 4 UP
+------------------------
+
+
+------------------------
+ELEVATOR 1 received: REQUEST 01:29:00.6 FLOOR from: 3 to: 4 UP
+------------------------
+
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 01:29:00.6 ELEVATOR at: 3
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER received: ARRIVE 01:29:00.6 ELEVATOR at: 3
+------------------------
+
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+SCHEDULER received: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: PICKUP
+------------------------
+
+
+FLOOR LIGHTS STATUS
+---------------------------------------
+| Floor 1 up light on :true  down light on :false |
+| Floor 2 up light on :false  down light on :false |
+| Floor 3 up light on :false  down light on :false |
+| Floor 4 up light on :false  down light on :true |
+---------------------------------------
+
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: true |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- MOVING ---------
+
+ELEVATOR STATE: --------- ARRIVED ---------
+
+------------------------
+ELEVATOR 1 sent: ARRIVE 01:29:00.6 ELEVATOR at: 4
+------------------------
+
+
+ELEVATOR STATE: --------- OPEN ---------
+
+------------------------
+SCHEDULER received: ARRIVE 01:29:00.6 ELEVATOR at: 4
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 sent: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+SCHEDULER received: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+SCHEDULER STATE: --------- POLL ---------
+
+------------------------
+FLOOR received: DOORS_OPENED 01:29:00.6 ELEVATOR Stop Type: DROPOFF
+------------------------
+
+
+------------------------
+FLOOR sent: KILL 00:00:00 FLOOR 
 No more floor requests remaining
+------------------------
 
-SCHEDULER received
-KILL 00:00:00 FLOOR
 
+------------------------
+SCHEDULER received: KILL 00:00:00 FLOOR 
 No more floor requests remaining
+------------------------
 
-SCHEDULER sent
-KILL 00:00:00 FLOOR
 
+SCHEDULER STATE: --------- PROCESSING ---------
+
+------------------------
+SCHEDULER sent: KILL 00:00:00 FLOOR 
 No more floor requests remaining
+------------------------
 
-ELEVATOR received
-KILL 00:00:00 FLOOR
 
+SCHEDULER STATE: --------- POLL ---------
+
+ELEVATOR STATE: --------- BOARDING ---------
+
+ELEVATOR STATE: --------- CLOSE ---------
+
+ELEVATOR LIGHTS STATUS
+------------------------------------------------
+| Floor 1 light on: false |
+| Floor 2 light on: false |
+| Floor 3 light on: false |
+| Floor 4 light on: false |
+------------------------------------------------
+
+
+ELEVATOR STATE: --------- POLL ---------
+
+------------------------
+ELEVATOR 1 received: KILL 00:00:00 FLOOR 
 No more floor requests remaining
+------------------------
 '''
 
 
