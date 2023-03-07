@@ -173,27 +173,28 @@ public class Elevator implements Runnable {
 		DirectionType newDirection = direction;
 		boolean isPickUp = false;
 		boolean isDropoff = false;
-		
+		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
 		for (ElevatorTrip trip: destinations) {
 			if(trip.getPickup() == floor) {
 				isPickUp = true;
-			} else if (trip.getDropoff() == floor) {
+				this.stopType = StopType.PICKUP;
+
+			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
+				this.stopType = StopType.DROPOFF;
+				this.floorLights[floor-1] = false;
+				removalList.add(trip);
 			}
 		}
 		
-		if (!(isPickUp || isDropoff)) {
+		if (isPickUp && isDropoff) {
+			this.stopType = StopType.PICKUP_AND_DROPOFF;
+		}
+		destinations.removeAll(removalList);
+		
+		if (!(isPickUp || isDropoff) || destinations.size() == 0) {
 			changeState(ElevatorState.POLL);
-		} else {
-			destinations.remove((Integer) floor);
-			this.floorLights[floor-1] = false;
-			
-			if (destinations.size() == 1) {
-				newDirection = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
-				this.stopType = StopType.PICKUP;
-			} else {
-				this.stopType = StopType.DROPOFF;
-			}
+		} else {			
 			
 			changeState(ElevatorState.OPEN);
 
