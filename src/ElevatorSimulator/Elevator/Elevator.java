@@ -37,7 +37,7 @@ public class Elevator implements Runnable {
 	private Message currentRequest;
 	
 	// list of destination floors
-	private ArrayList<Integer> destinations;
+	private ArrayList<ElevatorTrip> destinations;
 	
 	// stop type of an arrived
 	private StopType stopType;
@@ -89,11 +89,11 @@ public class Elevator implements Runnable {
 			kill(); 
 		} else {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
-			destinations.add(requestElevatorMessage.getFloor());
-			destinations.add(requestElevatorMessage.getDestination());
+			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
+			destinations.add(elevatorTrip);
 			this.floorLights[requestElevatorMessage.getDestination()-1] = true;
 			if (requestElevatorMessage.getFloor() != floor) {
-				this.direction = ((requestElevatorMessage.getFloor() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
+				this.direction = ((destinations.get(0).getPickup() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
 				changeState(ElevatorState.MOVING);
 			} else {
 				changeState(ElevatorState.ARRIVED);
@@ -171,8 +171,18 @@ public class Elevator implements Runnable {
 		queue.send(reply);
 		
 		DirectionType newDirection = direction;
+		boolean isPickUp = false;
+		boolean isDropoff = false;
 		
-		if (!destinations.contains(floor)) {
+		for (ElevatorTrip trip: destinations) {
+			if(trip.getPickup() == floor) {
+				isPickUp = true;
+			} else if (trip.getDropoff() == floor) {
+				isDropoff = true;
+			}
+		}
+		
+		if (!(isPickUp || isDropoff)) {
 			changeState(ElevatorState.POLL);
 		} else {
 			destinations.remove((Integer) floor);
