@@ -117,12 +117,13 @@ public class Floor implements Runnable {
 	 * @return the updated message.
 	 */
 	private Message requestUpdate() {
+	
 		Message message = queue.receiveFromFloor();
 		
 		updateLights(message);// turns light off
-			
-	
+		
 		return message;
+		
 	}
 	/**
 	 * Updates the lights based on message type
@@ -131,6 +132,7 @@ public class Floor implements Runnable {
 	private void updateLights(Message message) {
 		int floorNum;
 		DirectionType direction;
+		
 		if(message.getType().equals(MessageType.DOORS_OPENED)) {
 			DoorOpenedMessage doorOpened = (DoorOpenedMessage) message;
 			

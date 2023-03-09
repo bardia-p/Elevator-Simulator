@@ -131,7 +131,9 @@ public class Scheduler implements Runnable{
 		while(this.shouldRun) {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
-				changeState(SchedulerState.PROCESSING);
+				if (currentRequest != null) {
+					changeState(SchedulerState.PROCESSING);
+				}
 			} else {
 				processMessage();
 			}

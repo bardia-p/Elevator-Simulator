@@ -1,6 +1,9 @@
 package ElevatorSimulator.Messaging;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
+import javax.sound.midi.Soundbank;
 
 import ElevatorSimulator.Messages.Message;
 
@@ -12,13 +15,13 @@ import ElevatorSimulator.Messages.Message;
  */
 public class MessageQueue {
 	// All the new messages for the scheduler.
-	private Buffer newMessages;
+	private ConcurrentLinkedDeque<Message> newMessages;
 	
 	// All the messages sent to the elevator.
-	private ArrayList<Buffer> toElevator;
+	private ArrayList<ConcurrentLinkedDeque<Message>> toElevator;
 
 	// All the messages sent to the floor.
-	private Buffer toFloor;
+	private ConcurrentLinkedDeque<Message> toFloor;
 	
 	/**
 	 * Constructor for the class. Initialzies
@@ -26,9 +29,9 @@ public class MessageQueue {
 	 * and the toFloor Buffer object.
 	 */
 	public MessageQueue() {
-		this.newMessages = new Buffer();
-		this.toElevator = new ArrayList<Buffer>();
-		this.toFloor = new Buffer();
+		this.newMessages = new ConcurrentLinkedDeque<Message>();
+		this.toElevator = new ArrayList<ConcurrentLinkedDeque<Message>>();
+		this.toFloor = new ConcurrentLinkedDeque<Message>();
 	}
 	
 	/**
@@ -36,7 +39,7 @@ public class MessageQueue {
 	 * toElevator ArrayList.
 	 */
 	public void addElevator() {
-		this.toElevator.add(new Buffer());
+		this.toElevator.add(new ConcurrentLinkedDeque<Message>());
 	}
 	
 	/**
@@ -44,8 +47,9 @@ public class MessageQueue {
 	 * 
 	 * @param m the message to send to the buffer.
 	 */
-	public void send(Message m) {		
-		newMessages.put(m);
+	public void send(Message m) {
+		
+		newMessages.offer(m);
 	}
 	
 	/**
@@ -55,7 +59,8 @@ public class MessageQueue {
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
 	public void replyToFloor(Message m) {
-		toFloor.put(m);
+		System.out.println("message to floor");
+		toFloor.offer(m);
 	}
 	
 	/**
@@ -65,7 +70,8 @@ public class MessageQueue {
 	 * @param id the elevator id
 	 */
 	public void replyToElevator(Message m, int id) {
-		toElevator.get(id).put(m);
+		System.out.println("message to elevator");
+		toElevator.get(id).offer(m);
 	}
 	
 	/**
@@ -73,8 +79,8 @@ public class MessageQueue {
 	 * @return The message in the floor queue
 	 */
 	public Message receiveFromFloor() {
-		
-		return toFloor.get();
+		System.out.println("getting message for floor");
+		return toFloor.poll();
 	}
 	
 	/**
@@ -82,7 +88,8 @@ public class MessageQueue {
 	 * @return The message in the elevator queue
 	 */
 	public Message receiveFromElevator(int id) {
-		return toElevator.get(id).get();
+		System.out.println("getting message from elevator");
+		return toElevator.get(id).poll();
 	}
 	
 	
@@ -93,7 +100,7 @@ public class MessageQueue {
 	 * @return the latest message in the queue.
 	 */
 	public Message pop() {
-		return newMessages.get();
+		return newMessages.poll();
 	}
 	
 	/**
