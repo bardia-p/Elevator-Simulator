@@ -161,14 +161,15 @@ public class Floor implements Runnable {
 	 * A display of the light status
 	 */
 	private void printLightStatus() {
-		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n---------------------------------------";
-		for(int i = 0; i<this.upLights.length;i++) {
-			floorLightsDisplay += "\n| Floor " + (i+1) + " up light on :" + this.upLights[i] + " ";
-			floorLightsDisplay += " down light on :" + this.downLights[i] + " |";
+		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n-------------------------------------------";
+		for(int i = 0; i<this.upLights.length;i++) {			
+			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] ? "on " : "off") + " | ";
+			floorLightsDisplay += "DOWN light: " + (this.downLights[i] ? "on " : "off") + " |";
 		}
-		floorLightsDisplay += "\n---------------------------------------\n";
+		floorLightsDisplay += "\n-------------------------------------------\n";
 		System.out.println(floorLightsDisplay);
 	}
+	
 	/**
 	 * Kills the current running instance of the floor.
 	 */

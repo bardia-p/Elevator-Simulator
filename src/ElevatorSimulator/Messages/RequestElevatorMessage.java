@@ -37,8 +37,9 @@ public class RequestElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction;
+		return "from: " + floorNumber + " to: " + destination;
 	}
+	
 	
 	/**
 	 * Returns the requested destination.
@@ -63,6 +64,7 @@ public class RequestElevatorMessage extends Message {
 	 * 
 	 * @return the direction
 	 */
+	@Override
 	public DirectionType getDirection() {
 		return direction;
 	}

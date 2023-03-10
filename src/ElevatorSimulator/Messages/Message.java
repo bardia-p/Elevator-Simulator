@@ -62,8 +62,16 @@ public class Message {
 	 * 
 	 * @return String - message description
 	 */
+//	public String getDescription() {
+//		return type.toString() + " " + timestamp + " " + sender + " ";
+//	}
+	
 	public String getDescription() {
-		return type.toString() + " " + timestamp + " " + sender + " ";
+		 return "";
+	}
+	
+	public DirectionType getDirection() {
+		return null;
 	}
 	
 	

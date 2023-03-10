@@ -235,7 +235,6 @@ public class Elevator implements Runnable {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		queue.send(reply);
 		
-		DirectionType newDirection = direction;
 		boolean isPickUp = false;
 		boolean isDropoff = false;
 		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
@@ -245,7 +244,6 @@ public class Elevator implements Runnable {
 				isPickUp = true;
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
-				System.out.println("I DID A PICK UP WOOHOO");
 				this.floorLights[trip.getDropoff() - 1] = true;
 
 			}
@@ -377,12 +375,11 @@ public class Elevator implements Runnable {
 	 * prints floor light statuses
 	 */
 	private void printFloorLightStatus() {
-		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n------------------------------------------------";
+		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n----------------------";
 		for (int i = 0; i < this.floorLights.length; i++) {
-			elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
-			
+			elevatorLights += "\n| Floor " + (i + 1) + " light: " + (this.floorLights[i] ? "on " : "off") + " |";
 		}
-		elevatorLights += "\n------------------------------------------------\n";
+		elevatorLights += "\n----------------------\n";
 		System.out.println(elevatorLights);
 	}
 	
