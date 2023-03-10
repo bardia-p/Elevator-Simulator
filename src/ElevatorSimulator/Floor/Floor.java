@@ -23,9 +23,7 @@ public class Floor implements Runnable {
 	private boolean[] upLights; 
 	
 	private boolean[] downLights; 
-	
-	private boolean canSendRequest;
-	
+		
 	private boolean shouldRun;
 	
 	/**
@@ -40,7 +38,6 @@ public class Floor implements Runnable {
 		readInElevatorRequests(fileName);
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
-		this.canSendRequest = true;
 		this.shouldRun = true;
 	}
 	
@@ -101,13 +98,12 @@ public class Floor implements Runnable {
 	 */
 	private void requestElevator() {
 		
-		if (!this.canSendRequest || this.elevatorRequests.isEmpty()) {
+		if (this.elevatorRequests.isEmpty()) {
 			return;
 		}
 		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
-		this.canSendRequest = false;
 		queue.send(request);	
 	}
 	
@@ -117,12 +113,15 @@ public class Floor implements Runnable {
 	 * @return the updated message.
 	 */
 	private Message requestUpdate() {
+	
 		Message message = queue.receiveFromFloor();
 		
-		updateLights(message);// turns light off
-			
-	
+		if (message != null) {
+			updateLights(message); // turns light off
+		}
+		
 		return message;
+		
 	}
 	/**
 	 * Updates the lights based on message type
@@ -131,12 +130,9 @@ public class Floor implements Runnable {
 	private void updateLights(Message message) {
 		int floorNum;
 		DirectionType direction;
+		
 		if(message.getType().equals(MessageType.DOORS_OPENED)) {
 			DoorOpenedMessage doorOpened = (DoorOpenedMessage) message;
-			
-			if (doorOpened.getStopType() == StopType.DROPOFF) {
-				this.canSendRequest = true;
-			}
 			
 			floorNum = doorOpened.getArrivedFloor();
 
@@ -157,6 +153,8 @@ public class Floor implements Runnable {
 				this.downLights[floorNum-1] = true;
 			}
 		}
+		
+		printLightStatus();
 	}
 	
 	/**
@@ -175,15 +173,8 @@ public class Floor implements Runnable {
 	 * Kills the current running instance of the floor.
 	 */
 	private void kill() {
-		if (!this.canSendRequest) {
-			return;
-		}
 		this.shouldRun = false;
 		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
-	}
-	
-	public boolean getCanSendRequest() {
-		return this.canSendRequest;
 	}
 	
 	/**
@@ -194,12 +185,16 @@ public class Floor implements Runnable {
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
 			
-			printLightStatus();
-			
 			requestUpdate();
 			
 			if (this.elevatorRequests.isEmpty()) {
 				kill();
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 		

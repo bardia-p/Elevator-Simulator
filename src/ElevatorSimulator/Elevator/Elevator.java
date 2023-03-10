@@ -39,14 +39,13 @@ public class Elevator implements Runnable {
 	// list of destination floors
 	private ArrayList<ElevatorTrip> trips;
 	
-	//current trip being fulfilled
-	private ElevatorTrip currentTrip;
-	
 	// stop type of an arrived
 	private StopType stopType;
 	
 	// list of lights corresponding to active request for each floor
 	private boolean[] floorLights;
+	
+	private boolean canKill;
 		
 	/**
 	 * Constructor for the elevator.
@@ -66,6 +65,7 @@ public class Elevator implements Runnable {
 		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
+		this.canKill = false;
 		
 		changeState(ElevatorState.POLL);
 	}
@@ -76,7 +76,9 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
+		if (trips.size() == 0 && canKill) {
+			kill();
+		} else if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
 			return null;
 		}
 		return queue.receiveFromElevator(elevatorNumber);
@@ -89,32 +91,81 @@ public class Elevator implements Runnable {
 	 */
 	private void processMessage(Message message) {
 		if (message.getType() == MessageType.KILL) {
-			kill(); 
+			canKill = true;
 		} else {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
 			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
 			trips.add(elevatorTrip);
 			if (elevatorTrip.getPickup() == floor) {
-				elevatorTrip.isPickedUp = true;
 				changeState(ElevatorState.ARRIVED);
 			} else {
 				changeState(ElevatorState.MOVING);
 			}
 			
 			if (trips.size() == 1) {
-				startNewTrip();
+				updateDirection();
 			}
 		}
 	}
 	
 	/**
-	 * sets current trip as next in trip list
+	 * check to see if you have a trip in that direction.
+	 * If not change directions.
 	 */
-	private void startNewTrip() {
-		this.currentTrip = trips.get(0);
-		this.direction = floor - currentTrip.getPickup() > 0 ? DirectionType.DOWN : DirectionType.UP;
+	private void updateDirection() {
+		if (trips.size() == 0) {
+			return;
+		}
+		
+		if (hasDropoffInDirection()) {
+			return;
+		}
+		
+		if (hasPickupInDirection()) {
+			return;
+		}
+		
+		// cannot fulfill requests in the direction, toggle directions.
+		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 	}
 
+	private boolean hasDropoffInDirection() {
+		for (ElevatorTrip trip: trips) {
+			// can dropoff a trip.
+			if (trip.isPickedUp() && trip.getDirectionType() == direction) {
+				// going up to drop off
+				if (direction == DirectionType.UP && floor <= trip.getDropoff() && trip.isPickedUp()) {
+					return true;
+				}
+				
+				// going down to drop off
+				if (direction == DirectionType.DOWN && floor >= trip.getDropoff() && trip.isPickedUp()) {
+					return true;
+				}	
+			}
+		}
+		
+		return false;
+	}
+	
+	private boolean hasPickupInDirection() {
+		for (ElevatorTrip trip: trips) {
+			// can pickup a trip.
+			if (!trip.isPickedUp()) {
+				// can pickup a trip.
+				if (floor - trip.getPickup() >= 0 && direction == DirectionType.DOWN) {
+					return true;
+				}
+				
+				if (floor - trip.getPickup() <= 0 && direction == DirectionType.UP) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	/**
 	 * Kills the elevator subsystem.
 	 */
@@ -190,14 +241,16 @@ public class Elevator implements Runnable {
 		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
 		
 		for (ElevatorTrip trip: trips) {
-			if(trip.getPickup() == floor) {
+			if (trip.getPickup() == floor && !trip.isPickedUp() && (trip.getDirectionType() == direction || !hasDropoffInDirection())) {
 				isPickUp = true;
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
+				System.out.println("I DID A PICK UP WOOHOO");
 				this.floorLights[trip.getDropoff() - 1] = true;
-				this.direction = trip.getDirectionType();
 
-			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
+			}
+			
+			if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
 				this.stopType = StopType.DROPOFF;
 				this.floorLights[floor-1] = false;
@@ -210,6 +263,8 @@ public class Elevator implements Runnable {
 		if (isPickUp && isDropoff) {
 			this.stopType = StopType.PICKUP_AND_DROPOFF;
 		}
+		
+		updateDirection();
 	
 		if (isPickUp || isDropoff) {			
 			
@@ -231,7 +286,6 @@ public class Elevator implements Runnable {
 			Thread.sleep(1000); // change to calculated time
 			changeState(ElevatorState.BOARDING);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -264,7 +318,6 @@ public class Elevator implements Runnable {
 			Thread.sleep(1000); // change to calculated time
 			changeState(ElevatorState.POLL);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -278,7 +331,7 @@ public class Elevator implements Runnable {
 		if (incoming != null) {
 			currentRequest = incoming;
 			processMessage(incoming);
-		} else {
+		} else if (trips.size() != 0) {
 			changeState(ElevatorState.MOVING);
 		}
 	}
@@ -307,14 +360,24 @@ public class Elevator implements Runnable {
 			} else {
 				polling();
 			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
+	public int getNumTrips() {
+		return trips.size();
+	}
+	
 	/**
 	 * prints floor light statuses
 	 */
 	private void printFloorLightStatus() {
-		String elevatorLights = "\nELEVATOR LIGHTS STATUS\n------------------------------------------------";
+		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n------------------------------------------------";
 		for (int i = 0; i < this.floorLights.length; i++) {
 			elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
 			
@@ -328,7 +391,7 @@ public class Elevator implements Runnable {
 	 * @param newState
 	 */
 	private void changeState(ElevatorState newState) {
-		System.out.println("\nELEVATOR STATE: --------- " + newState + " ---------");
+		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		state = newState;
 
 	}
