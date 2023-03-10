@@ -79,7 +79,8 @@ public class Scheduler implements Runnable{
 						return elevator.getID();
 					}
 				}
-				else if (elevator.getNumTrips() == 0) {
+				
+				if (elevator.getNumTrips() == 0) {
 					return elevator.getID();
 				}
 			}

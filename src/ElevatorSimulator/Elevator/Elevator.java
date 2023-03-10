@@ -39,9 +39,6 @@ public class Elevator implements Runnable {
 	// list of destination floors
 	private ArrayList<ElevatorTrip> trips;
 	
-	//current trip being fulfilled
-	private ElevatorTrip currentTrip;
-	
 	// stop type of an arrived
 	private StopType stopType;
 	
@@ -107,17 +104,45 @@ public class Elevator implements Runnable {
 			}
 			
 			if (trips.size() == 1) {
-				startNewTrip();
+				updateDirection();
 			}
 		}
 	}
 	
 	/**
-	 * sets current trip as next in trip list
+	 * check to see if you have a trip in that direction.
+	 * If not change directions.
 	 */
-	private void startNewTrip() {
-		this.currentTrip = trips.get(0);
-		this.direction = floor - currentTrip.getPickup() > 0 ? DirectionType.DOWN : DirectionType.UP;
+	private void updateDirection() {
+		if (trips.size() == 0) {
+			return;
+		}
+		
+		for (ElevatorTrip trip: trips) {
+			// can dropoff a trip.
+			if (trip.isPickedUp() && trip.getDirectionType() == direction) {
+				// going up to drop off
+				if (direction == DirectionType.UP && floor <= trip.getDropoff() && trip.isPickedUp()) {
+					return;
+				}
+				
+				// going down to drop off
+				if (direction == DirectionType.DOWN && floor >= trip.getDropoff() && trip.isPickedUp()) {
+					return;
+				}
+			} else if (!trip.isPickedUp()) {
+				// can pickup a trip.
+				if (floor - trip.getPickup() >= 0 && direction == DirectionType.DOWN) {
+					return;
+				}
+				
+				if (floor - trip.getPickup() <= 0 && direction == DirectionType.UP) {
+					return;
+				}
+			}
+		}
+		// cannot fulfill requests in the direction, toggle directions.
+		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 	}
 
 	/**
@@ -200,7 +225,6 @@ public class Elevator implements Runnable {
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
 				this.floorLights[trip.getDropoff() - 1] = true;
-				this.direction = trip.getDirectionType();
 
 			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
@@ -215,6 +239,8 @@ public class Elevator implements Runnable {
 		if (isPickUp && isDropoff) {
 			this.stopType = StopType.PICKUP_AND_DROPOFF;
 		}
+		
+		updateDirection();
 	
 		if (isPickUp || isDropoff) {			
 			
