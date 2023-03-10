@@ -3,6 +3,7 @@ package ElevatorSimulator.Floor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import ElevatorSimulator.Messages.*;
@@ -20,11 +21,16 @@ public class Floor implements Runnable {
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
 	
+	
+	private HashSet<Integer> dropoffs;
+	
 	private boolean[] upLights; 
 	
 	private boolean[] downLights; 
 		
 	private boolean shouldRun;
+	
+	private boolean canKill;
 	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
@@ -35,10 +41,13 @@ public class Floor implements Runnable {
 	public Floor(MessageQueue queue, String fileName,int numFloors){
 		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
-		readInElevatorRequests(fileName);
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
+		this.canKill = false;
+		this.dropoffs = new HashSet<>();
+		
+		readInElevatorRequests(fileName);
 	}
 	
 	/**
@@ -91,6 +100,7 @@ public class Floor implements Runnable {
 	 */
 	private void addRequest(RequestElevatorMessage request) {
 		this.elevatorRequests.offer(request);
+		this.dropoffs.add(request.getDestination());
 	}
 	
 	/**
@@ -118,6 +128,13 @@ public class Floor implements Runnable {
 		
 		if (message != null) {
 			updateLights(message); // turns light off
+			
+			if (message.getType() == MessageType.DOORS_OPENED) {
+				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
+				if (openDoorMessage.getStopType() == StopType.DROPOFF) {
+					dropoffs.remove(openDoorMessage.getArrivedFloor());
+				}
+			}
 		}
 		
 		return message;
@@ -188,6 +205,10 @@ public class Floor implements Runnable {
 			requestUpdate();
 			
 			if (this.elevatorRequests.isEmpty()) {
+				this.canKill = true;
+			}
+			
+			if (dropoffs.isEmpty() && canKill) {
 				kill();
 			}
 			
