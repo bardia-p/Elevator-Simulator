@@ -98,8 +98,11 @@ public class Elevator implements Runnable {
 				elevatorTrip.isPickedUp = true;
 				changeState(ElevatorState.ARRIVED);
 			} else {
-				startNewTrip();
 				changeState(ElevatorState.MOVING);
+			}
+			
+			if (trips.size() == 1) {
+				startNewTrip();
 			}
 		}
 	}
@@ -109,14 +112,7 @@ public class Elevator implements Runnable {
 	 */
 	private void startNewTrip() {
 		this.currentTrip = trips.get(0);
-		int nextFloor = 0;
-		if (currentTrip.isPickedUp) {
-			nextFloor = this.currentTrip.getDropoff();
-		} else {
-			nextFloor = this.currentTrip.getPickup();
-		}
-		
-		this.direction = floor - nextFloor > 0 ? DirectionType.DOWN : DirectionType.UP;
+		this.direction = floor - currentTrip.getPickup() > 0 ? DirectionType.DOWN : DirectionType.UP;
 	}
 
 	/**
@@ -199,6 +195,7 @@ public class Elevator implements Runnable {
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
 				this.floorLights[trip.getDropoff() - 1] = true;
+				this.direction = trip.getDirectionType();
 
 			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
@@ -214,18 +211,14 @@ public class Elevator implements Runnable {
 			this.stopType = StopType.PICKUP_AND_DROPOFF;
 		}
 	
-		if (!(isPickUp || isDropoff) || trips.size() == 0) {
-			changeState(ElevatorState.POLL);
-		} else {			
+		if (isPickUp || isDropoff) {			
 			
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
 			queue.send(doorOpen);
-			
-			if (isDropoff) {
-				startNewTrip();
-			}
+		} else {
+			changeState(ElevatorState.POLL);
 		}
 	}
 	
