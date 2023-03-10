@@ -37,7 +37,10 @@ public class Elevator implements Runnable {
 	private Message currentRequest;
 	
 	// list of destination floors
-	private ArrayList<Integer> destinations;
+	private ArrayList<ElevatorTrip> trips;
+	
+	//current trip being fulfilled
+	private ElevatorTrip currentTrip;
 	
 	// stop type of an arrived
 	private StopType stopType;
@@ -59,7 +62,7 @@ public class Elevator implements Runnable {
 		this.elevatorNumber = id;
 		this.currentRequest = null;
 		
-		this.destinations = new ArrayList<>();
+		this.trips = new ArrayList<>();
 		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
@@ -73,7 +76,7 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		if (destinations.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
+		if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
 			return null;
 		}
 		return queue.receiveFromElevator(elevatorNumber);
@@ -89,16 +92,27 @@ public class Elevator implements Runnable {
 			kill(); 
 		} else {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
-			destinations.add(requestElevatorMessage.getFloor());
-			destinations.add(requestElevatorMessage.getDestination());
-			this.floorLights[requestElevatorMessage.getDestination()-1] = true;
-			if (requestElevatorMessage.getFloor() != floor) {
-				this.direction = ((requestElevatorMessage.getFloor() - floor) >= 0) ? DirectionType.UP : DirectionType.DOWN;
-				changeState(ElevatorState.MOVING);
-			} else {
+			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
+			trips.add(elevatorTrip);
+			if (elevatorTrip.getPickup() == floor) {
+				elevatorTrip.isPickedUp = true;
 				changeState(ElevatorState.ARRIVED);
+			} else {
+				changeState(ElevatorState.MOVING);
+			}
+			
+			if (trips.size() == 1) {
+				startNewTrip();
 			}
 		}
+	}
+	
+	/**
+	 * sets current trip as next in trip list
+	 */
+	private void startNewTrip() {
+		this.currentTrip = trips.get(0);
+		this.direction = floor - currentTrip.getPickup() > 0 ? DirectionType.DOWN : DirectionType.UP;
 	}
 
 	/**
@@ -171,26 +185,40 @@ public class Elevator implements Runnable {
 		queue.send(reply);
 		
 		DirectionType newDirection = direction;
+		boolean isPickUp = false;
+		boolean isDropoff = false;
+		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
 		
-		if (!destinations.contains(floor)) {
-			changeState(ElevatorState.POLL);
-		} else {
-			destinations.remove((Integer) floor);
-			this.floorLights[floor-1] = false;
-			
-			if (destinations.size() == 1) {
-				newDirection = (destinations.get(0) - floor >= 0) ? DirectionType.UP : DirectionType.DOWN;
+		for (ElevatorTrip trip: trips) {
+			if(trip.getPickup() == floor) {
+				isPickUp = true;
 				this.stopType = StopType.PICKUP;
-			} else {
+				trip.setPickedUp(true);
+				this.floorLights[trip.getDropoff() - 1] = true;
+				this.direction = trip.getDirectionType();
+
+			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
+				isDropoff = true;
 				this.stopType = StopType.DROPOFF;
+				this.floorLights[floor-1] = false;
+				removalList.add(trip);
 			}
+		}
+		
+		trips.removeAll(removalList);
+		
+		if (isPickUp && isDropoff) {
+			this.stopType = StopType.PICKUP_AND_DROPOFF;
+		}
+	
+		if (isPickUp || isDropoff) {			
 			
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
 			queue.send(doorOpen);
-			
-			this.direction = newDirection;
+		} else {
+			changeState(ElevatorState.POLL);
 		}
 	}
 	
@@ -306,4 +334,4 @@ public class Elevator implements Runnable {
 	}
 }
 
-
+//TODO - decide what to do with time stamps. Do we need currentRequest? 
