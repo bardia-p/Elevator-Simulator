@@ -220,7 +220,7 @@ public class Elevator implements Runnable {
 		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
 		
 		for (ElevatorTrip trip: trips) {
-			if(trip.getPickup() == floor) {
+			if(trip.getPickup() == floor && !trip.isPickedUp()) {
 				isPickUp = true;
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);

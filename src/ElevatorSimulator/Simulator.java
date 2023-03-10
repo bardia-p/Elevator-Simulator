@@ -14,7 +14,7 @@ import ElevatorSimulator.Scheduler.Scheduler;
  */
 public class Simulator {
 	// Keeps track of the input file name for the simulator.
-	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input.csv";
+	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input3.csv";
 	
 	public static int NUM_ELEVATORS = 2;
 	
