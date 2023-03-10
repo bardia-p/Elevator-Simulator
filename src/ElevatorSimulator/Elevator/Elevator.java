@@ -97,7 +97,6 @@ public class Elevator implements Runnable {
 			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
 			trips.add(elevatorTrip);
 			if (elevatorTrip.getPickup() == floor) {
-				elevatorTrip.isPickedUp = true;
 				changeState(ElevatorState.ARRIVED);
 			} else {
 				changeState(ElevatorState.MOVING);
@@ -118,33 +117,55 @@ public class Elevator implements Runnable {
 			return;
 		}
 		
+		if (hasDropoffInDirection()) {
+			return;
+		}
+		
+		if (hasPickupInDirection()) {
+			return;
+		}
+		
+		// cannot fulfill requests in the direction, toggle directions.
+		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
+	}
+
+	private boolean hasDropoffInDirection() {
 		for (ElevatorTrip trip: trips) {
 			// can dropoff a trip.
 			if (trip.isPickedUp() && trip.getDirectionType() == direction) {
 				// going up to drop off
 				if (direction == DirectionType.UP && floor <= trip.getDropoff() && trip.isPickedUp()) {
-					return;
+					return true;
 				}
 				
 				// going down to drop off
 				if (direction == DirectionType.DOWN && floor >= trip.getDropoff() && trip.isPickedUp()) {
-					return;
-				}
-			} else if (!trip.isPickedUp()) {
+					return true;
+				}	
+			}
+		}
+		
+		return false;
+	}
+	
+	private boolean hasPickupInDirection() {
+		for (ElevatorTrip trip: trips) {
+			// can pickup a trip.
+			if (!trip.isPickedUp()) {
 				// can pickup a trip.
 				if (floor - trip.getPickup() >= 0 && direction == DirectionType.DOWN) {
-					return;
+					return true;
 				}
 				
 				if (floor - trip.getPickup() <= 0 && direction == DirectionType.UP) {
-					return;
+					return true;
 				}
 			}
 		}
-		// cannot fulfill requests in the direction, toggle directions.
-		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
+		
+		return false;
 	}
-
+	
 	/**
 	 * Kills the elevator subsystem.
 	 */
@@ -220,13 +241,16 @@ public class Elevator implements Runnable {
 		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
 		
 		for (ElevatorTrip trip: trips) {
-			if(trip.getPickup() == floor && !trip.isPickedUp()) {
+			if (trip.getPickup() == floor && !trip.isPickedUp() && (trip.getDirectionType() == direction || !hasDropoffInDirection())) {
 				isPickUp = true;
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
+				System.out.println("I DID A PICK UP WOOHOO");
 				this.floorLights[trip.getDropoff() - 1] = true;
 
-			} else if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
+			}
+			
+			if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
 				this.stopType = StopType.DROPOFF;
 				this.floorLights[floor-1] = false;
