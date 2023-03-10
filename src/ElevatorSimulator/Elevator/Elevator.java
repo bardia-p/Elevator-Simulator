@@ -47,6 +47,8 @@ public class Elevator implements Runnable {
 	
 	// list of lights corresponding to active request for each floor
 	private boolean[] floorLights;
+	
+	private boolean canKill;
 		
 	/**
 	 * Constructor for the elevator.
@@ -66,6 +68,7 @@ public class Elevator implements Runnable {
 		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
+		this.canKill = false;
 		
 		changeState(ElevatorState.POLL);
 	}
@@ -76,7 +79,9 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
+		if (trips.size() == 0 && canKill) {
+			kill();
+		} else if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
 			return null;
 		}
 		return queue.receiveFromElevator(elevatorNumber);
@@ -89,7 +94,7 @@ public class Elevator implements Runnable {
 	 */
 	private void processMessage(Message message) {
 		if (message.getType() == MessageType.KILL) {
-			kill(); 
+			canKill = true;
 		} else {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
 			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
@@ -276,7 +281,7 @@ public class Elevator implements Runnable {
 		if (incoming != null) {
 			currentRequest = incoming;
 			processMessage(incoming);
-		} else if (destinations.size() != 0) {
+		} else if (trips.size() != 0) {
 			changeState(ElevatorState.MOVING);
 		}
 	}
@@ -314,11 +319,15 @@ public class Elevator implements Runnable {
 		}
 	}
 
+	public int getNumTrips() {
+		return trips.size();
+	}
+	
 	/**
 	 * prints floor light statuses
 	 */
 	private void printFloorLightStatus() {
-		String elevatorLights = "\nELEVATOR LIGHTS STATUS\n------------------------------------------------";
+		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n------------------------------------------------";
 		for (int i = 0; i < this.floorLights.length; i++) {
 			elevatorLights += "\n| Floor " + (i + 1) + " light on: " + this.floorLights[i] + " |";
 			
@@ -332,7 +341,7 @@ public class Elevator implements Runnable {
 	 * @param newState
 	 */
 	private void changeState(ElevatorState newState) {
-		System.out.println("\nELEVATOR STATE: --------- " + newState + " ---------");
+		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		state = newState;
 
 	}

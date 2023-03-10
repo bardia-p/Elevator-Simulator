@@ -66,22 +66,21 @@ public class Scheduler implements Runnable{
 		for (Elevator elevator : availableElevators) {
 
 			if (elevator.getState() == ElevatorState.POLL) {
-				if (elevator.getFloorNumber() == requestMessage.getFloor()) {
-					// Same floor
-					return elevator.getID();
-				}
-				else if (elevator.getDirection() == requestMessage.getDirection()) {
+				if (elevator.getDirection() == requestMessage.getDirection()) {
 
 					if ((elevator.getDirection() == DirectionType.UP &&
-							elevator.getFloorNumber() < requestMessage.getFloor()) ||
+							elevator.getFloorNumber() <= requestMessage.getFloor()) ||
 
 							(elevator.getDirection() == DirectionType.DOWN &&
-							elevator.getFloorNumber() > requestMessage.getFloor())) {
+							elevator.getFloorNumber() >= requestMessage.getFloor())) {
 						// Going up and elevator is below request floor OR
 						// Going down and elevator is above request floor
 
 						return elevator.getID();
 					}
+				}
+				else if (elevator.getNumTrips() == 0) {
+					return elevator.getID();
 				}
 			}
 		}
