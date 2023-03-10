@@ -203,7 +203,6 @@ public class Elevator implements Runnable {
 			Thread.sleep(1000); // change to calculated time
 			changeState(ElevatorState.BOARDING);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -236,7 +235,6 @@ public class Elevator implements Runnable {
 			Thread.sleep(1000); // change to calculated time
 			changeState(ElevatorState.POLL);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -250,7 +248,7 @@ public class Elevator implements Runnable {
 		if (incoming != null) {
 			currentRequest = incoming;
 			processMessage(incoming);
-		} else {
+		} else if (destinations.size() != 0) {
 			changeState(ElevatorState.MOVING);
 		}
 	}
@@ -278,6 +276,12 @@ public class Elevator implements Runnable {
 			
 			} else {
 				polling();
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}

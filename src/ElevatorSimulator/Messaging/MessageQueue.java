@@ -2,9 +2,6 @@ package ElevatorSimulator.Messaging;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
-
-import javax.sound.midi.Soundbank;
-
 import ElevatorSimulator.Messages.Message;
 
 /**
@@ -48,7 +45,7 @@ public class MessageQueue {
 	 * @param m the message to send to the buffer.
 	 */
 	public void send(Message m) {
-		
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent: " + m.getDescription() + "\n------------------------\n");
 		newMessages.offer(m);
 	}
 	
@@ -59,7 +56,7 @@ public class MessageQueue {
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
 	public void replyToFloor(Message m) {
-		System.out.println("message to floor");
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent: " + m.getDescription() + "\n------------------------\n");
 		toFloor.offer(m);
 	}
 	
@@ -70,7 +67,7 @@ public class MessageQueue {
 	 * @param id the elevator id
 	 */
 	public void replyToElevator(Message m, int id) {
-		System.out.println("message to elevator");
+		System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " sent: " + m.getDescription() + "\n------------------------\n");
 		toElevator.get(id).offer(m);
 	}
 	
@@ -79,8 +76,13 @@ public class MessageQueue {
 	 * @return The message in the floor queue
 	 */
 	public Message receiveFromFloor() {
-		System.out.println("getting message for floor");
-		return toFloor.poll();
+		Message m = toFloor.poll();
+		
+		if (m != null) {
+			System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " received: " + m.getDescription() + "\n------------------------\n");
+		}
+		
+		return m;
 	}
 	
 	/**
@@ -88,8 +90,13 @@ public class MessageQueue {
 	 * @return The message in the elevator queue
 	 */
 	public Message receiveFromElevator(int id) {
-		System.out.println("getting message from elevator");
-		return toElevator.get(id).poll();
+		Message m = toElevator.get(id).poll();
+		
+		if (m != null) {
+			System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " received: " + m.getDescription() + "\n------------------------\n");
+		}
+		
+		return m;
 	}
 	
 	
@@ -100,8 +107,13 @@ public class MessageQueue {
 	 * @return the latest message in the queue.
 	 */
 	public Message pop() {
-		return newMessages.poll();
-	}
+		Message m = newMessages.poll();
+		
+		if (m != null) {
+			System.out.println("\n------------------------\n" + Thread.currentThread().getName() + " received: " + m.getDescription() + "\n------------------------\n");
+		}
+		
+		return m;	}
 	
 	/**
 	 * Checks if the elevator has a request

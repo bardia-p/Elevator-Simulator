@@ -86,7 +86,7 @@ public class Scheduler implements Runnable{
 			}
 		}
 
-		return availableElevators.get(0).getID();
+		return -1;
 	}
 
 	/**
@@ -136,6 +136,12 @@ public class Scheduler implements Runnable{
 				}
 			} else {
 				processMessage();
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
