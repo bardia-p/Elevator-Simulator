@@ -40,6 +40,7 @@ public class DoorOpenedMessage extends Message{
 	 * 
 	 * @return the direction
 	 */
+	@Override
 	public DirectionType getDirection() {
 		return direction;
 	}
@@ -47,7 +48,7 @@ public class DoorOpenedMessage extends Message{
      * @Override
      */
     public String getDescription() {
-        return super.getDescription() + "Stop Type: " + this.type;
+        return String.valueOf(this.type);
     }
 
 }
