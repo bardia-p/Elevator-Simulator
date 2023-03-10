@@ -1,5 +1,7 @@
 package ElevatorSimulator;
 
+import java.text.ParseException;
+
 import ElevatorSimulator.Elevator.ElevatorController;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messaging.MessageQueue;
@@ -24,8 +26,9 @@ public class Simulator {
 	 * The main method and the starting point for the program.
 	 * 
 	 * @param args
+	 * @throws ParseException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		MessageQueue queue = new MessageQueue();
 		
 		Thread schedulerThread, elevatorControlThread, floorThread;
