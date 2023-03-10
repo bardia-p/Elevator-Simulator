@@ -245,7 +245,6 @@ public class Elevator implements Runnable {
 				isPickUp = true;
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
-				System.out.println("I DID A PICK UP WOOHOO");
 				this.floorLights[trip.getDropoff() - 1] = true;
 
 			}

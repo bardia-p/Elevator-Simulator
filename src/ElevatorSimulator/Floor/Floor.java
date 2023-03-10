@@ -2,7 +2,10 @@ package ElevatorSimulator.Floor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
+import java.util.Date;
 import java.util.Scanner;
 
 import ElevatorSimulator.Messages.*;
@@ -26,13 +29,18 @@ public class Floor implements Runnable {
 		
 	private boolean shouldRun;
 	
+	private Date startTime;
+	private SimpleDateFormat dateFormat;
+	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
 	 * @param queue, the message queue to communicate with the scheduler.
 	 * @param fileName the name of the input file.
+	 * @throws ParseException 
 	 */
-	public Floor(MessageQueue queue, String fileName,int numFloors){
+	public Floor(MessageQueue queue, String fileName,int numFloors) throws ParseException{
+		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
 		readInElevatorRequests(fileName);
@@ -64,8 +72,9 @@ public class Floor implements Runnable {
 	 * Given a file path, adds request to queue for each line.
 	 * 
 	 * @param fileName
+	 * @throws ParseException 
 	 */
-	private void readInElevatorRequests(String fileName) {
+	private void readInElevatorRequests(String fileName) throws ParseException {
 		Scanner sc;
 		try {
 			sc = new Scanner(new File(fileName));
@@ -81,7 +90,8 @@ public class Floor implements Runnable {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-			
+		
+		this.startTime = (Date) dateFormat.parse(this.elevatorRequests.peek().getTimestamp());
 	}
 	
 	/**
@@ -192,8 +202,14 @@ public class Floor implements Runnable {
 			}
 			
 			try {
-				Thread.sleep(1000);
+				Message nextRequest = elevatorRequests.peek();
+				if (nextRequest != null) {
+					int timedelay = (int) (this.startTime.getTime() - dateFormat.parse(nextRequest.getTimestamp()).getTime());
+					Thread.sleep(timedelay);
+				}
 			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
