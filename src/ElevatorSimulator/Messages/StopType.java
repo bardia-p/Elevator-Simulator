@@ -9,5 +9,6 @@ package ElevatorSimulator.Messages;
  */
 public enum StopType {
 	PICKUP,
-	DROPOFF
+	DROPOFF,
+	PICKUP_AND_DROPOFF
 }
