@@ -1,9 +1,8 @@
 package ElevatorSimulator.Scheduler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import ElevatorSimulator.Simulator;
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
@@ -142,11 +141,12 @@ public class Scheduler implements Runnable {
 	 */
 	private void processMessage() {
 		
-		if (currentRequest.getType() == MessageType.REQUEST) {
+		if (currentRequest.getType() == MessageType.KILL) {
+			kill((KillMessage) currentRequest);
+		} else if (currentRequest.getType() == MessageType.REQUEST) {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
-				System.out.println("PICKED ELEVATOR " + id);
 				queue.replyToElevator(currentRequest, id);
 			} else {
 				return;
@@ -169,6 +169,7 @@ public class Scheduler implements Runnable {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
 				if (currentRequest != null && currentRequest.getType() != MessageType.EMPTY) {
+					Logger.printMessage(currentRequest, "RECEIVED");
 					changeState(SchedulerState.PROCESSING);
 				}
 			} else {
@@ -191,6 +192,17 @@ public class Scheduler implements Runnable {
 	private void changeState(SchedulerState newState) {
 		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
 		state = newState;
+	}
+	
+	/**
+	 * Stops the scheduler thread from running.
+	 */
+	private void kill(KillMessage message) {
+		this.shouldRun = false;
+
+		for (ElevatorInfo info: queue.getElevatorInfos().values()) {
+			queue.replyToElevator(message, info.getElevatorId());
+		}
 	}
 	
 	public static void main(String[] args) {

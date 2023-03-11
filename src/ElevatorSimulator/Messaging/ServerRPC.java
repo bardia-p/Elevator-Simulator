@@ -1,18 +1,11 @@
 package ElevatorSimulator.Messaging;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.HashMap;
 
 import ElevatorSimulator.Serializer;
-import ElevatorSimulator.Simulator;
-import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Messages.ACKMessage;
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
@@ -20,7 +13,6 @@ import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.ReadyMessage;
 import ElevatorSimulator.Messages.SenderType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
-import ElevatorSimulator.Scheduler.Scheduler;
 
 public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
@@ -53,7 +45,6 @@ public class ServerRPC implements Runnable {
 			// Set a timeout for the socket.
 			sendReceiveSocket.setSoTimeout(TIMEOUT);		
 			this.queue = queue;
-			//logger = new Logger();
 						
 		} catch (SocketException se) { // Can't create the socket.
 			se.printStackTrace();
@@ -110,7 +101,6 @@ public class ServerRPC implements Runnable {
 		} else if (receiveMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage message = (UpdateElevatorInfoMessage) receiveMessage;
 			queue.updateInfo(message.getInfo().getElevatorId(), message.getInfo());
-			System.out.println("GOT UPDATE FROM ELEVATOR " + message.getInfo().getElevatorId());
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.START) {
 			queue.replyToFloor(receiveMessage);
@@ -142,8 +132,6 @@ public class ServerRPC implements Runnable {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
-		//System.out.println(Thread.currentThread().getName() + ": packet sent.\n");
 	}
 	
 	/**

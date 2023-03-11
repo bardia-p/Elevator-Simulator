@@ -5,10 +5,11 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
@@ -27,7 +28,7 @@ public class Floor extends ClientRPC implements Runnable {
 	private ArrayDeque<Message> elevatorRequests;
 	
 	
-	private HashSet<Integer> dropoffs;
+	private ArrayList<Integer> dropoffs;
 	
 	private boolean[] upLights; 
 	
@@ -43,7 +44,7 @@ public class Floor extends ClientRPC implements Runnable {
 	private SimpleDateFormat dateFormat;
 	
 	private String filename;
-	
+		
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
@@ -62,7 +63,7 @@ public class Floor extends ClientRPC implements Runnable {
 		this.canKill = false;
 		this.filename = fileName;
 		this.timer = new Timer();
-		this.dropoffs = new HashSet<>();
+		this.dropoffs = new ArrayList<>();
 		
 	}
 	
@@ -124,6 +125,9 @@ public class Floor extends ClientRPC implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
+		if (!canStart) {
+			return;
+		}
 		
 		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0)) {
 			return;
@@ -131,7 +135,13 @@ public class Floor extends ClientRPC implements Runnable {
 		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
-		sendRequest(request);		
+		sendRequest(request);
+		Logger.printMessage(request, "SENT");
+		
+		dropoffs.add(((RequestElevatorMessage)request).getDestination());
+		if (this.elevatorRequests.isEmpty()) {
+			this.canKill = true;
+		}
 	}
 	
 	/**
@@ -147,11 +157,18 @@ public class Floor extends ClientRPC implements Runnable {
 			if (message.getType() == MessageType.EMPTY) {
 				return null;
 			}
-			printMessage(message, "RECEIVED");
-
+			
+			Logger.printMessage(message, "RECEIVED");
 			if (message.getType() == MessageType.DOORS_OPENED) {
+				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
 
 				updateLights(message); // turns light off
+
+				if (openDoorMessage.getStopType() != StopType.PICKUP) {
+					for (int i = 0; i < openDoorMessage.getNumPassengers(); i++) {
+						dropoffs.remove((Integer)openDoorMessage.getArrivedFloor());
+					}
+				}				
  
 			}else if (message.getType() == MessageType.START) {
 				canStart = true;
@@ -208,6 +225,16 @@ public class Floor extends ClientRPC implements Runnable {
 	}
 	
 	/**
+	 * Kills the current running instance of the floor.
+	 */
+	private void kill() {
+		this.shouldRun = false;
+		KillMessage killMessage = new KillMessage(SenderType.FLOOR, timer.getTime());
+		sendRequest(killMessage);
+		Logger.printMessage(killMessage, "SENT");
+	}
+	
+	/**
 	 * The run function used to logic of the floor.
 	 */
 	@Override
@@ -219,13 +246,13 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
-			
-			if (canStart) {
-				requestElevator();
-			}
-			
+			requestElevator();
 			
 			requestUpdate();
+			
+			if (dropoffs.isEmpty() && canKill) {
+				kill();
+			}
 			
 			if (canStart) {
 				timer.tick();
@@ -241,30 +268,11 @@ public class Floor extends ClientRPC implements Runnable {
 	
 	public static void main(String[] args) {
 		try {
-			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS));
+			
+			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
 			floorThread.start();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String addResult = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), m.getDirection());
-			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			System.out.println(messageToPrint + result + addResult);
-		}
-		
 	}
 }
