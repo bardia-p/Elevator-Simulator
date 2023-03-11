@@ -10,7 +10,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Base64;
 
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
-import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -14,6 +13,7 @@ import ElevatorSimulator.Scheduler.Scheduler;
  * @author Kyra Lothrop
  * @author Guy Morgenshtern
  * @author Bardia Parmoun
+ * @author Sarah Chow
  *
  */
 public class Elevator extends ClientRPC implements Runnable {
@@ -113,15 +113,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * If not change directions.
 	 */
 	private void updateDirection() {
-		if (trips.size() == 0) {
-			return;
-		}
-		
-		if (hasDropoffInDirection()) {
-			return;
-		}
-		
-		if (hasPickupInDirection()) {
+		if (trips.size() == 0 || hasDropoffInDirection() || hasPickupInDirection()) {
 			return;
 		}
 		
@@ -131,40 +123,40 @@ public class Elevator extends ClientRPC implements Runnable {
 		sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
 	}
 
+	/**
+	 * Method to determine if the elevator is dropping off in the same direction of request.
+	 * @return true if same direction
+	 */
 	private boolean hasDropoffInDirection() {
 		for (ElevatorTrip trip: trips) {
-			// can dropoff a trip.
+			// Can dropoff a trip
 			if (trip.isPickedUp() && trip.getDirectionType() == direction) {
-				// going up to drop off
-				if (direction == DirectionType.UP && floor <= trip.getDropoff() && trip.isPickedUp()) {
+				// Going up to drop off or going down to drop off
+				if ((direction == DirectionType.UP && floor <= trip.getDropoff()) ||
+						(direction == DirectionType.DOWN && floor >= trip.getDropoff()))
+				{
 					return true;
 				}
-				
-				// going down to drop off
-				if (direction == DirectionType.DOWN && floor >= trip.getDropoff() && trip.isPickedUp()) {
-					return true;
-				}	
 			}
 		}
-		
 		return false;
 	}
 	
+	/**
+	 * Method to determine if the elevator is picking up in the same direction of request.
+	 * @return true if same direction
+	 */
 	private boolean hasPickupInDirection() {
 		for (ElevatorTrip trip: trips) {
-			// can pickup a trip.
+			// Can pickup a trip
 			if (!trip.isPickedUp()) {
-				// can pickup a trip.
-				if (floor - trip.getPickup() >= 0 && direction == DirectionType.DOWN) {
-					return true;
-				}
-				
-				if (floor - trip.getPickup() <= 0 && direction == DirectionType.UP) {
+				if ((floor - trip.getPickup() >= 0 && direction == DirectionType.DOWN) ||
+						(floor - trip.getPickup() <= 0 && direction == DirectionType.UP))	
+				{
 					return true;
 				}
 			}
 		}
-		
 		return false;
 	}
 	
@@ -222,7 +214,6 @@ public class Elevator extends ClientRPC implements Runnable {
 			Thread.sleep(5000); // change to calculated time
 			changeState(ElevatorState.ARRIVED);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -267,7 +258,6 @@ public class Elevator extends ClientRPC implements Runnable {
 		updateDirection();
 	
 		if (isPickUp || isDropoff) {			
-			
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);

@@ -94,21 +94,20 @@ public class Scheduler implements Runnable {
 		}
 
 		// Tries to find an elevator in going the same direction.
+		// Going up and elevator is below request floor OR
+		// Going down and elevator is above request floor
 		for (ElevatorInfo elevator : availableElevators) {
-			if (elevator.getState() == ElevatorState.POLL) {
-				if (elevator.getDirection() == requestMessage.getDirection()) {
-
-					if ((elevator.getDirection() == DirectionType.UP
+			if ((elevator.getState() == ElevatorState.POLL) &&
+					
+					(elevator.getDirection() == requestMessage.getDirection()) &&
+					
+					((elevator.getDirection() == DirectionType.UP
 							&& elevator.getFloorNumber() <= requestMessage.getFloor()) ||
 
 							(elevator.getDirection() == DirectionType.DOWN
-									&& elevator.getFloorNumber() >= requestMessage.getFloor())) {
-						// Going up and elevator is below request floor OR
-						// Going down and elevator is above request floor
-
-						possibleCandidates.add(elevator);
-					}
-				}
+									&& elevator.getFloorNumber() >= requestMessage.getFloor())))
+			{
+				possibleCandidates.add(elevator);
 			}
 		}
 
@@ -116,7 +115,8 @@ public class Scheduler implements Runnable {
 			// return the one with the least number of passengers.
 			return possibleCandidates.stream()
 					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get().getElevatorId();
-		} else {
+		} 
+		else {
 			// tries to find an empty elevator.
 			for (ElevatorInfo elevator : availableElevators) {
 				if (elevator.getState() == ElevatorState.POLL && elevator.getNumRequest() == 0) {
@@ -139,13 +139,14 @@ public class Scheduler implements Runnable {
 	}
 
 	/**
-	 * processes the message
+	 * Method to process the message.
 	 */
 	private void processMessage() {
 
 		if (currentRequest.getType() == MessageType.KILL) {
 			kill((KillMessage) currentRequest);
-		} else if (currentRequest.getType() == MessageType.REQUEST) {
+		} 
+		else if (currentRequest.getType() == MessageType.REQUEST) {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
@@ -170,9 +171,7 @@ public class Scheduler implements Runnable {
 			}
 			queue.replyToFloor(currentRequest);
 		}
-
 		changeState(SchedulerState.POLL);
-
 	}
 
 	/**
@@ -221,12 +220,10 @@ public class Scheduler implements Runnable {
 	private void changeState(SchedulerState newState) {
 		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
 		state = newState;
-
 	}
 	
 	public static void main(String[] args) {
 		Thread schedulerThread = new Thread(new Scheduler(), "SCHEDULER THREAD");
 		schedulerThread.start();
 	}
-
 }

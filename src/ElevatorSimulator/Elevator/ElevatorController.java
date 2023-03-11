@@ -2,16 +2,13 @@ package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.ReadyMessage;
-import ElevatorSimulator.Messages.RequestElevatorMessage;
 import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messaging.ClientRPC;
-import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -59,7 +56,6 @@ public class ElevatorController extends ClientRPC implements Runnable {
 		}
 	}
 	
-
 	/**
 	 * Kills all the elevators
 	 * 

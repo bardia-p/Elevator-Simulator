@@ -40,7 +40,7 @@ public class RequestElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return "from: " + floorNumber + " to: " + destination;
+		return "From: " + floorNumber + " To: " + destination;
 	}
 	
 	
