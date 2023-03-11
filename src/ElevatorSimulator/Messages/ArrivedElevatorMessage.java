@@ -26,25 +26,11 @@ public class ArrivedElevatorMessage extends Message {
 	}
 		
 	/**
-	 * Returns the description for the arrived message.
-	 * 
-	 * @return the description of the arrived message.
-	 */
-	@Override
-	public String getDescription() {
-		return "At: " + floorNumber;
-	}
-	/**
 	 * gets the arrived floor number
 	 * @return arrived floor number
 	 */
 	public int getArrivedFloor() {
 		return floorNumber;
-	}
-	
-	@Override
-	public DirectionType getDirection() {
-		return null;
 	}
 
 }

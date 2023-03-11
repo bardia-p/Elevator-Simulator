@@ -1,21 +1,15 @@
 package ElevatorSimulator.Messaging;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import ElevatorSimulator.Logger;
 import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.SenderType;
 
 public class ClientRPC {

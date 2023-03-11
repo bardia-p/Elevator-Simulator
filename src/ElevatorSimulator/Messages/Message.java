@@ -68,7 +68,7 @@ public class Message implements Serializable {
 	 * @return String - message description
 	 */
 	public String getDescription() {
-		 return "";
+		return String.valueOf(getType());
 	}
 	
 	/**

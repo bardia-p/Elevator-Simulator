@@ -7,7 +7,6 @@ import ElevatorSimulator.Logger;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Messages.EmptyMessage;
 import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.MessageType;
 
 /**
  * File representing the MessageQueue class.
@@ -26,15 +25,6 @@ public class MessageQueue {
 	// All the messages sent to the floor.
 	private ConcurrentLinkedDeque<Message> toFloor;
 	
-	// String for scheduler messages.
-	
-	private String schedulerMessages;
-	// String for floor messages.
-	private String floorMessages;
-	
-	// String for elevator messages.
-	private String elevatorMessages;
-	
 	//elevator info hashmap
 	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
 	
@@ -47,9 +37,6 @@ public class MessageQueue {
 		this.newMessages = new ConcurrentLinkedDeque<Message>();
 		this.toElevator = new HashMap<Integer, ConcurrentLinkedDeque<Message>>();
 		this.toFloor = new ConcurrentLinkedDeque<Message>();
-		this.schedulerMessages = "";
-		this.floorMessages = "";
-		this.elevatorMessages = "";
 		this.elevatorInfos = new HashMap<>();
 	}
 	

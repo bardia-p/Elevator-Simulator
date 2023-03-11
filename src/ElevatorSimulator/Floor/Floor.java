@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -28,7 +28,7 @@ public class Floor extends ClientRPC implements Runnable {
 	private ArrayDeque<Message> elevatorRequests;
 	
 	
-	private HashSet<Integer> dropoffs;
+	private ArrayList<Integer> dropoffs;
 	
 	private boolean[] upLights; 
 	
@@ -44,7 +44,7 @@ public class Floor extends ClientRPC implements Runnable {
 	private SimpleDateFormat dateFormat;
 	
 	private String filename;
-	
+		
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
@@ -63,7 +63,7 @@ public class Floor extends ClientRPC implements Runnable {
 		this.canKill = false;
 		this.filename = fileName;
 		this.timer = new Timer();
-		this.dropoffs = new HashSet<>();
+		this.dropoffs = new ArrayList<>();
 		
 	}
 	
@@ -125,6 +125,9 @@ public class Floor extends ClientRPC implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
+		if (!canStart) {
+			return;
+		}
 		
 		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0)) {
 			return;
@@ -134,6 +137,11 @@ public class Floor extends ClientRPC implements Runnable {
 		updateLights(request);// turns light on
 		sendRequest(request);
 		Logger.printMessage(request, "SENT");
+		
+		dropoffs.add(((RequestElevatorMessage)request).getDestination());
+		if (this.elevatorRequests.isEmpty()) {
+			this.canKill = true;
+		}
 	}
 	
 	/**
@@ -152,8 +160,15 @@ public class Floor extends ClientRPC implements Runnable {
 			
 			Logger.printMessage(message, "RECEIVED");
 			if (message.getType() == MessageType.DOORS_OPENED) {
+				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
+
 				updateLights(message); // turns light off
-				
+
+				if (openDoorMessage.getStopType() != StopType.PICKUP) {
+					for (int i = 0; i < openDoorMessage.getNumPassengers(); i++) {
+						dropoffs.remove((Integer)openDoorMessage.getArrivedFloor());
+					}
+				}				
  
 			}else if (message.getType() == MessageType.START) {
 				canStart = true;
@@ -210,6 +225,16 @@ public class Floor extends ClientRPC implements Runnable {
 	}
 	
 	/**
+	 * Kills the current running instance of the floor.
+	 */
+	private void kill() {
+		this.shouldRun = false;
+		KillMessage killMessage = new KillMessage(SenderType.FLOOR, timer.getTime());
+		sendRequest(killMessage);
+		Logger.printMessage(killMessage, "SENT");
+	}
+	
+	/**
 	 * The run function used to logic of the floor.
 	 */
 	@Override
@@ -221,13 +246,13 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
-			
-			if (canStart) {
-				requestElevator();
-			}
-			
+			requestElevator();
 			
 			requestUpdate();
+			
+			if (dropoffs.isEmpty() && canKill) {
+				kill();
+			}
 			
 			if (canStart) {
 				timer.tick();
