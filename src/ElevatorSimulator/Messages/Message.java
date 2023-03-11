@@ -1,5 +1,8 @@
 package ElevatorSimulator.Messages;
 
+import java.io.Serializable;
+import java.util.Date;
+
 /**
  * The default message class used for holding the information that is passed in the buffers.
  * 
@@ -7,12 +10,14 @@ package ElevatorSimulator.Messages;
  * @author Bardia Parmoun
  *
  */
-public class Message {
+@SuppressWarnings("serial")
+public class Message implements Serializable {
+
 	// The sender of the message.
 	private SenderType sender;
 	
 	// The timestamp used in the message.
-	private String timestamp;
+	private Date timestamp;
 	
 	// The message type.
 	private MessageType type;
@@ -24,7 +29,7 @@ public class Message {
 	 * @param timestamp the timestamp for the message.
 	 * @param type the type of the message
 	 */
-	public Message(SenderType sender, String timestamp, MessageType type){
+	public Message(SenderType sender, Date timestamp, MessageType type){
 		this.sender = sender;
 		this.timestamp = timestamp;
 		this.type = type;
@@ -44,14 +49,14 @@ public class Message {
 	 * 
 	 * @return String - timestamp
 	 */
-	public String getTimestamp() {
+	public Date getTimestamp() {
 		return timestamp;
 	}
 	
 	/**
 	 * Returns the type of the message.
 	 * 
-	 * @return MessageType
+	 * @return MessageType - type of message
 	 */
 	public MessageType getType() {
 		return type;
@@ -63,8 +68,15 @@ public class Message {
 	 * @return String - message description
 	 */
 	public String getDescription() {
-		return type.toString() + " " + timestamp + " " + sender + " ";
+		 return "";
 	}
 	
-	
+	/**
+	 * Returns the direction of the message.
+	 * 
+	 * @return DirectionType - direction
+	 */
+	public DirectionType getDirection() {
+		return null;
+	}
 }
