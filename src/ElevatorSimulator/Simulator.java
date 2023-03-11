@@ -1,5 +1,7 @@
 package ElevatorSimulator;
 
+import java.text.ParseException;
+
 import ElevatorSimulator.Elevator.ElevatorController;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messaging.MessageQueue;
@@ -14,18 +16,19 @@ import ElevatorSimulator.Scheduler.Scheduler;
  */
 public class Simulator {
 	// Keeps track of the input file name for the simulator.
-	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input5.csv";
+	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input.csv";
 	
 	public static int NUM_ELEVATORS = 2;
 	
-	public static int NUM_FLOORS = 5;
+	public static int NUM_FLOORS = 6;
 	
 	/**
 	 * The main method and the starting point for the program.
 	 * 
 	 * @param args
+	 * @throws ParseException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		MessageQueue queue = new MessageQueue();
 		
 		Thread schedulerThread, elevatorControlThread, floorThread;

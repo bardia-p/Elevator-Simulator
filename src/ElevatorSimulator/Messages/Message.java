@@ -1,5 +1,7 @@
 package ElevatorSimulator.Messages;
 
+import java.util.Date;
+
 /**
  * The default message class used for holding the information that is passed in the buffers.
  * 
@@ -12,7 +14,7 @@ public class Message {
 	private SenderType sender;
 	
 	// The timestamp used in the message.
-	private String timestamp;
+	private Date timestamp;
 	
 	// The message type.
 	private MessageType type;
@@ -24,7 +26,7 @@ public class Message {
 	 * @param timestamp the timestamp for the message.
 	 * @param type the type of the message
 	 */
-	public Message(SenderType sender, String timestamp, MessageType type){
+	public Message(SenderType sender, Date timestamp, MessageType type){
 		this.sender = sender;
 		this.timestamp = timestamp;
 		this.type = type;
@@ -44,7 +46,7 @@ public class Message {
 	 * 
 	 * @return String - timestamp
 	 */
-	public String getTimestamp() {
+	public Date getTimestamp() {
 		return timestamp;
 	}
 	
@@ -62,8 +64,16 @@ public class Message {
 	 * 
 	 * @return String - message description
 	 */
+//	public String getDescription() {
+//		return type.toString() + " " + timestamp + " " + sender + " ";
+//	}
+	
 	public String getDescription() {
-		return type.toString() + " " + timestamp + " " + sender + " ";
+		 return "";
+	}
+	
+	public DirectionType getDirection() {
+		return null;
 	}
 	
 	

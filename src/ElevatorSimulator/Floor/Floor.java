@@ -2,10 +2,14 @@ package ElevatorSimulator.Floor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.Date;
 import java.util.Scanner;
 
+import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
 
@@ -31,23 +35,30 @@ public class Floor implements Runnable {
 	private boolean shouldRun;
 	
 	private boolean canKill;
+	private Timer timer;
+	private SimpleDateFormat dateFormat;
+	
+	private String filename;
 	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
 	 * 
 	 * @param queue, the message queue to communicate with the scheduler.
 	 * @param fileName the name of the input file.
+	 * @throws ParseException 
 	 */
-	public Floor(MessageQueue queue, String fileName,int numFloors){
+	public Floor(MessageQueue queue, String fileName,int numFloors) throws ParseException{
+		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
 		this.canKill = false;
+		this.filename = fileName;
+		this.timer = new Timer();
 		this.dropoffs = new HashSet<>();
 		
-		readInElevatorRequests(fileName);
 	}
 	
 	/**
@@ -56,8 +67,9 @@ public class Floor implements Runnable {
 	 * @param line - comma separated string
 	 * 
 	 * @return - ElevatorRequestMessage
+	 * @throws ParseException 
 	 */
-	private RequestElevatorMessage buildRequestFromCSV(String line) {
+	private RequestElevatorMessage buildRequestFromCSV(String line) throws ParseException {
 		String[] entry = line.split(",");
 		
 		
@@ -66,15 +78,16 @@ public class Floor implements Runnable {
 		
 		DirectionType direction = DirectionType.valueOf(entry[2]);
 		
-		return new RequestElevatorMessage(entry[0], floor, direction, destination);
+		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination);
 	}
 	
 	/**
 	 * Given a file path, adds request to queue for each line.
 	 * 
 	 * @param fileName
+	 * @throws ParseException 
 	 */
-	private void readInElevatorRequests(String fileName) {
+	private void readInElevatorRequests(String fileName) throws ParseException {
 		Scanner sc;
 		try {
 			sc = new Scanner(new File(fileName));
@@ -90,7 +103,8 @@ public class Floor implements Runnable {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-			
+		
+		timer.setTime(this.elevatorRequests.peek().getTimestamp());
 	}
 	
 	/**
@@ -109,6 +123,10 @@ public class Floor implements Runnable {
 	private void requestElevator() {
 		
 		if (this.elevatorRequests.isEmpty()) {
+			return;
+		}
+		
+		if (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0) {
 			return;
 		}
 		
@@ -178,20 +196,21 @@ public class Floor implements Runnable {
 	 * A display of the light status
 	 */
 	private void printLightStatus() {
-		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n---------------------------------------";
-		for(int i = 0; i<this.upLights.length;i++) {
-			floorLightsDisplay += "\n| Floor " + (i+1) + " up light on :" + this.upLights[i] + " ";
-			floorLightsDisplay += " down light on :" + this.downLights[i] + " |";
+		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n-------------------------------------------";
+		for(int i = 0; i<this.upLights.length;i++) {			
+			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] ? "on " : "off") + " | ";
+			floorLightsDisplay += "DOWN light: " + (this.downLights[i] ? "on " : "off") + " |";
 		}
-		floorLightsDisplay += "\n---------------------------------------\n";
+		floorLightsDisplay += "\n-------------------------------------------\n";
 		System.out.println(floorLightsDisplay);
 	}
+	
 	/**
 	 * Kills the current running instance of the floor.
 	 */
 	private void kill() {
 		this.shouldRun = false;
-		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
+		queue.send(new KillMessage(SenderType.FLOOR, timer.getTime(), "No more floor requests remaining"));	
 	}
 	
 	/**
@@ -199,6 +218,12 @@ public class Floor implements Runnable {
 	 */
 	@Override
 	public void run() {
+		try {
+			readInElevatorRequests(this.filename);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
 			
@@ -211,6 +236,8 @@ public class Floor implements Runnable {
 			if (dropoffs.isEmpty() && canKill) {
 				kill();
 			}
+			
+			timer.tick();
 			
 			try {
 				Thread.sleep(1000);

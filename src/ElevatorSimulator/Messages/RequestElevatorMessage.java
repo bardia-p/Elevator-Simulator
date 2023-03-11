@@ -1,5 +1,7 @@
 package ElevatorSimulator.Messages;
 
+import java.util.Date;
+
 /**
  * A special type of message used for requesting the elevator.
  * 
@@ -25,7 +27,7 @@ public class RequestElevatorMessage extends Message {
 	 * @param direction the request direction.
 	 * @param destination the destination.
 	 */
-	public RequestElevatorMessage(String timestamp, int floorNumber,  DirectionType direction, int destination) {
+	public RequestElevatorMessage(Date timestamp, int floorNumber,  DirectionType direction, int destination) {
 		super(SenderType.FLOOR, timestamp, MessageType.REQUEST);
 		this.floorNumber = floorNumber;
 		this.destination = destination;
@@ -37,8 +39,9 @@ public class RequestElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return super.getDescription() + "from: " + floorNumber + " to: " + destination + " " + direction;
+		return "from: " + floorNumber + " to: " + destination;
 	}
+	
 	
 	/**
 	 * Returns the requested destination.
@@ -63,6 +66,7 @@ public class RequestElevatorMessage extends Message {
 	 * 
 	 * @return the direction
 	 */
+	@Override
 	public DirectionType getDirection() {
 		return direction;
 	}
