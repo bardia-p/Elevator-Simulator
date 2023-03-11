@@ -13,7 +13,7 @@ import ElevatorSimulator.Messages.DirectionType;
  */
 public class ElevatorTrip {
 	private int pickup, dropoff; // floor numbers 
-	boolean isPickedUp; // not really needed 
+	private boolean pickedUp; // not really needed 
 	private DirectionType directionType;
 	
 	/**
@@ -26,7 +26,7 @@ public class ElevatorTrip {
 		this.directionType = directionType;
 		this.dropoff = dropOff;
 		this.pickup = pickUp;
-		this.isPickedUp = false;
+		this.pickedUp = false;
 		
 	}
 
@@ -35,7 +35,7 @@ public class ElevatorTrip {
 	 * @return boolean indicating true if picked up
 	 */
 	public boolean isPickedUp() {
-		return isPickedUp;
+		return pickedUp;
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class ElevatorTrip {
 	 * @param isPickedUp boolean to be set
 	 */
 	public void setPickedUp(boolean isPickedUp) {
-		this.isPickedUp = isPickedUp;
+		this.pickedUp = isPickedUp;
 	}
 
 	/**

@@ -1,7 +1,10 @@
 package ElevatorSimulator.Messaging;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+
+import ElevatorSimulator.Elevator.ElevatorInfo;
+import ElevatorSimulator.Messages.EmptyMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 
@@ -17,7 +20,7 @@ public class MessageQueue {
 	private ConcurrentLinkedDeque<Message> newMessages;
 	
 	// All the messages sent to the elevator.
-	private ArrayList<ConcurrentLinkedDeque<Message>> toElevator;
+	private HashMap<Integer, ConcurrentLinkedDeque<Message>> toElevator;
 
 	// All the messages sent to the floor.
 	private ConcurrentLinkedDeque<Message> toFloor;
@@ -31,6 +34,9 @@ public class MessageQueue {
 	// String for elevator messages.
 	private String elevatorMessages;
 	
+	//elevator info hashmap
+	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
+	
 	/**
 	 * Constructor for the class. Initialzies
 	 * the newMessages Buffer object, toElevator ArrayList,
@@ -38,19 +44,38 @@ public class MessageQueue {
 	 */
 	public MessageQueue() {
 		this.newMessages = new ConcurrentLinkedDeque<Message>();
-		this.toElevator = new ArrayList<ConcurrentLinkedDeque<Message>>();
+		this.toElevator = new HashMap<Integer, ConcurrentLinkedDeque<Message>>();
 		this.toFloor = new ConcurrentLinkedDeque<Message>();
 		this.schedulerMessages = "";
 		this.floorMessages = "";
 		this.elevatorMessages = "";
+		this.elevatorInfos = new HashMap<>();
+	}
+	
+	/**
+	 * returns elevator info hashmap
+	 * @return
+	 */
+	public HashMap<Integer, ElevatorInfo> getElevatorInfos() {
+		return this.elevatorInfos;
+	}
+	
+	/**
+	 * updates info of given elevator
+	 * @param id -  elevator id
+	 * @param info - new info
+	 */
+	public void updateInfo(Integer id, ElevatorInfo info) {
+		this.elevatorInfos.put(id, info);
 	}
 	
 	/**
 	 * Method to add a new Buffer object to the
 	 * toElevator ArrayList.
 	 */
-	public void addElevator() {
-		this.toElevator.add(new ConcurrentLinkedDeque<Message>());
+	public void addElevator(int id, ElevatorInfo info) {
+		this.updateInfo(id, info);
+		this.toElevator.put(id, new ConcurrentLinkedDeque<Message>());
 	}
 	
 	/**
@@ -59,7 +84,7 @@ public class MessageQueue {
 	 * @param m the message to send to the buffer.
 	 */
 	public void send(Message m) {
-		this.printMessage(m, "SEND");
+		//this.printMessage(m, "SEND");
 		newMessages.offer(m);
 	}
 	
@@ -70,7 +95,7 @@ public class MessageQueue {
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
 	public void replyToFloor(Message m) {
-		this.printMessage(m, "SEND");
+		//this.printMessage(m, "SEND");
 		toFloor.offer(m);
 	}
 	
@@ -81,7 +106,7 @@ public class MessageQueue {
 	 * @param id the elevator id
 	 */
 	public void replyToElevator(Message m, int id) {
-		this.printMessage(m, "SEND");
+		printMessage(m, "SENT");
 		toElevator.get(id).offer(m);
 	}
 	
@@ -91,7 +116,9 @@ public class MessageQueue {
 	 */
 	public Message receiveFromFloor() {
 		Message m = toFloor.poll();
-		this.printMessage(m, "RECEIVED");
+		if (m == null) {
+			return new EmptyMessage();
+		}
 		return m;
 	}
 	
@@ -101,7 +128,9 @@ public class MessageQueue {
 	 */
 	public Message receiveFromElevator(int id) {
 		Message m = toElevator.get(id).poll();
-		this.printMessage(m, "RECEIVED");
+		if (m == null) {
+			return new EmptyMessage();
+		}
 		return m;
 	}
 	
@@ -115,6 +144,10 @@ public class MessageQueue {
 	public Message pop() {
 		Message m = newMessages.poll();
 		this.printMessage(m, "RECEIVED");
+
+		if (m == null) {
+			return new EmptyMessage();
+		}
 		return m;	
 	}
 	

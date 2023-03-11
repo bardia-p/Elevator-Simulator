@@ -9,6 +9,7 @@ import java.util.Date;
  * @author Sarah Chow
  *
  */
+@SuppressWarnings("serial")
 public class RequestElevatorMessage extends Message {
 	// The floor that the elevator was requested at.
 	private int floorNumber;
