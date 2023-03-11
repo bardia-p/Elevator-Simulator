@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorController;
+import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
@@ -20,8 +21,12 @@ public class Scheduler implements Runnable {
 	private MessageQueue queue;
 	private SchedulerState state;
 	private Message currentRequest;
+	
+	private ArrayList<ElevatorInfo> elevatorInfos; 
 
 	private ElevatorController elevatorController;
+	
+	public static final int ELEVATOR_PORT = 23, FLOOR_PORT = 69;
 
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
@@ -36,6 +41,7 @@ public class Scheduler implements Runnable {
 		this.currentRequest = null;
 		this.state = null;
 		this.elevatorController = elevatorController;
+		this.elevatorInfos = new ArrayList<>();
 
 		changeState(SchedulerState.POLL);
 	}
@@ -50,21 +56,41 @@ public class Scheduler implements Runnable {
 	}
 
 	/**
+	 * Gets all the available elevators 
+	 * 
+	 * @param message A request elevator message 
+	 * 
+	 * @return A list of availble elevators 
+	 */
+	private ArrayList<ElevatorInfo> getAvailableElevators(){
+		ArrayList<ElevatorInfo> availableElevators = new ArrayList<>();
+
+		for (ElevatorInfo e : elevatorInfos) {
+			if (e.getState() == ElevatorState.POLL) {
+				availableElevators.add(e);
+			}
+			
+		}
+		return availableElevators;
+	}
+	
+	
+	/**
 	 * Checks to see the closest elevator and adds it to the list
 	 * 
 	 * @param requestMessage the request messsage
 	 * @return the id of the closest elevator
 	 */
 	public int getClosestElevator(RequestElevatorMessage requestMessage) {
-		ArrayList<Elevator> availableElevators = elevatorController.getAvailableElevators(requestMessage);
-		ArrayList<Elevator> possibleCandidates = new ArrayList<>();
+		ArrayList<ElevatorInfo> availableElevators = this.getAvailableElevators();
+		ArrayList<ElevatorInfo> possibleCandidates = new ArrayList<>();
 
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
 
 		// Tries to find an elevator in going the same direction.
-		for (Elevator elevator : availableElevators) {
+		for (ElevatorInfo elevator : availableElevators) {
 			if (elevator.getState() == ElevatorState.POLL) {
 				if (elevator.getDirection() == requestMessage.getDirection()) {
 
@@ -85,11 +111,11 @@ public class Scheduler implements Runnable {
 		if (possibleCandidates.size() != 0) {
 			// return the one with the least number of passengers.
 			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(first.getNumTrips(), second.getNumTrips())).get().getID();
+					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get().getElevatorId();
 		} else {
 			// tries to find an empty elevator.
-			for (Elevator elevator : availableElevators) {
-				if (elevator.getState() == ElevatorState.POLL && elevator.getNumTrips() == 0) {
+			for (ElevatorInfo elevator : availableElevators) {
+				if (elevator.getState() == ElevatorState.POLL && elevator.getNumRequest() == 0) {
 					possibleCandidates.add(elevator);
 				}
 			}
@@ -99,8 +125,8 @@ public class Scheduler implements Runnable {
 				return possibleCandidates.stream()
 						.min((first, second) -> Integer.compare(
 								Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
-								Math.abs(second.getNumTrips() - requestMessage.getFloor())))
-						.get().getID();
+								Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+						.get().getElevatorId();
 			}
 		}
 
@@ -127,6 +153,13 @@ public class Scheduler implements Runnable {
 		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
 			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
 			queue.replyToFloor(request);
+		}
+		else if (currentRequest.getType() == MessageType.READY) {
+			ReadyMessage message = (ReadyMessage) currentRequest;
+			elevatorInfos.add(message.getElevatorInfo());
+		}
+		else if (currentRequest.getType() == MessageType.START) {
+			
 		}
 
 		changeState(SchedulerState.POLL);

@@ -13,6 +13,7 @@ import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * @author Guy Morgenshtern
@@ -33,6 +34,8 @@ public class Floor extends ClientRPC implements Runnable {
 	private boolean shouldRun;
 	
 	private boolean canKill;
+	
+	private boolean canStart;
 	private Timer timer;
 	private SimpleDateFormat dateFormat;
 	
@@ -46,12 +49,13 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @throws ParseException 
 	 */
 	public Floor(MessageQueue queue, String fileName,int numFloors) throws ParseException{
-		super(23);
+		super(Scheduler.FLOOR_PORT);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		elevatorRequests = new ArrayDeque<Message>();
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
+		this.canStart = false;
 		this.canKill = false;
 		this.filename = fileName;
 		this.timer = new Timer();
@@ -144,13 +148,15 @@ public class Floor extends ClientRPC implements Runnable {
 		Message message = getFloorUpdate();
 		
 		if (message != null) {
-			updateLights(message); // turns light off
 			
 			if (message.getType() == MessageType.DOORS_OPENED) {
 				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
+				updateLights(message); // turns light off
 				if (openDoorMessage.getStopType() == StopType.DROPOFF) {
 					dropoffs.remove(openDoorMessage.getArrivedFloor());
 				}
+			}else if (message.getType() == MessageType.START) {
+				canStart = true;
 			}
 		}
 		
@@ -224,11 +230,15 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
-			requestElevator();
+			
+			if (canStart) {
+				requestElevator();
+			}
+			
 			
 			requestUpdate();
 			
-			if (this.elevatorRequests.isEmpty()) {
+			if (this.elevatorRequests.isEmpty() && canStart) {
 				this.canKill = true;
 			}
 			

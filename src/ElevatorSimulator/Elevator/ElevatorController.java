@@ -1,17 +1,24 @@
 package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import ElevatorSimulator.Messages.KillMessage;
+import ElevatorSimulator.Messages.MessageType;
+import ElevatorSimulator.Messages.ReadyMessage;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messages.StartMessage;
+import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
+ * 
  * The Elevator controller class responsible for controlling the multiple elevators 
  * @author Andre Hazim, 
  * @author Bardia Parmoun
  */
-public class ElevatorController implements Runnable {
+public class ElevatorController extends ClientRPC implements Runnable {
 	
 	private ArrayList<Elevator> elevators;
 	private int numElevators;
@@ -26,6 +33,7 @@ public class ElevatorController implements Runnable {
 	 * @param numFloors The number of Floors 
 	 */
 	public ElevatorController(MessageQueue queue, int numElevators, int numFloors) {
+		super(Scheduler.ELEVATOR_PORT);
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
 		this.queue = queue;		
@@ -38,11 +46,17 @@ public class ElevatorController implements Runnable {
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
 			Elevator elevator = new Elevator(queue, i, this.numFloors);
+			sendRequest(new ReadyMessage(null, MessageType.READY, 
+					new ElevatorInfo(elevator.getDirection(),elevator.getState() , elevator.getFloorNumber(), elevator.getID()
+							, elevator.getNumTrips())));
 			elevators.add(elevator);
 			queue.addElevator();
-			Thread elevatorThread = new Thread(elevator, "ELEVATOR " + (i+1));
+			Thread elevatorThread = new Thread(elevators.get(i), "ELEVATOR " + (i+1));
 			elevatorThread.start();
+			
+			
 		}
+		sendRequest(new StartMessage()); 
 	}
 	
 	/**
@@ -62,25 +76,7 @@ public class ElevatorController implements Runnable {
 		
 	}
 	
-	/**
-	 * Gets all the available elevators 
-	 * 
-	 * @param message A request elevator message 
-	 * 
-	 * @return A list of availble elevators 
-	 */
-	public ArrayList<Elevator> getAvailableElevators(RequestElevatorMessage message){
-		ArrayList<Elevator> availableElevators = new ArrayList<>();
 
-		for (Elevator e : elevators) {
-			if (checkElevatorValid(e)) {
-				availableElevators.add(e);
-			}
-			
-		}
-		return availableElevators;
-	}
-	
 	/**
 	 * Kills all the elevators
 	 * 

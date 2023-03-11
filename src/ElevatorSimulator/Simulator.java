@@ -20,7 +20,7 @@ public class Simulator {
 	
 	public static int NUM_ELEVATORS = 2;
 	
-	public static int NUM_FLOORS = 6;
+	public static int NUM_FLOORS = 6; 
 	
 	/**
 	 * The main method and the starting point for the program.

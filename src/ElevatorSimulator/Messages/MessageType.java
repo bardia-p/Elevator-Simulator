@@ -9,5 +9,7 @@ public enum MessageType {
 	REQUEST,
 	MOVING,
 	KILL,
-	DOORS_OPENED
+	DOORS_OPENED,
+	READY,
+	START
 }

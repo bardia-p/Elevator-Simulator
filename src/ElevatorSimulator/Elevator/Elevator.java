@@ -351,7 +351,7 @@ public class Elevator extends ClientRPC implements Runnable {
 			} else if (state.equals(ElevatorState.CLOSE)) {
 				closeDoors();
 			
-			} else {
+			} else{
 				polling();
 			}
 			
