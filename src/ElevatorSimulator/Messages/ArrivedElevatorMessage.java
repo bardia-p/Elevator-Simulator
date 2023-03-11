@@ -1,5 +1,7 @@
 package ElevatorSimulator.Messages;
 
+import java.util.Date;
+
 /**
  * A special type of message used to indicate the elevator has arrived.
  * 
@@ -17,7 +19,7 @@ public class ArrivedElevatorMessage extends Message {
 	 * @param timestamp the message timestamp.
 	 * @param arrivedFloor the floor at which the elevator arrived at.
 	 */
-	public ArrivedElevatorMessage(String timestamp, int arrivedFloor) {
+	public ArrivedElevatorMessage(Date timestamp, int arrivedFloor) {
 		super(SenderType.ELEVATOR, timestamp, MessageType.ARRIVE);
 		this.floorNumber = arrivedFloor;
 	}

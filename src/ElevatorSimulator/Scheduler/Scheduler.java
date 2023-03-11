@@ -9,21 +9,19 @@ import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
- * The scheduler subsystem:
- * - Removes a message from the elevator and sends to the floor.
- * - Removes a message from the floor and sends to the elevator.
+ * The scheduler subsystem: - Removes a message from the elevator and sends to
+ * the floor. - Removes a message from the floor and sends to the elevator.
  * 
  * @author Andre Hazim
  * @author Bardia Parmoun
  *
  */
-public class Scheduler implements Runnable{
+public class Scheduler implements Runnable {
 	private MessageQueue queue;
 	private SchedulerState state;
 	private Message currentRequest;
 
 	private ElevatorController elevatorController;
-
 
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
@@ -42,50 +40,71 @@ public class Scheduler implements Runnable{
 		changeState(SchedulerState.POLL);
 	}
 
-
 	/**
 	 * Polls its newMessages buffer to see if a new message is sent.
 	 * 
 	 * @return the new message.
 	 */
 	private Message checkForNewMessages() {
-		return queue.pop();	
+		return queue.pop();
 	}
 
 	/**
-	 * Checks to see the closest elevator and adds it to the list 
+	 * Checks to see the closest elevator and adds it to the list
+	 * 
 	 * @param requestMessage the request messsage
-	 * @return the id of the closest elevator 
+	 * @return the id of the closest elevator
 	 */
 	public int getClosestElevator(RequestElevatorMessage requestMessage) {
 		ArrayList<Elevator> availableElevators = elevatorController.getAvailableElevators(requestMessage);
+		ArrayList<Elevator> possibleCandidates = new ArrayList<>();
 
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
-		for (Elevator elevator : availableElevators) {
 
+		// Tries to find an elevator in going the same direction.
+		for (Elevator elevator : availableElevators) {
 			if (elevator.getState() == ElevatorState.POLL) {
 				if (elevator.getDirection() == requestMessage.getDirection()) {
 
-					if ((elevator.getDirection() == DirectionType.UP &&
-							elevator.getFloorNumber() <= requestMessage.getFloor()) ||
+					if ((elevator.getDirection() == DirectionType.UP
+							&& elevator.getFloorNumber() <= requestMessage.getFloor()) ||
 
-							(elevator.getDirection() == DirectionType.DOWN &&
-							elevator.getFloorNumber() >= requestMessage.getFloor())) {
+							(elevator.getDirection() == DirectionType.DOWN
+									&& elevator.getFloorNumber() >= requestMessage.getFloor())) {
 						// Going up and elevator is below request floor OR
 						// Going down and elevator is above request floor
 
-						return elevator.getID();
+						possibleCandidates.add(elevator);
 					}
-				}
-				
-				if (elevator.getNumTrips() == 0) {
-					return elevator.getID();
 				}
 			}
 		}
 
+		if (possibleCandidates.size() != 0) {
+			// return the one with the least number of passengers.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(first.getNumTrips(), second.getNumTrips())).get().getID();
+		} else {
+			// tries to find an empty elevator.
+			for (Elevator elevator : availableElevators) {
+				if (elevator.getState() == ElevatorState.POLL && elevator.getNumTrips() == 0) {
+					possibleCandidates.add(elevator);
+				}
+			}
+
+			if (possibleCandidates.size() != 0) {
+				// return the closest elevator.
+				return possibleCandidates.stream()
+						.min((first, second) -> Integer.compare(
+								Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+								Math.abs(second.getNumTrips() - requestMessage.getFloor())))
+						.get().getID();
+			}
+		}
+
+		// could not find an elevator.
 		return -1;
 	}
 
@@ -94,10 +113,9 @@ public class Scheduler implements Runnable{
 	 */
 	private void processMessage() {
 
-		if (currentRequest.getType() == MessageType.KILL){
+		if (currentRequest.getType() == MessageType.KILL) {
 			kill((KillMessage) currentRequest);
-		}
-		else if (currentRequest.getType() == MessageType.REQUEST) {
+		} else if (currentRequest.getType() == MessageType.REQUEST) {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
@@ -128,7 +146,7 @@ public class Scheduler implements Runnable{
 	 */
 	@Override
 	public void run() {
-		while(this.shouldRun) {
+		while (this.shouldRun) {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
 				if (currentRequest != null) {
@@ -137,7 +155,7 @@ public class Scheduler implements Runnable{
 			} else {
 				processMessage();
 			}
-			
+
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -148,6 +166,7 @@ public class Scheduler implements Runnable{
 
 	/**
 	 * change and print state
+	 * 
 	 * @param newState
 	 */
 	private void changeState(SchedulerState newState) {

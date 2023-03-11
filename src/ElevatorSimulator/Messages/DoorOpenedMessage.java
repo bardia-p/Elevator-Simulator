@@ -1,5 +1,7 @@
 package ElevatorSimulator.Messages;
 
+import java.util.Date;
+
 public class DoorOpenedMessage extends Message{
 	private StopType type;
 	
@@ -11,7 +13,7 @@ public class DoorOpenedMessage extends Message{
 	 * @param arrivedFloor the floor it arrived at
 	 * @param type the type of message
 	 */
-	public DoorOpenedMessage(String timestamp, int arrivedFloor, StopType type, DirectionType direction){
+	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction){
 		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;

@@ -1,5 +1,7 @@
 package ElevatorSimulator.Messages;
 
+import java.util.Date;
+
 /**
  * A special type of message used for killing the system.
  * 
@@ -17,8 +19,8 @@ public class KillMessage extends Message{
 	 * @param sender the sender of the message.
 	 * @param reason the reason for killing the system.
 	 */
-	public KillMessage(SenderType sender, String reason) {
-		super(sender,"00:00:00", MessageType.KILL);
+	public KillMessage(SenderType sender, Date timestamp, String reason) {
+		super(sender,timestamp, MessageType.KILL);
 		this.reason = reason;
 	}
 	

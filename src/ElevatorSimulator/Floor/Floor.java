@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Date;
 import java.util.Scanner;
 
+import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
 
@@ -23,14 +25,20 @@ public class Floor implements Runnable {
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
 	
+	
+	private HashSet<Integer> dropoffs;
+	
 	private boolean[] upLights; 
 	
 	private boolean[] downLights; 
 		
 	private boolean shouldRun;
 	
-	private Date startTime;
+	private boolean canKill;
+	private Timer timer;
 	private SimpleDateFormat dateFormat;
+	
+	private String filename;
 	
 	/**
 	 * ELevator constructor with a scheduler and a filename.
@@ -43,10 +51,14 @@ public class Floor implements Runnable {
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
-		readInElevatorRequests(fileName);
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
+		this.canKill = false;
+		this.filename = fileName;
+		this.timer = new Timer();
+		this.dropoffs = new HashSet<>();
+		
 	}
 	
 	/**
@@ -55,8 +67,9 @@ public class Floor implements Runnable {
 	 * @param line - comma separated string
 	 * 
 	 * @return - ElevatorRequestMessage
+	 * @throws ParseException 
 	 */
-	private RequestElevatorMessage buildRequestFromCSV(String line) {
+	private RequestElevatorMessage buildRequestFromCSV(String line) throws ParseException {
 		String[] entry = line.split(",");
 		
 		
@@ -65,7 +78,7 @@ public class Floor implements Runnable {
 		
 		DirectionType direction = DirectionType.valueOf(entry[2]);
 		
-		return new RequestElevatorMessage(entry[0], floor, direction, destination);
+		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination);
 	}
 	
 	/**
@@ -91,7 +104,7 @@ public class Floor implements Runnable {
 			e.printStackTrace();
 		}
 		
-		this.startTime = (Date) dateFormat.parse(this.elevatorRequests.peek().getTimestamp());
+		timer.setTime(this.elevatorRequests.peek().getTimestamp());
 	}
 	
 	/**
@@ -101,6 +114,7 @@ public class Floor implements Runnable {
 	 */
 	private void addRequest(RequestElevatorMessage request) {
 		this.elevatorRequests.offer(request);
+		this.dropoffs.add(request.getDestination());
 	}
 	
 	/**
@@ -109,6 +123,10 @@ public class Floor implements Runnable {
 	private void requestElevator() {
 		
 		if (this.elevatorRequests.isEmpty()) {
+			return;
+		}
+		
+		if (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0) {
 			return;
 		}
 		
@@ -128,6 +146,13 @@ public class Floor implements Runnable {
 		
 		if (message != null) {
 			updateLights(message); // turns light off
+			
+			if (message.getType() == MessageType.DOORS_OPENED) {
+				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
+				if (openDoorMessage.getStopType() == StopType.DROPOFF) {
+					dropoffs.remove(openDoorMessage.getArrivedFloor());
+				}
+			}
 		}
 		
 		return message;
@@ -185,7 +210,7 @@ public class Floor implements Runnable {
 	 */
 	private void kill() {
 		this.shouldRun = false;
-		queue.send(new KillMessage(SenderType.FLOOR, "No more floor requests remaining"));	
+		queue.send(new KillMessage(SenderType.FLOOR, timer.getTime(), "No more floor requests remaining"));	
 	}
 	
 	/**
@@ -193,24 +218,30 @@ public class Floor implements Runnable {
 	 */
 	@Override
 	public void run() {
+		try {
+			readInElevatorRequests(this.filename);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
 			
 			requestUpdate();
 			
 			if (this.elevatorRequests.isEmpty()) {
+				this.canKill = true;
+			}
+			
+			if (dropoffs.isEmpty() && canKill) {
 				kill();
 			}
 			
+			timer.tick();
+			
 			try {
-				Message nextRequest = elevatorRequests.peek();
-				if (nextRequest != null) {
-					int timedelay = (int) (this.startTime.getTime() - dateFormat.parse(nextRequest.getTimestamp()).getTime());
-					Thread.sleep(timedelay);
-				}
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}

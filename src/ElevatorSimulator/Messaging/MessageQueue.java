@@ -125,58 +125,26 @@ public class MessageQueue {
 				
 		if (m != null) {
 			
-			if (schedulerMessages == "" || floorMessages == "" || elevatorMessages == "") {
-				result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-				result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-				result += new String(new char[52]).replace("\0", "-");
-			}
+			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
+			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
+			result += new String(new char[52]).replace("\0", "-");
 			
-			addResult += String.format("\n| %-15s | %-10s | ", m.getDescription(), m.getDirection());
+			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
 			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
 			
-			if (m.getType() == MessageType.KILL) {
-				addResult = m.getDescription();
+			
+			if (Thread.currentThread().getName().contains("SCHEDULER")) {				
+				messageToPrint = this.schedulerMessages;
+			}
+			else if (Thread.currentThread().getName().contains("FLOOR")) {
+				messageToPrint = this.floorMessages;
+			}
+			else if (Thread.currentThread().getName().contains("ELEVATOR")) {
+				messageToPrint = this.elevatorMessages;
 			}
 			
+			System.out.println(messageToPrint + result + addResult);
 		}
-		
-		if (Thread.currentThread().getName().contains("SCHEDULER")) {
-			
-			if (schedulerMessages == "") {
-				schedulerMessages += result + addResult;
-			}
-			else {
-				schedulerMessages += addResult;
-			}
-			
-			
-			messageToPrint = this.schedulerMessages;
-		}
-		else if (Thread.currentThread().getName().contains("FLOOR")) {
-			
-			if (floorMessages == "") {
-				floorMessages += result + addResult;
-			}
-			else {
-				floorMessages += addResult;
-			}
-			
-			messageToPrint = this.floorMessages;
-		}
-		else if (Thread.currentThread().getName().contains("ELEVATOR")) {
-			
-			if (elevatorMessages == "") {
-				elevatorMessages += result + addResult;
-			}
-			else {
-				elevatorMessages += addResult;
-			}
-
-			messageToPrint = this.elevatorMessages;
-		}
-		
-		System.out.println(messageToPrint);
-
 		
 	}
 	
