@@ -1,8 +1,11 @@
 package ElevatorSimulator.Elevator;
 
+import java.io.Serializable;
+
 import ElevatorSimulator.Messages.DirectionType;
 
-public class ElevatorInfo {
+@SuppressWarnings("serial")
+public class ElevatorInfo implements Serializable{
 	
 	private DirectionType directionType;
 	private ElevatorState state; 

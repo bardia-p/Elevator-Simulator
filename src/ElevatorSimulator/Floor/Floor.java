@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Date;
 import java.util.Scanner;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
@@ -48,7 +49,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param fileName the name of the input file.
 	 * @throws ParseException 
 	 */
-	public Floor(MessageQueue queue, String fileName,int numFloors) throws ParseException{
+	public Floor(String fileName,int numFloors) throws ParseException{
 		super(Scheduler.FLOOR_PORT);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		elevatorRequests = new ArrayDeque<Message>();
@@ -134,8 +135,7 @@ public class Floor extends ClientRPC implements Runnable {
 		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
-		sendRequest(request);
-		
+		sendRequest(request);		
 	}
 	
 	/**
@@ -148,7 +148,11 @@ public class Floor extends ClientRPC implements Runnable {
 		Message message = getFloorUpdate();
 		
 		if (message != null) {
-			
+			if (message.getType() == MessageType.EMPTY) {
+				return null;
+			}
+			printMessage(message, "RECEIVED");
+
 			if (message.getType() == MessageType.DOORS_OPENED) {
 				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
 				updateLights(message); // turns light off
@@ -246,7 +250,9 @@ public class Floor extends ClientRPC implements Runnable {
 				kill();
 			}
 			
-			timer.tick();
+			if (canStart) {
+				timer.tick();
+			}
 			
 			try {
 				Thread.sleep(1000);
@@ -257,6 +263,35 @@ public class Floor extends ClientRPC implements Runnable {
 		
 	}
 
+	
+	public static void main(String[] args) {
+		try {
+			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS));
+			floorThread.start();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void printMessage(Message m, String type) {
+		
+		String result = "";
+		String addResult = "";
+		String messageToPrint = "";
+				
+		if (m != null) {
+			
+			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
+			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
+			result += new String(new char[52]).replace("\0", "-");
+			
+			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
+			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
+			
+			System.out.println(messageToPrint + result + addResult);
+		}
+		
+	}
 	
 
 }

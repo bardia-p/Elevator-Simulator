@@ -1,6 +1,7 @@
 package ElevatorSimulator.Messages;
 
 
+@SuppressWarnings("serial")
 public class StartMessage extends Message {
 
 	public StartMessage() {

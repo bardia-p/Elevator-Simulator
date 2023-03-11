@@ -11,5 +11,9 @@ public enum MessageType {
 	KILL,
 	DOORS_OPENED,
 	READY,
-	START
+	START,
+	GET_UPDATE,
+	ACKMessage,
+	UPDATE_ELEVATOR_INFO,
+	EMPTY
 }

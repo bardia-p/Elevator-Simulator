@@ -15,9 +15,11 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Bardia Parmoun
  *
  */
-public class Elevator extends ClientRPC implements Runnable {
+public class Elevator implements Runnable {
 	// Elevator's current state
 	private ElevatorState state;
+	
+	private ElevatorController controller;
 	
 	// Check if the elevator is to continue running.
 	private boolean shouldRun;
@@ -50,10 +52,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * 
 	 * @param queue, the message queue.
 	 */
-	public Elevator(MessageQueue queue, int id, int numFloors) {
-		super(69);
+	public Elevator(ElevatorController controller, int id, int numFloors) {
 		this.shouldRun = true;
-		this.state = null;
+		this.state = ElevatorState.POLL;
 		this.floor = 1; // not sure if we should pass in start position
 		this.direction = DirectionType.UP;
 		this.elevatorNumber = id;
@@ -65,7 +66,9 @@ public class Elevator extends ClientRPC implements Runnable {
 		this.stopType = null;
 		this.canKill = false;
 		
-		changeState(ElevatorState.POLL);
+		this.controller = controller;
+		
+		//changeState(ElevatorState.POLL);
 	}
 
 	/**
@@ -74,8 +77,8 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		Message update = getElevatorUpdate(elevatorNumber);
-		if (trips.size() == 0 && canKill) {
+		Message update = controller.getElevatorUpdate(elevatorNumber);
+		if (update == null && trips.size() == 0 && canKill) {
 			kill();
 		}
 		return update;
@@ -89,7 +92,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	private void processMessage(Message message) {
 		if (message.getType() == MessageType.KILL) {
 			canKill = true;
-		} else {
+		} else if (message.getType() == MessageType.REQUEST){
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
 			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(), requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
 			trips.add(elevatorTrip);
@@ -124,6 +127,8 @@ public class Elevator extends ClientRPC implements Runnable {
 		
 		// cannot fulfill requests in the direction, toggle directions.
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
+		
+		controller.sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
 	}
 
 	private boolean hasDropoffInDirection() {
@@ -230,7 +235,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	private void arrived() {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
-		sendRequest(reply);
+		controller.sendRequest(reply);
 		
 		boolean isPickUp = false;
 		boolean isDropoff = false;
@@ -266,7 +271,7 @@ public class Elevator extends ClientRPC implements Runnable {
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
-			sendRequest(doorOpen);
+			controller.sendRequest(doorOpen);
 		} else {
 			changeState(ElevatorState.POLL);
 		}
@@ -322,7 +327,8 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	private void polling() {
 		Message incoming = requestUpdate();
-		if (incoming != null) {
+		if (incoming != null && incoming.getType() != MessageType.EMPTY) {
+			printMessage(incoming, "RECEIVED");
 			currentRequest = incoming;
 			processMessage(incoming);
 		} else if (trips.size() != 0) {
@@ -386,6 +392,27 @@ public class Elevator extends ClientRPC implements Runnable {
 	private void changeState(ElevatorState newState) {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		state = newState;
-
+		controller.sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
 	}
+	
+	private void printMessage(Message m, String type) {
+		
+		String result = "";
+		String addResult = "";
+		String messageToPrint = "";
+				
+		if (m != null) {
+			
+			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
+			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
+			result += new String(new char[52]).replace("\0", "-");
+			
+			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
+			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
+			
+			System.out.println(messageToPrint + result + addResult);
+		}
+		
+	}
+	
 }

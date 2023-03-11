@@ -1,13 +1,14 @@
 package ElevatorSimulator.Scheduler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import ElevatorSimulator.Elevator.Elevator;
-import ElevatorSimulator.Elevator.ElevatorController;
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Messaging.SchedulerHelper;
 
 /**
  * The scheduler subsystem: - Removes a message from the elevator and sends to
@@ -22,9 +23,7 @@ public class Scheduler implements Runnable {
 	private SchedulerState state;
 	private Message currentRequest;
 	
-	private ArrayList<ElevatorInfo> elevatorInfos; 
-
-	private ElevatorController elevatorController;
+	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
 	
 	public static final int ELEVATOR_PORT = 23, FLOOR_PORT = 69;
 
@@ -35,13 +34,18 @@ public class Scheduler implements Runnable {
 	 * Default constructor for the Scheduler.
 	 * 
 	 */
-	public Scheduler(MessageQueue queue, ElevatorController elevatorController) {
-		this.queue = queue;
+	public Scheduler() {
+		this.queue = new MessageQueue();
 		this.shouldRun = true;
 		this.currentRequest = null;
 		this.state = null;
-		this.elevatorController = elevatorController;
-		this.elevatorInfos = new ArrayList<>();
+		this.elevatorInfos = new HashMap<>();
+
+		Thread floorThread = new Thread(new SchedulerHelper(this, queue, FLOOR_PORT), "FLOOR MESSAGE THREAD");
+		Thread elevatorThread = new Thread(new SchedulerHelper(this, queue, ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
+		
+		floorThread.start();
+		elevatorThread.start();
 
 		changeState(SchedulerState.POLL);
 	}
@@ -65,7 +69,7 @@ public class Scheduler implements Runnable {
 	private ArrayList<ElevatorInfo> getAvailableElevators(){
 		ArrayList<ElevatorInfo> availableElevators = new ArrayList<>();
 
-		for (ElevatorInfo e : elevatorInfos) {
+		for (ElevatorInfo e : elevatorInfos.values()) {
 			if (e.getState() == ElevatorState.POLL) {
 				availableElevators.add(e);
 			}
@@ -145,6 +149,7 @@ public class Scheduler implements Runnable {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
+				System.out.println("PICKED ELEVATOR " + id);
 				queue.replyToElevator(currentRequest, id);
 			} else {
 				return;
@@ -156,10 +161,14 @@ public class Scheduler implements Runnable {
 		}
 		else if (currentRequest.getType() == MessageType.READY) {
 			ReadyMessage message = (ReadyMessage) currentRequest;
-			elevatorInfos.add(message.getElevatorInfo());
+			queue.addElevator(message.getElevatorInfo().getElevatorId());
+			elevatorInfos.put(message.getElevatorInfo().getElevatorId(), message.getElevatorInfo());
 		}
 		else if (currentRequest.getType() == MessageType.START) {
-			
+			if (elevatorInfos.size() != Simulator.NUM_ELEVATORS) {
+				return;
+			}
+			queue.replyToFloor(currentRequest);
 		}
 
 		changeState(SchedulerState.POLL);
@@ -171,7 +180,10 @@ public class Scheduler implements Runnable {
 	 */
 	private void kill(KillMessage message) {
 		this.shouldRun = false;
-		elevatorController.kill(message);
+	}
+	
+	public void updateInfo(int elevatorId, ElevatorInfo info) {
+		elevatorInfos.put(elevatorId, info);
 	}
 
 	/**
@@ -182,7 +194,7 @@ public class Scheduler implements Runnable {
 		while (this.shouldRun) {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
-				if (currentRequest != null) {
+				if (currentRequest != null && currentRequest.getType() != MessageType.EMPTY) {
 					changeState(SchedulerState.PROCESSING);
 				}
 			} else {
@@ -206,6 +218,11 @@ public class Scheduler implements Runnable {
 		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
 		state = newState;
 
+	}
+	
+	public static void main(String[] args) {
+		Thread schedulerThread = new Thread(new Scheduler(), "SCHEDULER THREAD");
+		schedulerThread.start();
 	}
 
 }

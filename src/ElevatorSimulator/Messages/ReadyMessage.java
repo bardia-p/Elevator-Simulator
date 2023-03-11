@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ElevatorSimulator.Elevator.ElevatorInfo;
 
+@SuppressWarnings("serial")
 public class ReadyMessage extends Message{
 	private ElevatorInfo elevatorInfo;
 

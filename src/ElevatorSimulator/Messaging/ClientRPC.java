@@ -10,8 +10,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Base64;
 
+import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
+import ElevatorSimulator.Messages.MessageType;
+import ElevatorSimulator.Messages.SenderType;
 
 public class ClientRPC {
 	// Used to hold the send and receive packets.
@@ -22,19 +26,17 @@ public class ClientRPC {
 	
 	// The port used to send the packets to.
 	private int sendPort;
-	
+		
 	// The timeout used for closing the socket.
 	public static final int TIMEOUT = 30000;
 	
-	public static final String RESPONSE_REQUEST = "REQUEST UPDATE";
-
 	
 	/**
 	 * The constructor for the class.
 	 * 
 	 * @param sendPort, the port used to send the packets to.
 	 */
-	public ClientRPC(int sendPort) {
+	public ClientRPC( int sendPort) {
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine.
 			// This socket will be used to send and receive UDP Datagram packets.
@@ -58,9 +60,7 @@ public class ClientRPC {
 	 * 
 	 * @param request, the request body to include in the packet.
 	 */
-	private byte[] sendAndReceive(String message) {
-		byte[] request = message.getBytes();
-		
+	private byte[] sendAndReceive(byte[] request) {		
 		// Tries to initialize the packet to send to the host.
 		try {
 			sendPacket = new DatagramPacket(request, request.length, InetAddress.getLocalHost(), sendPort);
@@ -70,7 +70,7 @@ public class ClientRPC {
 			System.exit(1);
 		}
 
-		System.out.println("Sending packet:");
+		//System.out.println("Sending packet:");
 		
 		//logger.displayPacket(sendPacket);
 
@@ -83,10 +83,10 @@ public class ClientRPC {
 			System.exit(1);
 		}
 
-		System.out.println("Packet sent.\n");
+		//System.out.println("Packet sent.\n");
 
 		// Construct a DatagramPacket for receiving packets up to 100 bytes.
-		byte data[] = new byte[100];
+		byte data[] = new byte[100000];
 		receivePacket = new DatagramPacket(data, data.length);
 
 		// Try to receive the response packet.
@@ -99,7 +99,7 @@ public class ClientRPC {
 			System.exit(1);
 		}
 		
-		System.out.println("Received Packet.\n");
+		//System.out.println("Received Packet.\n");
 
 		// Process the received datagram packet.
 		//logger.displayPacket(receivePacket);
@@ -114,43 +114,49 @@ public class ClientRPC {
 	 * @return the update received from the host.
 	 */
 	public Message getFloorUpdate() {
-		return deserializeMessage(sendAndReceive(RESPONSE_REQUEST));
+		return deserializeMessage(sendAndReceive(serializeMessage(new GetUpdateMessage(null, SenderType.FLOOR))));
 	}
 	
 	
 	public Message getElevatorUpdate(int elevatorNumber) {
-		return deserializeMessage(sendAndReceive(RESPONSE_REQUEST + " " + elevatorNumber));
+		return deserializeMessage(sendAndReceive(serializeMessage(new GetUpdateMessage(null, SenderType.ELEVATOR, elevatorNumber))));
 	}
 	
 	public void sendRequest(Message m) {
-		String serializedRequest = serializeMessage(m);
-		sendAndReceive(serializedRequest);
+		printMessage(m, "SEND");
+		sendAndReceive(serializeMessage(m));
 	}
 	
-	private String serializeMessage(Message m) {
+	private byte[] serializeMessage(Message m) {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ObjectOutputStream out;
+		byte[] result = new byte[100];
 		try {
 			out = new ObjectOutputStream(outputStream);
 			out.writeObject(m);
+			out.flush();
+			
+			result = outputStream.toByteArray();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return outputStream.toString();
+
+		return result;
 	}
 	
 	private Message deserializeMessage(byte[] content) {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 		ObjectInputStream in;
+		Message result = null;
 		try {
 			in = new ObjectInputStream(inputStream);
-			return (Message)in.readObject();
+			result = (Message)in.readObject();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return result;
 	}
 	
 	/**
@@ -158,5 +164,25 @@ public class ClientRPC {
 	 */
 	public void close() {
 		sendReceiveSocket.close();
+	}
+	
+	private void printMessage(Message m, String type) {
+		
+		String result = "";
+		String addResult = "";
+		String messageToPrint = "";
+				
+		if (m != null) {
+			
+			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
+			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
+			result += new String(new char[52]).replace("\0", "-");
+			
+			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
+			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
+			
+			System.out.println(messageToPrint + result + addResult);
+		}
+		
 	}
 }

@@ -1,8 +1,10 @@
 package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.KillMessage;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.ReadyMessage;
@@ -23,7 +25,6 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	private ArrayList<Elevator> elevators;
 	private int numElevators;
 	private int numFloors;
-	private MessageQueue queue;
 	
 	/**
 	 * The constructor of the Elevator Controller 
@@ -32,11 +33,10 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 * @param numElevators The number of Elevators
 	 * @param numFloors The number of Floors 
 	 */
-	public ElevatorController(MessageQueue queue, int numElevators, int numFloors) {
+	public ElevatorController(int numElevators, int numFloors) {
 		super(Scheduler.ELEVATOR_PORT);
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
-		this.queue = queue;		
 		this.numFloors = numFloors;
 	}
 	
@@ -45,35 +45,18 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
-			Elevator elevator = new Elevator(queue, i, this.numFloors);
-			sendRequest(new ReadyMessage(null, MessageType.READY, 
+			Elevator elevator = new Elevator(this, i, this.numFloors);
+			sendRequest(new ReadyMessage(new Date(), MessageType.READY, 
 					new ElevatorInfo(elevator.getDirection(),elevator.getState() , elevator.getFloorNumber(), elevator.getID()
 							, elevator.getNumTrips())));
 			elevators.add(elevator);
-			queue.addElevator();
-			Thread elevatorThread = new Thread(elevators.get(i), "ELEVATOR " + (i+1));
-			elevatorThread.start();
-			
-			
 		}
 		sendRequest(new StartMessage()); 
-	}
-	
-	/**
-	 * Checks to see if the elevator is in a valid state
-	 * 
-	 * @param elevator The elevator you want to check
-	 * 
-	 * @return Boolean true of false
-	 */
-	private boolean checkElevatorValid(Elevator elevator) {
 		
-		if (elevator.getState() == ElevatorState.POLL) {
-			return true;
+		for (int i = 0; i < numElevators; i++) {
+			Thread elevatorThread = new Thread(elevators.get(i), "ELEVATOR " + (i+1));
+			elevatorThread.start();
 		}
-		
-		return false;
-		
 	}
 	
 
@@ -84,7 +67,7 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public void kill(KillMessage message) {
 		for (int i =0; i < elevators.size(); i++) {
-			queue.replyToElevator(message, i);
+			//queue.replyToElevator(message, i);
 		}
 	}
 
@@ -94,5 +77,10 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public void run() {
 		initializeElevators();
+	}
+	
+	public static void main(String[] args) {
+		Thread elevatorControllerThread = new Thread(new ElevatorController(Simulator.NUM_ELEVATORS, Simulator.NUM_FLOORS), "ELEVATOR CONTROLLER");
+		elevatorControllerThread.start();
 	}
 }
