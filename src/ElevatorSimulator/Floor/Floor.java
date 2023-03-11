@@ -118,7 +118,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 */
 	private void addRequest(RequestElevatorMessage request) {
 		this.elevatorRequests.offer(request);
-		this.dropoffs.add(request.getDestination());
 	}
 	
 	/**
@@ -151,13 +150,9 @@ public class Floor extends ClientRPC implements Runnable {
 			printMessage(message, "RECEIVED");
 
 			if (message.getType() == MessageType.DOORS_OPENED) {
-				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
 
 				updateLights(message); // turns light off
-
-				if (openDoorMessage.getStopType() == StopType.DROPOFF) {
-					dropoffs.remove(openDoorMessage.getArrivedFloor());
-				}
+ 
 			}else if (message.getType() == MessageType.START) {
 				canStart = true;
 			}
@@ -213,14 +208,6 @@ public class Floor extends ClientRPC implements Runnable {
 	}
 	
 	/**
-	 * Kills the current running instance of the floor.
-	 */
-	private void kill() {
-		this.shouldRun = false;
-		sendRequest(new KillMessage(SenderType.FLOOR, timer.getTime(), "No more floor requests remaining"));	
-	}
-	
-	/**
 	 * The run function used to logic of the floor.
 	 */
 	@Override
@@ -239,14 +226,6 @@ public class Floor extends ClientRPC implements Runnable {
 			
 			
 			requestUpdate();
-			
-			if (this.elevatorRequests.isEmpty() && canStart) {
-				this.canKill = true;
-			}
-			
-			if (dropoffs.isEmpty() && canKill) {
-				kill();
-			}
 			
 			if (canStart) {
 				timer.tick();
@@ -281,7 +260,7 @@ public class Floor extends ClientRPC implements Runnable {
 			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
 			result += new String(new char[52]).replace("\0", "-");
 			
-			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
+			addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), m.getDirection());
 			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
 			
 			System.out.println(messageToPrint + result + addResult);

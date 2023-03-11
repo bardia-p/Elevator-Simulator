@@ -3,6 +3,7 @@ package ElevatorSimulator.Messaging;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Messages.EmptyMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
@@ -33,6 +34,9 @@ public class MessageQueue {
 	// String for elevator messages.
 	private String elevatorMessages;
 	
+	//elevator info hashmap
+	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
+	
 	/**
 	 * Constructor for the class. Initialzies
 	 * the newMessages Buffer object, toElevator ArrayList,
@@ -45,13 +49,32 @@ public class MessageQueue {
 		this.schedulerMessages = "";
 		this.floorMessages = "";
 		this.elevatorMessages = "";
+		this.elevatorInfos = new HashMap<>();
+	}
+	
+	/**
+	 * returns elevator info hashmap
+	 * @return
+	 */
+	public HashMap<Integer, ElevatorInfo> getElevatorInfos() {
+		return this.elevatorInfos;
+	}
+	
+	/**
+	 * updates info of given elevator
+	 * @param id -  elevator id
+	 * @param info - new info
+	 */
+	public void updateInfo(Integer id, ElevatorInfo info) {
+		this.elevatorInfos.put(id, info);
 	}
 	
 	/**
 	 * Method to add a new Buffer object to the
 	 * toElevator ArrayList.
 	 */
-	public void addElevator(int id) {
+	public void addElevator(int id, ElevatorInfo info) {
+		this.updateInfo(id, info);
 		this.toElevator.put(id, new ConcurrentLinkedDeque<Message>());
 	}
 	

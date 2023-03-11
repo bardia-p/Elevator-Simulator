@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
@@ -113,49 +114,17 @@ public class ClientRPC {
 	 * @return the update received from the host.
 	 */
 	public Message getFloorUpdate() {
-		return deserializeMessage(sendAndReceive(serializeMessage(new GetUpdateMessage(null, SenderType.FLOOR))));
+		return Serializer.deserializeMessage(sendAndReceive(Serializer.serializeMessage(new GetUpdateMessage(null, SenderType.FLOOR))));
 	}
 	
 	
 	public Message getElevatorUpdate(int elevatorNumber) {
-		return deserializeMessage(sendAndReceive(serializeMessage(new GetUpdateMessage(null, SenderType.ELEVATOR, elevatorNumber))));
+		return Serializer.deserializeMessage(sendAndReceive(Serializer.serializeMessage(new GetUpdateMessage(null, SenderType.ELEVATOR, elevatorNumber))));
 	}
 	
 	public void sendRequest(Message m) {
 		printMessage(m, "SEND");
-		sendAndReceive(serializeMessage(m));
-	}
-	
-	private byte[] serializeMessage(Message m) {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		ObjectOutputStream out;
-		byte[] result = new byte[100];
-		try {
-			out = new ObjectOutputStream(outputStream);
-			out.writeObject(m);
-			out.flush();
-			
-			result = outputStream.toByteArray();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-	
-	private Message deserializeMessage(byte[] content) {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
-		ObjectInputStream in;
-		Message result = null;
-		try {
-			in = new ObjectInputStream(inputStream);
-			result = (Message)in.readObject();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return result;
+		sendAndReceive(Serializer.serializeMessage(m));
 	}
 	
 	/**

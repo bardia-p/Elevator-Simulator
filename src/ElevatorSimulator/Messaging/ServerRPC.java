@@ -8,7 +8,11 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.HashMap;
 
+import ElevatorSimulator.Serializer;
+import ElevatorSimulator.Simulator;
+import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Messages.ACKMessage;
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
@@ -18,7 +22,7 @@ import ElevatorSimulator.Messages.SenderType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 import ElevatorSimulator.Scheduler.Scheduler;
 
-public class SchedulerHelper implements Runnable {
+public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
 	private DatagramPacket sendPacket, receivePacket;
 	
@@ -33,24 +37,22 @@ public class SchedulerHelper implements Runnable {
 	
 	private MessageQueue queue;
 	
-	private Scheduler scheduler;
+
 	
 	/**
 	 * The constructor for the class.
 	 * 
 	 * @param sendPort, the port used to send the packets to.
 	 */
-	public SchedulerHelper(Scheduler sch, MessageQueue queue, int port) {
+	public ServerRPC(MessageQueue queue, int port) {
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine.
 			// This socket will be used to send and receive UDP Datagram packets.
 			sendReceiveSocket = new DatagramSocket(port);
 			
 			// Set a timeout for the socket.
-			sendReceiveSocket.setSoTimeout(TIMEOUT);
-			
+			sendReceiveSocket.setSoTimeout(TIMEOUT);		
 			this.queue = queue;
-			this.scheduler = sch;
 			//logger = new Logger();
 						
 		} catch (SocketException se) { // Can't create the socket.
@@ -58,7 +60,7 @@ public class SchedulerHelper implements Runnable {
 			System.exit(1);
 		}
 	}
-	
+
 	/**
 	 * Receives a packet and from a source (either client or host)
 	 */
@@ -90,7 +92,7 @@ public class SchedulerHelper implements Runnable {
 	 * @return the proper reply for the packet.
 	 */
 	private Message processPacket() {
-		Message receiveMessage = deserializeMessage(receivePacket.getData());
+		Message receiveMessage = Serializer.deserializeMessage(receivePacket.getData());
 		
 		Message replyMessage;
 		if (receiveMessage.getType() == MessageType.GET_UPDATE) { // for request update packets check the receiving buffer.
@@ -102,13 +104,16 @@ public class SchedulerHelper implements Runnable {
 			}
 		} else if (receiveMessage.getType() == MessageType.READY) {
 			ReadyMessage readyMessage = (ReadyMessage) receiveMessage;
-			queue.addElevator(readyMessage.getElevatorInfo().getElevatorId());
+			queue.addElevator(readyMessage.getElevatorInfo().getElevatorId(),readyMessage.getElevatorInfo());
 			queue.send(receiveMessage);
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage message = (UpdateElevatorInfoMessage) receiveMessage;
-			scheduler.updateInfo(message.getInfo().getElevatorId(), message.getInfo());
+			queue.updateInfo(message.getInfo().getElevatorId(), message.getInfo());
 			System.out.println("GOT UPDATE FROM ELEVATOR " + message.getInfo().getElevatorId());
+			replyMessage = new ACKMessage();
+		} else if (receiveMessage.getType() == MessageType.START) {
+			queue.replyToFloor(receiveMessage);
 			replyMessage = new ACKMessage();
 		} else { // for data packets, send an acknowledgement message and update the send buffer.
 			queue.send(receiveMessage);
@@ -124,12 +129,10 @@ public class SchedulerHelper implements Runnable {
 	 * @param content, the contents of the packet to send back.
 	 */
 	private void send(Message replyMessage) {
-		byte[] content = serializeMessage(replyMessage);
+		byte[] content = Serializer.serializeMessage(replyMessage);
 		
-		// Create a new datagram packet to reply to the soruce.
+		// Create a new datagram packet to reply to the source.
 		sendPacket = new DatagramPacket(content, content.length, receivePacket.getAddress(), sourcePort);
-
-		//System.out.println(Thread.currentThread().getName() + ": Sending packet:\n");
 
 		// Try to send the packet to the source.
 		try {
@@ -141,39 +144,6 @@ public class SchedulerHelper implements Runnable {
 		}
 
 		//System.out.println(Thread.currentThread().getName() + ": packet sent.\n");
-	}
-	
-	
-	private byte[] serializeMessage(Message m) {
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		ObjectOutputStream out;
-		byte[] result = new byte[100];
-		try {
-			out = new ObjectOutputStream(outputStream);
-			out.writeObject(m);
-			out.flush();
-
-			result = outputStream.toByteArray();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-	
-	private Message deserializeMessage(byte[] content) {
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
-		ObjectInputStream in;
-		Message result = null;
-		try {
-			in = new ObjectInputStream(inputStream);
-			result = (Message)in.readObject();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 	
 	/**
