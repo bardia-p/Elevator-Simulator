@@ -1,81 +1,42 @@
 package ElevatorSimulator.Messaging;
 
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.ArrayList;
 
-import ElevatorSimulator.Elevator.ElevatorInfo;
-import ElevatorSimulator.Messages.EmptyMessage;
 import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.MessageType;
 
 /**
  * File representing the MessageQueue class.
- * 
  * @author Bardia Parmoun
  * @author Andre Hazim
- * @author Sarah Chow
+ *
  */
 public class MessageQueue {
 	// All the new messages for the scheduler.
-	private ConcurrentLinkedDeque<Message> newMessages;
+	private Buffer newMessages;
 	
 	// All the messages sent to the elevator.
-	private HashMap<Integer, ConcurrentLinkedDeque<Message>> toElevator;
+	private ArrayList<Buffer> toElevator;
 
 	// All the messages sent to the floor.
-	private ConcurrentLinkedDeque<Message> toFloor;
-	
-	// String for scheduler messages.
-	
-	private String schedulerMessages;
-	// String for floor messages.
-	private String floorMessages;
-	
-	// String for elevator messages.
-	private String elevatorMessages;
-	
-	//elevator info hashmap
-	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
+	private Buffer toFloor;
 	
 	/**
 	 * Constructor for the class. Initialzies
 	 * the newMessages Buffer object, toElevator ArrayList,
-	 * toFloor Buffer object, and the String messages.
+	 * and the toFloor Buffer object.
 	 */
 	public MessageQueue() {
-		this.newMessages = new ConcurrentLinkedDeque<Message>();
-		this.toElevator = new HashMap<Integer, ConcurrentLinkedDeque<Message>>();
-		this.toFloor = new ConcurrentLinkedDeque<Message>();
-		this.schedulerMessages = "";
-		this.floorMessages = "";
-		this.elevatorMessages = "";
-		this.elevatorInfos = new HashMap<>();
-	}
-	
-	/**
-	 * returns elevator info hashmap
-	 * @return
-	 */
-	public HashMap<Integer, ElevatorInfo> getElevatorInfos() {
-		return this.elevatorInfos;
-	}
-	
-	/**
-	 * updates info of given elevator
-	 * @param id -  elevator id
-	 * @param info - new info
-	 */
-	public void updateInfo(Integer id, ElevatorInfo info) {
-		this.elevatorInfos.put(id, info);
+		this.newMessages = new Buffer();
+		this.toElevator = new ArrayList<Buffer>();
+		this.toFloor = new Buffer();
 	}
 	
 	/**
 	 * Method to add a new Buffer object to the
 	 * toElevator ArrayList.
 	 */
-	public void addElevator(int id, ElevatorInfo info) {
-		this.updateInfo(id, info);
-		this.toElevator.put(id, new ConcurrentLinkedDeque<Message>());
+	public void addElevator() {
+		this.toElevator.add(new Buffer());
 	}
 	
 	/**
@@ -83,9 +44,8 @@ public class MessageQueue {
 	 * 
 	 * @param m the message to send to the buffer.
 	 */
-	public void send(Message m) {
-		//this.printMessage(m, "SEND");
-		newMessages.offer(m);
+	public void send(Message m) {		
+		newMessages.put(m);
 	}
 	
 	/**
@@ -95,8 +55,7 @@ public class MessageQueue {
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
 	public void replyToFloor(Message m) {
-		//this.printMessage(m, "SEND");
-		toFloor.offer(m);
+		toFloor.put(m);
 	}
 	
 	/**
@@ -106,8 +65,7 @@ public class MessageQueue {
 	 * @param id the elevator id
 	 */
 	public void replyToElevator(Message m, int id) {
-		printMessage(m, "SENT");
-		toElevator.get(id).offer(m);
+		toElevator.get(id).put(m);
 	}
 	
 	/**
@@ -115,11 +73,8 @@ public class MessageQueue {
 	 * @return The message in the floor queue
 	 */
 	public Message receiveFromFloor() {
-		Message m = toFloor.poll();
-		if (m == null) {
-			return new EmptyMessage();
-		}
-		return m;
+		
+		return toFloor.get();
 	}
 	
 	/**
@@ -127,11 +82,7 @@ public class MessageQueue {
 	 * @return The message in the elevator queue
 	 */
 	public Message receiveFromElevator(int id) {
-		Message m = toElevator.get(id).poll();
-		if (m == null) {
-			return new EmptyMessage();
-		}
-		return m;
+		return toElevator.get(id).get();
 	}
 	
 	
@@ -142,46 +93,7 @@ public class MessageQueue {
 	 * @return the latest message in the queue.
 	 */
 	public Message pop() {
-		Message m = newMessages.poll();
-		this.printMessage(m, "RECEIVED");
-
-		if (m == null) {
-			return new EmptyMessage();
-		}
-		return m;	
-	}
-	
-	/**
-	 * Method to display a received or sent message.
-	 * @param m message in reference
-	 * @param type receive or send type
-	 */
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			result += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
-			result += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			
-			if (Thread.currentThread().getName().contains("SCHEDULER")) {				
-				messageToPrint = this.schedulerMessages;
-			}
-			else if (Thread.currentThread().getName().contains("FLOOR")) {
-				messageToPrint = this.floorMessages;
-			}
-			else if (Thread.currentThread().getName().contains("ELEVATOR")) {
-				messageToPrint = this.elevatorMessages;
-			}
-			
-			System.out.println(messageToPrint + result);
-		}
+		return newMessages.get();
 	}
 	
 	/**

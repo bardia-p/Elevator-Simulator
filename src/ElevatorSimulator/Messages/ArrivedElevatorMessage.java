@@ -1,7 +1,5 @@
 package ElevatorSimulator.Messages;
 
-import java.util.Date;
-
 /**
  * A special type of message used to indicate the elevator has arrived.
  * 
@@ -9,7 +7,6 @@ import java.util.Date;
  * @author Kyra Lothrop
  *
  */
-@SuppressWarnings("serial")
 public class ArrivedElevatorMessage extends Message {
 	// The floor number the elevator arrived at.
 	private int floorNumber;
@@ -20,7 +17,7 @@ public class ArrivedElevatorMessage extends Message {
 	 * @param timestamp the message timestamp.
 	 * @param arrivedFloor the floor at which the elevator arrived at.
 	 */
-	public ArrivedElevatorMessage(Date timestamp, int arrivedFloor) {
+	public ArrivedElevatorMessage(String timestamp, int arrivedFloor) {
 		super(SenderType.ELEVATOR, timestamp, MessageType.ARRIVE);
 		this.floorNumber = arrivedFloor;
 	}
@@ -32,7 +29,7 @@ public class ArrivedElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return "At: " + floorNumber;
+		return super.getDescription() + "at: " + floorNumber;
 	}
 	/**
 	 * gets the arrived floor number
@@ -40,11 +37,6 @@ public class ArrivedElevatorMessage extends Message {
 	 */
 	public int getArrivedFloor() {
 		return floorNumber;
-	}
-	
-	@Override
-	public DirectionType getDirection() {
-		return null;
 	}
 
 }

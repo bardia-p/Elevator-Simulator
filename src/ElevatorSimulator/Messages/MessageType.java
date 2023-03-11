@@ -9,11 +9,5 @@ public enum MessageType {
 	REQUEST,
 	MOVING,
 	KILL,
-	DOORS_OPENED,
-	READY,
-	START,
-	GET_UPDATE,
-	ACKMessage,
-	UPDATE_ELEVATOR_INFO,
-	EMPTY
+	DOORS_OPENED
 }

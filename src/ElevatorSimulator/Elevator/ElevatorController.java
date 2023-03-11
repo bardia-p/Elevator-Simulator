@@ -1,27 +1,22 @@
 package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.KillMessage;
-import ElevatorSimulator.Messages.MessageType;
-import ElevatorSimulator.Messages.ReadyMessage;
-import ElevatorSimulator.Messages.StartMessage;
-import ElevatorSimulator.Messaging.ClientRPC;
-import ElevatorSimulator.Scheduler.Scheduler;
+import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
- * 
  * The Elevator controller class responsible for controlling the multiple elevators 
  * @author Andre Hazim, 
  * @author Bardia Parmoun
  */
-public class ElevatorController extends ClientRPC implements Runnable {
+public class ElevatorController implements Runnable {
 	
 	private ArrayList<Elevator> elevators;
 	private int numElevators;
 	private int numFloors;
+	private MessageQueue queue;
 	
 	/**
 	 * The constructor of the Elevator Controller 
@@ -30,10 +25,10 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 * @param numElevators The number of Elevators
 	 * @param numFloors The number of Floors 
 	 */
-	public ElevatorController(int numElevators, int numFloors) {
-		super(Scheduler.ELEVATOR_PORT);
+	public ElevatorController(MessageQueue queue, int numElevators, int numFloors) {
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
+		this.queue = queue;		
 		this.numFloors = numFloors;
 	}
 	
@@ -42,18 +37,48 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
-			Elevator elevator = new Elevator(i, this.numFloors);
-			sendRequest(new ReadyMessage(new Date(), MessageType.READY, 
-					new ElevatorInfo(elevator.getDirection(),elevator.getState() , elevator.getFloorNumber(), elevator.getID()
-							, elevator.getNumTrips())));
+			Elevator elevator = new Elevator(queue, i, this.numFloors);
 			elevators.add(elevator);
-		}
-		sendRequest(new StartMessage()); 
-		
-		for (int i = 0; i < numElevators; i++) {
-			Thread elevatorThread = new Thread(elevators.get(i), "ELEVATOR " + (i+1));
+			queue.addElevator();
+			Thread elevatorThread = new Thread(elevator, "ELEVATOR " + (i+1));
 			elevatorThread.start();
 		}
+	}
+	
+	/**
+	 * Checks to see if the elevator is in a valid state
+	 * 
+	 * @param elevator The elevator you want to check
+	 * 
+	 * @return Boolean true of false
+	 */
+	private boolean checkElevatorValid(Elevator elevator) {
+		
+		if (elevator.getState() == ElevatorState.POLL) {
+			return true;
+		}
+		
+		return false;
+		
+	}
+	
+	/**
+	 * Gets all the available elevators 
+	 * 
+	 * @param message A request elevator message 
+	 * 
+	 * @return A list of availble elevators 
+	 */
+	public ArrayList<Elevator> getAvailableElevators(RequestElevatorMessage message){
+		ArrayList<Elevator> availableElevators = new ArrayList<>();
+
+		for (Elevator e : elevators) {
+			if (checkElevatorValid(e)) {
+				availableElevators.add(e);
+			}
+			
+		}
+		return availableElevators;
 	}
 	
 	/**
@@ -63,7 +88,7 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public void kill(KillMessage message) {
 		for (int i =0; i < elevators.size(); i++) {
-			//queue.replyToElevator(message, i);
+			queue.replyToElevator(message, i);
 		}
 	}
 
@@ -73,10 +98,5 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public void run() {
 		initializeElevators();
-	}
-	
-	public static void main(String[] args) {
-		Thread elevatorControllerThread = new Thread(new ElevatorController(Simulator.NUM_ELEVATORS, Simulator.NUM_FLOORS), "ELEVATOR CONTROLLER");
-		elevatorControllerThread.start();
 	}
 }
