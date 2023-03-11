@@ -53,7 +53,7 @@ public class Message {
 	/**
 	 * Returns the type of the message.
 	 * 
-	 * @return MessageType
+	 * @return MessageType - type of message
 	 */
 	public MessageType getType() {
 		return type;
@@ -64,17 +64,16 @@ public class Message {
 	 * 
 	 * @return String - message description
 	 */
-//	public String getDescription() {
-//		return type.toString() + " " + timestamp + " " + sender + " ";
-//	}
-	
 	public String getDescription() {
 		 return "";
 	}
 	
+	/**
+	 * Returns the direction of the message.
+	 * 
+	 * @return DirectionType - direction
+	 */
 	public DirectionType getDirection() {
 		return null;
 	}
-	
-	
 }

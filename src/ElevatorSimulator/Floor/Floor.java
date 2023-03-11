@@ -16,6 +16,8 @@ import ElevatorSimulator.Messaging.MessageQueue;
 /**
  * @author Guy Morgenshtern
  * @author Sarah Chow
+ * @author Kyra Lothrop
+ * @author Bardia Parmoun
  *
  */
 public class Floor implements Runnable {
@@ -34,7 +36,6 @@ public class Floor implements Runnable {
 		
 	private boolean shouldRun;
 	
-	private boolean canKill;
 	private Timer timer;
 	private SimpleDateFormat dateFormat;
 	
@@ -54,7 +55,6 @@ public class Floor implements Runnable {
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
-		this.canKill = false;
 		this.filename = fileName;
 		this.timer = new Timer();
 		this.dropoffs = new HashSet<>();
@@ -71,7 +71,6 @@ public class Floor implements Runnable {
 	 */
 	private RequestElevatorMessage buildRequestFromCSV(String line) throws ParseException {
 		String[] entry = line.split(",");
-		
 		
 		int floor = Integer.parseInt(entry[1]);
 		int destination = Integer.parseInt(entry[3]);
@@ -122,11 +121,7 @@ public class Floor implements Runnable {
 	 */
 	private void requestElevator() {
 		
-		if (this.elevatorRequests.isEmpty()) {
-			return;
-		}
-		
-		if (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0) {
+		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0)) {
 			return;
 		}
 		
@@ -149,6 +144,7 @@ public class Floor implements Runnable {
 			
 			if (message.getType() == MessageType.DOORS_OPENED) {
 				DoorOpenedMessage openDoorMessage = (DoorOpenedMessage)message;
+				
 				if (openDoorMessage.getStopType() == StopType.DROPOFF) {
 					dropoffs.remove(openDoorMessage.getArrivedFloor());
 				}
@@ -156,8 +152,8 @@ public class Floor implements Runnable {
 		}
 		
 		return message;
-		
 	}
+	
 	/**
 	 * Updates the lights based on message type
 	 * @param message The message that came in
@@ -198,8 +194,7 @@ public class Floor implements Runnable {
 	private void printLightStatus() {
 		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n-------------------------------------------";
 		for(int i = 0; i<this.upLights.length;i++) {			
-			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] ? "on " : "off") + " | ";
-			floorLightsDisplay += "DOWN light: " + (this.downLights[i] ? "on " : "off") + " |";
+			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] ? "on " : "off") + " | DOWN light: " + (this.downLights[i] ? "on " : "off") + " |";
 		}
 		floorLightsDisplay += "\n-------------------------------------------\n";
 		System.out.println(floorLightsDisplay);
@@ -226,14 +221,9 @@ public class Floor implements Runnable {
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			requestElevator();
-			
 			requestUpdate();
 			
-			if (this.elevatorRequests.isEmpty()) {
-				this.canKill = true;
-			}
-			
-			if (dropoffs.isEmpty() && canKill) {
+			if (dropoffs.isEmpty() && this.elevatorRequests.isEmpty()) {
 				kill();
 			}
 			
@@ -245,9 +235,5 @@ public class Floor implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
 	}
-
-	
-
 }

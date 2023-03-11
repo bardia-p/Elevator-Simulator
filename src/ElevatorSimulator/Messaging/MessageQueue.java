@@ -7,9 +7,10 @@ import ElevatorSimulator.Messages.MessageType;
 
 /**
  * File representing the MessageQueue class.
+ * 
  * @author Bardia Parmoun
  * @author Andre Hazim
- *
+ * @author Sarah Chow
  */
 public class MessageQueue {
 	// All the new messages for the scheduler.
@@ -21,20 +22,24 @@ public class MessageQueue {
 	// All the messages sent to the floor.
 	private ConcurrentLinkedDeque<Message> toFloor;
 	
+	// String for scheduler messages.
+	
 	private String schedulerMessages;
+	// String for floor messages.
 	private String floorMessages;
+	
+	// String for elevator messages.
 	private String elevatorMessages;
 	
 	/**
 	 * Constructor for the class. Initialzies
 	 * the newMessages Buffer object, toElevator ArrayList,
-	 * and the toFloor Buffer object.
+	 * toFloor Buffer object, and the String messages.
 	 */
 	public MessageQueue() {
 		this.newMessages = new ConcurrentLinkedDeque<Message>();
 		this.toElevator = new ArrayList<ConcurrentLinkedDeque<Message>>();
 		this.toFloor = new ConcurrentLinkedDeque<Message>();
-		
 		this.schedulerMessages = "";
 		this.floorMessages = "";
 		this.elevatorMessages = "";
@@ -87,7 +92,6 @@ public class MessageQueue {
 	public Message receiveFromFloor() {
 		Message m = toFloor.poll();
 		this.printMessage(m, "RECEIVED");
-		
 		return m;
 	}
 	
@@ -98,7 +102,6 @@ public class MessageQueue {
 	public Message receiveFromElevator(int id) {
 		Message m = toElevator.get(id).poll();
 		this.printMessage(m, "RECEIVED");
-		
 		return m;
 	}
 	
@@ -112,25 +115,26 @@ public class MessageQueue {
 	public Message pop() {
 		Message m = newMessages.poll();
 		this.printMessage(m, "RECEIVED");
-		
 		return m;	
 	}
 	
-	
+	/**
+	 * Method to display a received or sent message.
+	 * @param m message in reference
+	 * @param type receive or send type
+	 */
 	private void printMessage(Message m, String type) {
 		
 		String result = "";
-		String addResult = "";
 		String messageToPrint = "";
 				
 		if (m != null) {
-			
 			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
 			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
 			result += new String(new char[52]).replace("\0", "-");
 			
-			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
-			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
+			result += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
+			result += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
 			
 			
 			if (Thread.currentThread().getName().contains("SCHEDULER")) {				
@@ -143,11 +147,9 @@ public class MessageQueue {
 				messageToPrint = this.elevatorMessages;
 			}
 			
-			System.out.println(messageToPrint + result + addResult);
+			System.out.println(messageToPrint + result);
 		}
-		
 	}
-	
 	
 	/**
 	 * Checks if the elevator has a request

@@ -31,7 +31,7 @@ public class ArrivedElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return "at: " + floorNumber;
+		return "At: " + floorNumber;
 	}
 	/**
 	 * gets the arrived floor number
