@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * The elevator - Receives and replies to messages.
@@ -15,11 +16,9 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Bardia Parmoun
  *
  */
-public class Elevator implements Runnable {
+public class Elevator extends ClientRPC implements Runnable {
 	// Elevator's current state
 	private ElevatorState state;
-	
-	private ElevatorController controller;
 	
 	// Check if the elevator is to continue running.
 	private boolean shouldRun;
@@ -52,7 +51,8 @@ public class Elevator implements Runnable {
 	 * 
 	 * @param queue, the message queue.
 	 */
-	public Elevator(ElevatorController controller, int id, int numFloors) {
+	public Elevator(int id, int numFloors) {
+		super(Scheduler.ELEVATOR_PORT);
 		this.shouldRun = true;
 		this.state = ElevatorState.POLL;
 		this.floor = 1; // not sure if we should pass in start position
@@ -64,10 +64,7 @@ public class Elevator implements Runnable {
 		this.floorLights = new boolean[numFloors];
 		
 		this.stopType = null;
-		this.canKill = false;
-		
-		this.controller = controller;
-		
+		this.canKill = false;		
 		//changeState(ElevatorState.POLL);
 	}
 
@@ -77,8 +74,11 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
-		Message update = controller.getElevatorUpdate(elevatorNumber);
-		if (update == null && trips.size() == 0 && canKill) {
+		Message update = getElevatorUpdate(elevatorNumber);
+		if (update == null) {
+			return null;
+		}
+		if (update.getType() == MessageType.EMPTY && trips.size() == 0 && canKill) {
 			kill();
 		}
 		return update;
@@ -128,7 +128,7 @@ public class Elevator implements Runnable {
 		// cannot fulfill requests in the direction, toggle directions.
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 		
-		controller.sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
+		sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
 	}
 
 	private boolean hasDropoffInDirection() {
@@ -235,7 +235,7 @@ public class Elevator implements Runnable {
 	 */
 	private void arrived() {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
-		controller.sendRequest(reply);
+		sendRequest(reply);
 		
 		boolean isPickUp = false;
 		boolean isDropoff = false;
@@ -271,7 +271,7 @@ public class Elevator implements Runnable {
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
-			controller.sendRequest(doorOpen);
+			sendRequest(doorOpen);
 		} else {
 			changeState(ElevatorState.POLL);
 		}
@@ -392,7 +392,7 @@ public class Elevator implements Runnable {
 	private void changeState(ElevatorState newState) {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		state = newState;
-		controller.sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
+		sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
 	}
 	
 	private void printMessage(Message m, String type) {

@@ -45,7 +45,7 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
-			Elevator elevator = new Elevator(this, i, this.numFloors);
+			Elevator elevator = new Elevator(i, this.numFloors);
 			sendRequest(new ReadyMessage(new Date(), MessageType.READY, 
 					new ElevatorInfo(elevator.getDirection(),elevator.getState() , elevator.getFloorNumber(), elevator.getID()
 							, elevator.getNumTrips())));

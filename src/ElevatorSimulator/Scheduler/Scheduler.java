@@ -180,6 +180,10 @@ public class Scheduler implements Runnable {
 	 */
 	private void kill(KillMessage message) {
 		this.shouldRun = false;
+		
+		for (ElevatorInfo info: elevatorInfos.values()) {
+			queue.replyToElevator(message, info.getElevatorId());
+		}
 	}
 	
 	public void updateInfo(int elevatorId, ElevatorInfo info) {
