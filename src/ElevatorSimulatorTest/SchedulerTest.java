@@ -2,11 +2,14 @@ package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Date;
+
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Elevator.ElevatorInfo;
+import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
-import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -20,22 +23,11 @@ import ElevatorSimulator.Scheduler.Scheduler;
 public class SchedulerTest {
 	
 	private Scheduler scheduler;
+		
+	private RequestElevatorMessage message1;
+	private RequestElevatorMessage message2;
+	private RequestElevatorMessage message3;
 	
-	private MockElevatorController mockEC;
-	
-	private MessageQueue queue;
-	
-	RequestElevatorMessage message;
-	
-	/**
-	 * Initializes new queue and message before each test.
-	 */
-	@BeforeEach
-	void init() {
-		queue = new MessageQueue();
-		message = new RequestElevatorMessage("timestamp", 4, DirectionType.DOWN, 1);
-
-	}
 	
 	/**
 	 * Test to check the behaviour of the system when there is at least
@@ -46,28 +38,31 @@ public class SchedulerTest {
 	void testAvailElevator() {
 		System.out.println("\n----------testAvailElevator----------\n");
 
-		mockEC = new MockElevatorController(queue, 1);
-		scheduler = new Scheduler(queue, mockEC);
-						
-		queue.send(message);	
+		message1 = new RequestElevatorMessage(new Date(1000), 4, DirectionType.DOWN, 1);
+		message2 = new RequestElevatorMessage(new Date(1000), 2, DirectionType.UP, 5);
+		message3 = new RequestElevatorMessage(new Date(1000), 3, DirectionType.DOWN, 1);
 		
-		assertEquals(0, scheduler.getClosestElevator(message));
-	}
-	
-	/**
-	 * Test to check the behaviour of the system when there is are no
-	 * available elevators in the ArrayList. Should return -1.
-	 */
-	@Test
-	void testZeroElevator() {
-		System.out.println("\n----------testZeroElevator----------\n");
+		ElevatorInfo e1 = new ElevatorInfo(DirectionType.UP, ElevatorState.POLL, 1, 0, 0);
+		ElevatorInfo e2 = new ElevatorInfo(DirectionType.UP, ElevatorState.POLL, 1, 1, 0);
+		
+		scheduler = new Scheduler();
 
-		mockEC = new MockElevatorController(queue, 0);
-		scheduler = new Scheduler(queue, mockEC);
-						
-		queue.send(message);	
+		scheduler.addToQueue(e1);
+		scheduler.addToQueue(e2);
 		
-		assertEquals(-1, scheduler.getClosestElevator(message));
+		int id1 = scheduler.getClosestElevator(message1);
+		assertEquals(0, id1); // Elevator 0 service
+		e1.setState(ElevatorState.MOVING);
+		
+		int id2 = scheduler.getClosestElevator(message2);
+		assertEquals(1, id2); // Elevator 1 service
+		e2.setState(ElevatorState.MOVING);
+		
+		e1.setState(ElevatorState.POLL);
+		int id3 = scheduler.getClosestElevator(message3);
+		
+		assertEquals(0, id3); // Elevator 0 service
+		
 	}
 
 }

@@ -34,6 +34,9 @@ public class ElevatorInfo implements Serializable{
 	public int getNumRequest() {
 		return numRequest;
 	} 
+	public void setState(ElevatorState state) {
+		this.state = state;
+	}
 	
 
 }

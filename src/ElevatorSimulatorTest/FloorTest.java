@@ -2,6 +2,10 @@ package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +16,7 @@ import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Messaging.ServerRPC;
 
 /**
  * The unit tests for the floor subsystem.
@@ -21,10 +26,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Bardia Parmoun
  *
  */
-public class FloorTest {
-	
-	MessageQueue queue;
-	
+public class FloorTest{	
 	public static int NUM_FLOORS = 4;
 	
 	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
@@ -32,6 +34,8 @@ public class FloorTest {
 	private boolean shouldRun;
 	
 	private int DESTINATION_FLOOR = 4;
+	private ArrayList<DoorOpenedMessage> messages;
+
 	
 	/**
 	 * Creating a new instance of the queue and shouldRun 
@@ -39,8 +43,21 @@ public class FloorTest {
 	 */
 	@BeforeEach
 	void init() {
-		queue = new MessageQueue();
 		shouldRun = true;
+		
+		DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(1000), DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP);
+		DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(1100), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP);
+
+		messages = new ArrayList<>();	
+		messages.add(pickupMessage);
+		messages.add(dropoffMessage);
+	}
+	
+
+	public Message getFloorUpdate() {
+		DoorOpenedMessage temp = messages.get(0);
+		messages.remove(0);
+		return temp;
 	}
 	
 	/**
@@ -50,36 +67,38 @@ public class FloorTest {
 	 * to terminate thread.
 	 */
 	@Test
-	void testOneFloorRequest() {
+	void testOneFloorRequest() throws Exception{
 		
 		System.out.println("\n----------testOneFloorRequest----------\n");
 
+		Floor floor = new Floor(FILEPATH, NUM_FLOORS);
 		
-		Floor floor = new Floor(queue, FILEPATH, NUM_FLOORS);
+		assertNotNull(floor);
+				
+		int count = 0;
 		
-		assertTrue(floor.getCanSendRequest());
-
-		Thread floorThread = new Thread(floor, "FLOOR");
-		
-		floorThread.start();		
-		
+		Date d1 = new Date();
+		Date d2 = new Date();
 			
 		while(this.shouldRun) {
-			Message newMessage = queue.pop();
 			
-			if (newMessage.getType() == MessageType.REQUEST) {
-				DoorOpenedMessage pickupMessage = new DoorOpenedMessage("timestamp", DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP);
-				
-				queue.replyToFloor(pickupMessage);
-				
-				assertFalse(floor.getCanSendRequest());
+			if (count == 0) {
+				Message newMessage = this.getFloorUpdate();
 
-				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage("timestamp", DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP);
-
-				queue.replyToFloor(dropoffMessage);
-			} else if (newMessage.getType() == MessageType.KILL) {
-				shouldRun = false;
+				d1 = newMessage.getTimestamp();
 			}
+			else if (count == 1) {
+				Message newMessage = this.getFloorUpdate();
+
+				d2 = newMessage.getTimestamp();
+			}
+			else {
+				this.shouldRun = false;
+			}
+			
+			count++;
 		}
+		
+		assertEquals(d2.getTime() - d1.getTime(), 100); 
 	}
 }

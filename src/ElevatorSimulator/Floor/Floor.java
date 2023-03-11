@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.HashSet;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -25,21 +24,17 @@ import ElevatorSimulator.Scheduler.Scheduler;
 public class Floor extends ClientRPC implements Runnable {
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
-	
-	
-	private HashSet<Integer> dropoffs;
-	
+		
 	private boolean[] upLights; 
 	
 	private boolean[] downLights; 
 		
 	private boolean shouldRun;
-	
-	private boolean canKill;
-	
+		
 	private boolean canStart;
 
 	private Timer timer;
+	
 	private SimpleDateFormat dateFormat;
 	
 	private String filename;
@@ -54,16 +49,13 @@ public class Floor extends ClientRPC implements Runnable {
 	public Floor(String fileName,int numFloors) throws ParseException{
 		super(Scheduler.FLOOR_PORT);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-		elevatorRequests = new ArrayDeque<Message>();
+		this.elevatorRequests = new ArrayDeque<Message>();
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
 		this.shouldRun = true;
 		this.canStart = false;
-		this.canKill = false;
 		this.filename = fileName;
-		this.timer = new Timer();
-		this.dropoffs = new HashSet<>();
-		
+		this.timer = new Timer();		
 	}
 	
 	/**
@@ -124,7 +116,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
-		
 		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0)) {
 			return;
 		}
@@ -140,7 +131,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @return the updated message.
 	 */
 	private Message requestUpdate() {
-	
 		Message message = getFloorUpdate();
 		
 		if (message != null) {
@@ -150,10 +140,9 @@ public class Floor extends ClientRPC implements Runnable {
 			printMessage(message, "RECEIVED");
 
 			if (message.getType() == MessageType.DOORS_OPENED) {
-
 				updateLights(message); // turns light off
- 
-			}else if (message.getType() == MessageType.START) {
+			}
+			else if (message.getType() == MessageType.START) {
 				canStart = true;
 			}
 		}
@@ -181,7 +170,8 @@ public class Floor extends ClientRPC implements Runnable {
 				this.downLights[floorNum-1] = false;
 			}
 			
-		} else {
+		} 
+		else {
 			RequestElevatorMessage request = (RequestElevatorMessage) message;
 			floorNum = request.getFloor();
 			direction = request.getDirection();			
@@ -224,7 +214,6 @@ public class Floor extends ClientRPC implements Runnable {
 				requestElevator();
 			}
 			
-			
 			requestUpdate();
 			
 			if (canStart) {
@@ -236,15 +225,6 @@ public class Floor extends ClientRPC implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-	
-	public static void main(String[] args) {
-		try {
-			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS));
-			floorThread.start();
-		} catch (ParseException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -267,4 +247,14 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 		
 	}
+	
+	public static void main(String[] args) {
+		try {
+			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS));
+			floorThread.start();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }
