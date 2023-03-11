@@ -1,5 +1,6 @@
 package ElevatorSimulator.Messages;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -9,7 +10,9 @@ import java.util.Date;
  * @author Bardia Parmoun
  *
  */
-public class Message {
+@SuppressWarnings("serial")
+public class Message implements Serializable {
+
 	// The sender of the message.
 	private SenderType sender;
 	

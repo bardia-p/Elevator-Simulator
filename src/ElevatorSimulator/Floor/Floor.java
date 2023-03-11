@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
@@ -18,10 +19,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Sarah Chow
  *
  */
-public class Floor implements Runnable {
-	// The message queue.
-	private MessageQueue queue;
-	
+public class Floor extends ClientRPC implements Runnable {
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
 	
@@ -48,8 +46,8 @@ public class Floor implements Runnable {
 	 * @throws ParseException 
 	 */
 	public Floor(MessageQueue queue, String fileName,int numFloors) throws ParseException{
+		super(23);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-		this.queue = queue;
 		elevatorRequests = new ArrayDeque<Message>();
 		this.upLights = new boolean[numFloors];
 		this.downLights = new boolean[numFloors];
@@ -132,7 +130,8 @@ public class Floor implements Runnable {
 		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
-		queue.send(request);	
+		sendRequest(request);
+		
 	}
 	
 	/**
@@ -142,7 +141,7 @@ public class Floor implements Runnable {
 	 */
 	private Message requestUpdate() {
 	
-		Message message = queue.receiveFromFloor();
+		Message message = getFloorUpdate();
 		
 		if (message != null) {
 			updateLights(message); // turns light off
@@ -210,7 +209,7 @@ public class Floor implements Runnable {
 	 */
 	private void kill() {
 		this.shouldRun = false;
-		queue.send(new KillMessage(SenderType.FLOOR, timer.getTime(), "No more floor requests remaining"));	
+		sendRequest(new KillMessage(SenderType.FLOOR, timer.getTime(), "No more floor requests remaining"));	
 	}
 	
 	/**

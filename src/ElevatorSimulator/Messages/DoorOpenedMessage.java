@@ -2,6 +2,7 @@ package ElevatorSimulator.Messages;
 
 import java.util.Date;
 
+@SuppressWarnings("serial")
 public class DoorOpenedMessage extends Message{
 	private StopType type;
 	

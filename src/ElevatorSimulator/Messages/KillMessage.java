@@ -9,6 +9,7 @@ import java.util.Date;
  * @author Kyra Lothrop
  *
  */
+@SuppressWarnings("serial")
 public class KillMessage extends Message{
 	// The reason for killing the system.
 	private String reason;

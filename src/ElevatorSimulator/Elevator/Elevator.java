@@ -3,6 +3,7 @@ package ElevatorSimulator.Elevator;
 import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
@@ -14,10 +15,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
  * @author Bardia Parmoun
  *
  */
-public class Elevator implements Runnable {
-	// The message queue.
-	private MessageQueue queue;
-
+public class Elevator extends ClientRPC implements Runnable {
 	// Elevator's current state
 	private ElevatorState state;
 	
@@ -53,7 +51,7 @@ public class Elevator implements Runnable {
 	 * @param queue, the message queue.
 	 */
 	public Elevator(MessageQueue queue, int id, int numFloors) {
-		this.queue = queue;
+		super(69);
 		this.shouldRun = true;
 		this.state = null;
 		this.floor = 1; // not sure if we should pass in start position
@@ -76,12 +74,11 @@ public class Elevator implements Runnable {
 	 * @return the update received from the scheduler.
 	 */
 	private Message requestUpdate() {
+		Message update = getElevatorUpdate(elevatorNumber);
 		if (trips.size() == 0 && canKill) {
 			kill();
-		} else if (trips.size() != 0 && !queue.elevatorHasRequest(elevatorNumber)) {
-			return null;
 		}
-		return queue.receiveFromElevator(elevatorNumber);
+		return update;
 	}
 
 	/**
@@ -233,7 +230,7 @@ public class Elevator implements Runnable {
 	 */
 	private void arrived() {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
-		queue.send(reply);
+		sendRequest(reply);
 		
 		boolean isPickUp = false;
 		boolean isDropoff = false;
@@ -269,7 +266,7 @@ public class Elevator implements Runnable {
 			changeState(ElevatorState.OPEN);
 
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
-			queue.send(doorOpen);
+			sendRequest(doorOpen);
 		} else {
 			changeState(ElevatorState.POLL);
 		}
@@ -300,7 +297,6 @@ public class Elevator implements Runnable {
 			changeState(ElevatorState.CLOSE);
 			
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -309,7 +305,7 @@ public class Elevator implements Runnable {
 	 * close state behaviour - add doors closing delay of X seconds
 	 * close -> poll
 	 */
-	private void close() {
+	private void closeDoors() {
 		printFloorLightStatus();
 		
 		try {
@@ -353,7 +349,7 @@ public class Elevator implements Runnable {
 				boarding();
 			
 			} else if (state.equals(ElevatorState.CLOSE)) {
-				close();
+				closeDoors();
 			
 			} else {
 				polling();
@@ -393,5 +389,3 @@ public class Elevator implements Runnable {
 
 	}
 }
-
-//TODO - decide what to do with time stamps. Do we need currentRequest? 
