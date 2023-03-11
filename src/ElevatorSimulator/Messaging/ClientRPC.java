@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
@@ -70,9 +71,6 @@ public class ClientRPC {
 			System.exit(1);
 		}
 
-		//System.out.println("Sending packet:");
-		
-		//logger.displayPacket(sendPacket);
 
 		// Send the datagram packet to the host via the send/receive socket.
 		try {
@@ -82,8 +80,6 @@ public class ClientRPC {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
-		//System.out.println("Packet sent.\n");
 
 		// Construct a DatagramPacket for receiving packets up to 100 bytes.
 		byte data[] = new byte[100000];
@@ -98,11 +94,6 @@ public class ClientRPC {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
-		//System.out.println("Received Packet.\n");
-
-		// Process the received datagram packet.
-		//logger.displayPacket(receivePacket);
 		
 		return receivePacket.getData();
 	}
@@ -123,7 +114,6 @@ public class ClientRPC {
 	}
 	
 	public void sendRequest(Message m) {
-		printMessage(m, "SEND");
 		sendAndReceive(Serializer.serializeMessage(m));
 	}
 	
@@ -133,24 +123,5 @@ public class ClientRPC {
 	public void close() {
 		sendReceiveSocket.close();
 	}
-	
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String addResult = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			addResult += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
-			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			System.out.println(messageToPrint + result + addResult);
-		}
-		
-	}
+
 }

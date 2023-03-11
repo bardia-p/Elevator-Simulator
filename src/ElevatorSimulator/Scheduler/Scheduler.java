@@ -3,6 +3,7 @@ package ElevatorSimulator.Scheduler;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
@@ -169,6 +170,7 @@ public class Scheduler implements Runnable {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
 				if (currentRequest != null && currentRequest.getType() != MessageType.EMPTY) {
+					Logger.printMessage(currentRequest, "RECEIVED");
 					changeState(SchedulerState.PROCESSING);
 				}
 			} else {

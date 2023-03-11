@@ -3,6 +3,7 @@ package ElevatorSimulator.Messaging;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Messages.EmptyMessage;
 import ElevatorSimulator.Messages.Message;
@@ -84,7 +85,6 @@ public class MessageQueue {
 	 * @param m the message to send to the buffer.
 	 */
 	public void send(Message m) {
-		//this.printMessage(m, "SEND");
 		newMessages.offer(m);
 	}
 	
@@ -95,8 +95,8 @@ public class MessageQueue {
 	 * @param receiver the subsystem in charge of receiving the message.
 	 */
 	public void replyToFloor(Message m) {
-		//this.printMessage(m, "SEND");
 		toFloor.offer(m);
+		Logger.printMessage(m, "SENT");
 	}
 	
 	/**
@@ -106,8 +106,8 @@ public class MessageQueue {
 	 * @param id the elevator id
 	 */
 	public void replyToElevator(Message m, int id) {
-		printMessage(m, "SENT");
 		toElevator.get(id).offer(m);
+		Logger.printMessage(m, "SENT");
 	}
 	
 	/**
@@ -143,45 +143,12 @@ public class MessageQueue {
 	 */
 	public Message pop() {
 		Message m = newMessages.poll();
-		this.printMessage(m, "RECEIVED");
+
 
 		if (m == null) {
 			return new EmptyMessage();
 		}
 		return m;	
-	}
-	
-	/**
-	 * Method to display a received or sent message.
-	 * @param m message in reference
-	 * @param type receive or send type
-	 */
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			result += String.format("\n| %-15s | %-10s | ", (m.getType() == MessageType.KILL ? "KILL" : m.getDescription()), m.getDirection());
-			result += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			
-			if (Thread.currentThread().getName().contains("SCHEDULER")) {				
-				messageToPrint = this.schedulerMessages;
-			}
-			else if (Thread.currentThread().getName().contains("FLOOR")) {
-				messageToPrint = this.floorMessages;
-			}
-			else if (Thread.currentThread().getName().contains("ELEVATOR")) {
-				messageToPrint = this.elevatorMessages;
-			}
-			
-			System.out.println(messageToPrint + result);
-		}
 	}
 	
 	/**

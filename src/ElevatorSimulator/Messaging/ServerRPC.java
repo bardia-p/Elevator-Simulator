@@ -10,6 +10,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.HashMap;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
@@ -110,7 +111,6 @@ public class ServerRPC implements Runnable {
 		} else if (receiveMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage message = (UpdateElevatorInfoMessage) receiveMessage;
 			queue.updateInfo(message.getInfo().getElevatorId(), message.getInfo());
-			System.out.println("GOT UPDATE FROM ELEVATOR " + message.getInfo().getElevatorId());
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.START) {
 			queue.replyToFloor(receiveMessage);

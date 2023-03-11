@@ -2,6 +2,7 @@ package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
@@ -212,6 +213,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	private void arrived() {
 		Message reply = new ArrivedElevatorMessage(currentRequest.getTimestamp(), this.floor);
 		sendRequest(reply);
+		Logger.printMessage(reply, "SENT");
 		
 		boolean isPickUp = false;
 		boolean isDropoff = false;
@@ -249,6 +251,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp || isDropoff) {			
 			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction);
 			sendRequest(doorOpen);
+			Logger.printMessage(doorOpen, "SENT");
 			updateDirection();
 			changeState(ElevatorState.OPEN);
 		} else {
@@ -308,7 +311,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	private void polling() {
 		Message incoming = requestUpdate();
 		if (incoming != null && incoming.getType() != MessageType.EMPTY) {
-			printMessage(incoming, "RECEIVED");
+			Logger.printMessage(incoming, "RECEIVED");
 			currentRequest = incoming;
 			processMessage(incoming);
 		} else if (trips.size() != 0) {
@@ -373,26 +376,6 @@ public class Elevator extends ClientRPC implements Runnable {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		state = newState;
 		sendRequest(new UpdateElevatorInfoMessage(new ElevatorInfo(direction,state , floor, elevatorNumber, trips.size())));
-	}
-	
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String addResult = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			addResult += String.format("\n| %-15s | %-10s | ",m.getDescription(), m.getDirection());
-			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			System.out.println(messageToPrint + result + addResult);
-		}
-		
 	}
 	
 }

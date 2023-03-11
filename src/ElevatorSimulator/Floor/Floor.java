@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Date;
 import java.util.Scanner;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;
 import ElevatorSimulator.Messages.*;
@@ -131,7 +132,8 @@ public class Floor extends ClientRPC implements Runnable {
 		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
-		sendRequest(request);		
+		sendRequest(request);
+		Logger.printMessage(request, "SENT");
 	}
 	
 	/**
@@ -147,11 +149,11 @@ public class Floor extends ClientRPC implements Runnable {
 			if (message.getType() == MessageType.EMPTY) {
 				return null;
 			}
-			printMessage(message, "RECEIVED");
-
+			
+			Logger.printMessage(message, "RECEIVED");
 			if (message.getType() == MessageType.DOORS_OPENED) {
-
 				updateLights(message); // turns light off
+				
  
 			}else if (message.getType() == MessageType.START) {
 				canStart = true;
@@ -241,30 +243,11 @@ public class Floor extends ClientRPC implements Runnable {
 	
 	public static void main(String[] args) {
 		try {
-			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS));
+			
+			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
 			floorThread.start();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private void printMessage(Message m, String type) {
-		
-		String result = "";
-		String addResult = "";
-		String messageToPrint = "";
-				
-		if (m != null) {
-			
-			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
-			result += new String(new char[52]).replace("\0", "-");
-			
-			addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), m.getDirection());
-			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
-			
-			System.out.println(messageToPrint + result + addResult);
-		}
-		
 	}
 }
