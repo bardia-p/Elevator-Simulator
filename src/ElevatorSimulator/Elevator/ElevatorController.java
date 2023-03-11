@@ -53,13 +53,10 @@ public class ElevatorController implements Runnable {
 	 * @return Boolean true of false
 	 */
 	private boolean checkElevatorValid(Elevator elevator) {
-		
 		if (elevator.getState() == ElevatorState.POLL) {
 			return true;
 		}
-		
 		return false;
-		
 	}
 	
 	/**
@@ -76,7 +73,6 @@ public class ElevatorController implements Runnable {
 			if (checkElevatorValid(e)) {
 				availableElevators.add(e);
 			}
-			
 		}
 		return availableElevators;
 	}
