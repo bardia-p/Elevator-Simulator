@@ -11,26 +11,13 @@ import java.util.Date;
  */
 @SuppressWarnings("serial")
 public class KillMessage extends Message{
-	// The reason for killing the system.
-	private String reason;
-	
 	/**
 	 * The constructor for the kill message.
 	 * 
 	 * @param sender the sender of the message.
 	 * @param reason the reason for killing the system.
 	 */
-	public KillMessage(SenderType sender, Date timestamp, String reason) {
+	public KillMessage(SenderType sender, Date timestamp) {
 		super(sender,timestamp, MessageType.KILL);
-		this.reason = reason;
-	}
-	
-	/**
-	 * Returns the message description.
-	 * 
-	 * @return String - description
-	 */
-	public String getDescription() {
-		return super.getDescription() + "\n" + reason;
 	}
 }

@@ -8,17 +8,20 @@ public class DoorOpenedMessage extends Message{
 	
 	private int arrivedFloor;
 	private DirectionType direction;
+	private int numPassengers;
+	
 	/**
 	 * The constructor 
 	 * @param timestamp The timestamp
 	 * @param arrivedFloor the floor it arrived at
 	 * @param type the type of message
 	 */
-	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction){
+	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction, int numPassengers){
 		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;
 		this.direction = direction;
+		this.numPassengers = numPassengers;
 		
 	}
 	/**
@@ -38,6 +41,10 @@ public class DoorOpenedMessage extends Message{
 		return arrivedFloor;
 	}
 	
+	public int getNumPassengers(){
+		return numPassengers;
+	}
+	
 	/**
 	 * Gets the direction of the elevator 
 	 * 
@@ -47,6 +54,8 @@ public class DoorOpenedMessage extends Message{
 	public DirectionType getDirection() {
 		return direction;
 	}
+	
+	
 	/**
      * @Override
      */
