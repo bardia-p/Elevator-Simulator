@@ -68,7 +68,10 @@ public class Scheduler implements Runnable {
 		ArrayList<ElevatorInfo> availableElevators = new ArrayList<>();
 
 		for (ElevatorInfo e : queue.getElevatorInfos().values()) {
+						
 			if (e.getState() == ElevatorState.POLL) {
+				
+				//System.out.println(e.getElevatorId());
 				availableElevators.add(e);
 			}
 			
@@ -194,6 +197,10 @@ public class Scheduler implements Runnable {
 		state = newState;
 	}
 	
+
+	public void addToQueue(ElevatorInfo e) {
+		this.queue.addElevator(e.getElevatorId(), e);
+
 	/**
 	 * Stops the scheduler thread from running.
 	 */
@@ -203,6 +210,7 @@ public class Scheduler implements Runnable {
 		for (ElevatorInfo info: queue.getElevatorInfos().values()) {
 			queue.replyToElevator(message, info.getElevatorId());
 		}
+
 	}
 	
 	public static void main(String[] args) {
