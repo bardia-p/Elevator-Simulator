@@ -30,8 +30,7 @@ public class ElevatorTest {
 	private ArrayList<Message> messages;
 	
 	/**
-	 * Creating a new instance of the MessageQueue
-	 * before each test.
+	 * Creating the messages and adding them to an arraylist.
 	 */
 	@BeforeEach
 	void init() {
@@ -47,6 +46,10 @@ public class ElevatorTest {
 		messages.add(messageD);
 	}
 	
+	/**
+	 * Method to get the latest message.
+	 * @return message in the ArrayList, Message
+	 */
 	public Message getElevatorUpdate() {
 		Message temp = messages.get(0);
 		messages.remove(0);
@@ -54,11 +57,10 @@ public class ElevatorTest {
 	}
 
 	/**
-	 * The unit test depicts the receiving of a message from the
-	 * scheduler to the elevator to move from floor 4 to 1.
+	 * The unit test depicts the receiving of a message to the 
+	 * elevator to move from floor 1 to 4.
 	 * Confirms the expected environments of each 
-	 * state (DOORS_OPENED, PICKUP, ARRIVE). Sends kill message
-	 * at the end to terminate thread.
+	 * state (DOORS_OPENED, PICKUP, ARRIVE). 
 	 * @throws InterruptedException 
 	 */
 	@Test
@@ -104,8 +106,6 @@ public class ElevatorTest {
 				// Check passive floors
 				assertEquals(expectedFloor, ((ArrivedElevatorMessage)newMessage).getArrivedFloor());
 			}
-			
-		}
-				
+		}		
 	}
 }
