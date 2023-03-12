@@ -5,8 +5,19 @@ import ElevatorSimulator.Messages.DoorOpenedMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 
+/**
+ * The logger class in charge of printing the messages.
+ * 
+ * @author Guy Morgenshtern
+ *
+ */
 public class Logger {
-	
+	/**
+	 * Print the message contents.
+	 * 
+	 * @param m, the message to print.
+	 * @param type, the type status to print.
+	 */
 	public static void printMessage(Message m, String type) {
 		String result = "";
 		String addResult = "";

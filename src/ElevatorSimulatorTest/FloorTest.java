@@ -34,7 +34,7 @@ public class FloorTest{
 
 	
 	/**
-	 * Creating a new instance of the queue and shouldRun 
+	 * Creating the messages and adding to ArrayList
 	 * before each test.
 	 */
 	@BeforeEach
@@ -50,6 +50,10 @@ public class FloorTest{
 	}
 	
 
+	/**
+	 * Method to retrieve the latest message in the arraylist.
+	 * @return latest message, Message
+	 */
 	public Message getFloorUpdate() {
 		DoorOpenedMessage temp = messages.get(0);
 		messages.remove(0);
@@ -57,10 +61,9 @@ public class FloorTest{
 	}
 	
 	/**
-	 * The unit test depicts the sending of a message from the
-	 * floor to the scheduler and back from the scheduler to floor
-	 * as a confirmation message. Sends kill message at the end 
-	 * to terminate thread.
+	 * The unit test depicts the receiving of a message to the
+	 * floor. Confirms the time delay between the two messages
+	 * are as expected.
 	 */
 	@Test
 	void testOneFloorRequest() throws Exception{

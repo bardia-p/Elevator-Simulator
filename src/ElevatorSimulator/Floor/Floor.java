@@ -17,6 +17,8 @@ import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
+ * The class in charge of the floor subsystem.
+ * 
  * @author Guy Morgenshtern
  * @author Sarah Chow
  * @author Kyra Lothrop
@@ -27,22 +29,31 @@ public class Floor extends ClientRPC implements Runnable {
 	// Used for keeping track of all the pressed buttons.
 	private ArrayDeque<Message> elevatorRequests;
   
+	// Used for keeping track of all the dropoff locations for the floor.
 	private ArrayList<Integer> dropoffs;
   
+	/**
+	 * Floor lights.
+	 */
 	private boolean[] upLights; 
-	
 	private boolean[] downLights; 
-		
+	
+	// The flag used to check if the floor subsystem should keep running.
 	private boolean shouldRun;
 		
+	// Checks to see if the floor subsystem can start sending requests.
 	private boolean canStart;
 
+	// The timer used for sending the requests.
 	private Timer timer;
 	
+	// The date format used for parsing the messages.
 	private SimpleDateFormat dateFormat;
 	
+	// The filename used for reading the requests.
 	private String filename;
 	
+	// Checks to see if the floor subsystem can die.
 	private boolean canKill;
 		
 	/**
@@ -265,6 +276,10 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 	}
 	
+	/**
+	 * The starting point for the floor subsystem.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		try {
 			

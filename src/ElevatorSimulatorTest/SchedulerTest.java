@@ -12,8 +12,7 @@ import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
- * The unit tests for the scheduler subsystem using the
- * Mock ElevatorController class.
+ * The unit tests for the scheduler subsystem.
  * 
  * @author Sarah Chow
  * @author Kyra Lothrop
@@ -29,9 +28,8 @@ public class SchedulerTest {
 	
 	
 	/**
-	 * Test to check the behaviour of the system when there is at least
-	 * one available elevator in the ArrayList. Should return the ID of
-	 * the available elevator.
+	 * Test to check the behaviour of the system when there are two elevators
+	 * and confirms the servicing of each request per elevator is as expected.
 	 */
 	@Test
 	void testAvailElevator() {

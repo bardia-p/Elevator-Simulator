@@ -19,13 +19,13 @@ public class MessageQueue {
 	// All the new messages for the scheduler.
 	private ConcurrentLinkedDeque<Message> newMessages;
 	
-	// All the messages sent to the elevator.
+	// All the messages sent to the elevators.
 	private HashMap<Integer, ConcurrentLinkedDeque<Message>> toElevator;
 
 	// All the messages sent to the floor.
 	private ConcurrentLinkedDeque<Message> toFloor;
 	
-	//elevator info hashmap
+	// Keeps track of all the elevator statuses.
 	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
 	
 	/**
@@ -41,7 +41,8 @@ public class MessageQueue {
 	}
 	
 	/**
-	 * returns elevator info hashmap
+	 * Returns the elevator statuses.
+	 * 
 	 * @return
 	 */
 	public HashMap<Integer, ElevatorInfo> getElevatorInfos() {
@@ -49,7 +50,8 @@ public class MessageQueue {
 	}
 	
 	/**
-	 * updates info of given elevator
+	 * Updates info of given elevator
+	 * 
 	 * @param id -  elevator id
 	 * @param info - new info
 	 */

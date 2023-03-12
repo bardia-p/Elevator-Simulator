@@ -12,7 +12,6 @@ import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
- * 
  * The Elevator controller class responsible for controlling the multiple
  * elevators
  * 
@@ -20,9 +19,13 @@ import ElevatorSimulator.Scheduler.Scheduler;
  * @author Bardia Parmoun
  */
 public class ElevatorController extends ClientRPC implements Runnable {
-
+	// Keeps track of all the elevators.
 	private ArrayList<Elevator> elevators;
+	
+	// Keeps track of the number of elevators.
 	private int numElevators;
+	
+	// Keeps track of the number of floors.
 	private int numFloors;
 
 	/**
@@ -73,6 +76,10 @@ public class ElevatorController extends ClientRPC implements Runnable {
 		initializeElevators();
 	}
 
+	/**
+	 * The main program for the elevator controller.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Thread elevatorControllerThread = new Thread(
 				new ElevatorController(Simulator.NUM_ELEVATORS, Simulator.NUM_FLOORS), "ELEVATOR CONTROLLER");

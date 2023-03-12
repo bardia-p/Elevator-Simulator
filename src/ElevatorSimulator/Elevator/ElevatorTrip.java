@@ -12,8 +12,11 @@ import ElevatorSimulator.Messages.DirectionType;
  * @author Guy Morgenshtern
  */
 public class ElevatorTrip {
-	private int pickup, dropoff; // floor numbers 
-	private boolean pickedUp; // not really needed 
+	// Pickup and dropoff floors for the elevator.
+	private int pickup, dropoff; 
+	
+	// Checks to see if the trip was picked up.
+	private boolean pickedUp;
 	private DirectionType directionType;
 	
 	/**

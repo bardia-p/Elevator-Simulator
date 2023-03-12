@@ -2,6 +2,12 @@ package ElevatorSimulator.Messages;
 
 import java.util.Date;
 
+/**
+ * The message sent by the subsystem to get an update.
+ * 
+ * @author Sarah Chow
+ *
+ */
 @SuppressWarnings("serial")
 public class GetUpdateMessage extends Message {
 	private int elevatorNumber;

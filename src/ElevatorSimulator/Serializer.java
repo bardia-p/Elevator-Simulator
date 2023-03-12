@@ -8,8 +8,20 @@ import java.io.ObjectOutputStream;
 
 import ElevatorSimulator.Messages.Message;
 
+/**
+ * The class in charge of serializing and deserializing the message contents.
+ * 
+ * @author Andre Hazim
+ *
+ */
 public class Serializer {
-	
+	/**
+	 * Serializing the message content to a byte array to transfer over UDP.
+	 * 
+	 * @param m, the message to serialize.
+	 * 
+	 * @return the byte array contents of the message.
+	 */
 	public static byte[] serializeMessage(Message m) {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ObjectOutputStream out;
@@ -27,6 +39,13 @@ public class Serializer {
 		return result;
 	}
 	
+	/**
+	 * Deserializing the byte array back to a message.
+	 * 
+	 * @param content, the byte array to deserialize.
+	 * 
+	 * @return the deserialized message.
+	 */
 	public static Message deserializeMessage(byte[] content) {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 		ObjectInputStream in;

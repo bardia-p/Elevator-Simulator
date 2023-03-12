@@ -2,6 +2,12 @@ package ElevatorSimulator.Messages;
 
 import java.util.Date;
 
+/**
+ * The message for when the elevator doors are open.
+ * 
+ * @author Kyra Lothrop
+ *
+ */
 @SuppressWarnings("serial")
 public class DoorOpenedMessage extends Message{
 	private StopType type;

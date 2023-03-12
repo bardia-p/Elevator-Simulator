@@ -14,6 +14,12 @@ import ElevatorSimulator.Messages.ReadyMessage;
 import ElevatorSimulator.Messages.SenderType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 
+/**
+ * The ServerRPC class in charge of receiving elevator/floor requests and forwarding them.
+ * 
+ * @author bardiaparmoun
+ *
+ */
 public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
 	private DatagramPacket sendPacket, receivePacket;
@@ -27,9 +33,8 @@ public class ServerRPC implements Runnable {
 	// The timeout used for closing the socket.
 	public static final int TIMEOUT = 30000;
 	
+	// Keeps track of the message queue for the shared data.
 	private MessageQueue queue;
-	
-
 	
 	/**
 	 * The constructor for the class.
@@ -141,6 +146,9 @@ public class ServerRPC implements Runnable {
 		sendReceiveSocket.close();
 	}
 
+	/**
+	 * The run function for the server thread.
+	 */
 	@Override
 	public void run() {
 		while(true) {

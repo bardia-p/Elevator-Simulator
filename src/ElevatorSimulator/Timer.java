@@ -10,8 +10,10 @@ import java.util.Date;
  *
  */
 public class Timer {
+	// The value to increment the timer by.
 	public static int INCREMENT = 1000;
 	
+	// The current time for the timer.
 	private Date currentTime;
 	
 	/**
