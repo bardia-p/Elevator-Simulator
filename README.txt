@@ -23,9 +23,7 @@ Iteration 5: Measuring the Scheduler and predicting the performance
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
  - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labelled "class_diagram_iter3.png".
- - The sequence diagrams are located in "./diagrams/sequence_diagrams/Iteration2" as follows:
-	- "elevator_to_floor.png"
-	- "floor_to_elevator.png"
+ - The sequence diagrams is located in "./diagram/sequence_diagrams" labelled: "iter3_sequence_diagram.jpg".
  - The state diagrams are located in "./diagrams/state_diagrams" as follows:
       - "elevator_state_machine.jpg"
       - "scheduler_state_machine.jpg"
