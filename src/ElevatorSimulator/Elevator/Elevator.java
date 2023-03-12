@@ -240,6 +240,8 @@ public class Elevator extends ClientRPC implements Runnable {
 		
 		int numPassengers = 0;
 		
+		DirectionType stopDirection = direction;
+		
 		for (ElevatorTrip trip: trips) {
 			if (trip.getDropoff() == floor && trip.isPickedUp()) { //checking isPickedUp is redundant if only good requests are sent
 				isDropoff = true;
@@ -247,6 +249,7 @@ public class Elevator extends ClientRPC implements Runnable {
 				this.floorLights[floor-1] = false;
 				removalList.add(trip);
 				numPassengers++;
+				stopDirection = trip.getDirectionType();
 			}
 		}
 		
@@ -259,6 +262,7 @@ public class Elevator extends ClientRPC implements Runnable {
 				this.stopType = StopType.PICKUP;
 				trip.setPickedUp(true);
 				this.floorLights[trip.getDropoff() - 1] = true;
+				stopDirection = trip.getDirectionType();
 			}
 		}
 		
@@ -271,7 +275,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp || isDropoff) {	
 			changeState(ElevatorState.OPEN);
 			
-			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, this.direction, numPassengers);
+			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentRequest.getTimestamp(), floor, stopType, stopDirection, numPassengers);
 			sendRequest(doorOpen);
 			Logger.printMessage(doorOpen, "SENT");
 		} else {

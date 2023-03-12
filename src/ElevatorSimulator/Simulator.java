@@ -9,7 +9,7 @@ package ElevatorSimulator;
  */
 public class Simulator {
 	// Keeps track of the input file name for the simulator.
-	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input2.csv";
+	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input.csv";
 	
 	// Keeps track of the number of elevators.
 	public static int NUM_ELEVATORS = 2;
