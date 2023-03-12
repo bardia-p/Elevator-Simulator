@@ -5,6 +5,7 @@ package ElevatorSimulator.Elevator;
 
 /**
  * The states of the elevators
+ * 
  * @author Andre Hazim
  */
 public enum ElevatorState {

@@ -18,12 +18,16 @@ import ElevatorSimulator.Messaging.ServerRPC;
  *
  */
 public class Scheduler implements Runnable {
+	// Keeps track of the shared message queue.
 	private MessageQueue queue;
+
+	// Keeps track of the scheduler state.
 	private SchedulerState state;
+
+	// Keeps track of the current request for the scheduler.
 	private Message currentRequest;
-	
-	
-	
+
+	// The scheduler ports used for UDP.
 	public static final int ELEVATOR_PORT = 23, FLOOR_PORT = 69;
 
 	// Keeps track of whether the scheduler should keep running or not.
@@ -41,7 +45,7 @@ public class Scheduler implements Runnable {
 
 		Thread floorThread = new Thread(new ServerRPC(queue, FLOOR_PORT), "FLOOR MESSAGE THREAD");
 		Thread elevatorThread = new Thread(new ServerRPC(queue, ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
-		
+
 		floorThread.start();
 		elevatorThread.start();
 
@@ -58,28 +62,27 @@ public class Scheduler implements Runnable {
 	}
 
 	/**
-	 * Gets all the available elevators 
+	 * Gets all the available elevators
 	 * 
-	 * @param message A request elevator message 
+	 * @param message A request elevator message
 	 * 
-	 * @return A list of availble elevators 
+	 * @return A list of availble elevators
 	 */
-	private ArrayList<ElevatorInfo> getAvailableElevators(){
+	private ArrayList<ElevatorInfo> getAvailableElevators() {
 		ArrayList<ElevatorInfo> availableElevators = new ArrayList<>();
 
 		for (ElevatorInfo e : queue.getElevatorInfos().values()) {
-						
+
 			if (e.getState() == ElevatorState.POLL) {
-				
-				//System.out.println(e.getElevatorId());
+
+				// System.out.println(e.getElevatorId());
 				availableElevators.add(e);
 			}
-			
+
 		}
 		return availableElevators;
 	}
-	
-	
+
 	/**
 	 * Checks to see the closest elevator and adds it to the list
 	 * 
@@ -98,16 +101,13 @@ public class Scheduler implements Runnable {
 		// Going up and elevator is below request floor OR
 		// Going down and elevator is above request floor
 		for (ElevatorInfo elevator : availableElevators) {
-			if ((elevator.getState() == ElevatorState.POLL) &&
-					
-					(elevator.getDirection() == requestMessage.getDirection()) &&
-					
+			if ((elevator.getDirection() == requestMessage.getDirection()) &&
+
 					((elevator.getDirection() == DirectionType.UP
 							&& elevator.getFloorNumber() <= requestMessage.getFloor()) ||
 
 							(elevator.getDirection() == DirectionType.DOWN
-									&& elevator.getFloorNumber() >= requestMessage.getFloor())))
-			{
+									&& elevator.getFloorNumber() >= requestMessage.getFloor()))) {
 				possibleCandidates.add(elevator);
 			}
 		}
@@ -115,35 +115,67 @@ public class Scheduler implements Runnable {
 		if (possibleCandidates.size() != 0) {
 			// return the one with the least number of passengers.
 			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get().getElevatorId();
-		} 
-		else {
-			// tries to find an empty elevator.
-			for (ElevatorInfo elevator : availableElevators) {
-				if (elevator.getState() == ElevatorState.POLL && elevator.getNumRequest() == 0) {
-					possibleCandidates.add(elevator);
-				}
-			}
+					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
+					.getElevatorId();
+		}
 
-			if (possibleCandidates.size() != 0) {
-				// return the closest elevator.
-				return possibleCandidates.stream()
-						.min((first, second) -> Integer.compare(
-								Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
-								Math.abs(second.getNumRequest() - requestMessage.getFloor())))
-						.get().getElevatorId();
+		// tries to find an empty elevator.
+		for (ElevatorInfo elevator : availableElevators) {
+			if (elevator.getNumRequest() == 0) {
+				possibleCandidates.add(elevator);
 			}
 		}
 
-		// could not find an elevator.
+		if (possibleCandidates.size() != 0) {
+			// return the closest elevator.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
+		}
+
+		/*
+		// tries to find an elevator that can pickup the floor on the way.
+		for (ElevatorInfo elevator : availableElevators) {
+			if (((elevator.getDirection() == DirectionType.UP && elevator.getFloorNumber() <= requestMessage.getFloor())
+					||
+
+					(elevator.getDirection() == DirectionType.DOWN
+							&& elevator.getFloorNumber() >= requestMessage.getFloor()))) {
+				possibleCandidates.add(elevator);
+			}
+		}
+
+		if (possibleCandidates.size() != 0) {
+			// return the closest elevator.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
+		}
+
+		// pick any available elevator.
+		for (ElevatorInfo elevator : availableElevators) {
+			possibleCandidates.add(elevator);
+		}
+
+		// return the closest elevator.
+		return possibleCandidates.stream()
+				.min((first, second) -> Integer.compare(Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+						Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+				.get().getElevatorId();
+		*/
 		return -1;
+
 	}
 
 	/**
 	 * Method to process the message.
 	 */
 	private void processMessage() {
-		
+
 		if (currentRequest.getType() == MessageType.KILL) {
 			kill((KillMessage) currentRequest);
 		} else if (currentRequest.getType() == MessageType.REQUEST) {
@@ -159,7 +191,7 @@ public class Scheduler implements Runnable {
 			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
 			queue.replyToFloor(request);
 		}
-		
+
 		changeState(SchedulerState.POLL);
 	}
 
@@ -196,24 +228,28 @@ public class Scheduler implements Runnable {
 		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
 		state = newState;
 	}
-	
 
+	/**
+	 * Add an elevator to the scheduler queue.
+	 * 
+	 * @param e
+	 */
 	public void addToQueue(ElevatorInfo e) {
 		this.queue.addElevator(e.getElevatorId(), e);
 	}
-	
+
 	/**
 	 * Stops the scheduler thread from running.
 	 */
 	private void kill(KillMessage message) {
 		this.shouldRun = false;
 
-		for (ElevatorInfo info: queue.getElevatorInfos().values()) {
+		for (ElevatorInfo info : queue.getElevatorInfos().values()) {
 			queue.replyToElevator(message, info.getElevatorId());
 		}
 
 	}
-	
+
 	public static void main(String[] args) {
 		Thread schedulerThread = new Thread(new Scheduler(), "SCHEDULER THREAD");
 		schedulerThread.start();

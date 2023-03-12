@@ -4,6 +4,12 @@ import java.util.Date;
 
 import ElevatorSimulator.Elevator.ElevatorInfo;
 
+/**
+ * The message sent by the elevator to say an elevator is ready.
+ * 
+ * @author Guy Morgenshtern
+ *
+ */
 @SuppressWarnings("serial")
 public class ReadyMessage extends Message{
 	private ElevatorInfo elevatorInfo;
@@ -16,9 +22,4 @@ public class ReadyMessage extends Message{
 	public ElevatorInfo getElevatorInfo() {
 		return elevatorInfo;
 	}
-	
-	
-	
-	
-
 }

@@ -12,6 +12,14 @@ import ElevatorSimulator.Messages.GetUpdateMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.SenderType;
 
+/**
+ * The class in charge of the UDP responsibilities.
+ * 
+ * @author Bardia Parmoun
+ * @author Andre Hazim
+ * @author Guy Morgenshtern
+ *
+ */
 public class ClientRPC {
 	// Used to hold the send and receive packets.
 	private DatagramPacket sendPacket, receivePacket;
@@ -96,17 +104,31 @@ public class ClientRPC {
 	 * A specific form of the sendAndReceive request.
 	 * Sends a "REQUEST UPDATE" request and obtains the reply.
 	 * 
+	 * Used by the floor.
+	 * 
 	 * @return the update received from the host.
 	 */
 	public Message getFloorUpdate() {
 		return Serializer.deserializeMessage(sendAndReceive(Serializer.serializeMessage(new GetUpdateMessage(null, SenderType.FLOOR))));
 	}
 	
-	
+	/**
+	 * A specific form of the sendAndReceive request.
+	 * Sends a "REQUEST UPDATE" request and obtains the reply.
+	 * 
+	 * Used by the elevator.
+	 * 
+	 * @return the update received from the host.
+	 */
 	public Message getElevatorUpdate(int elevatorNumber) {
 		return Serializer.deserializeMessage(sendAndReceive(Serializer.serializeMessage(new GetUpdateMessage(null, SenderType.ELEVATOR, elevatorNumber))));
 	}
 	
+	/**
+	 * Send a message request.
+	 * 
+	 * @param m, the message to send over UDP.
+	 */
 	public void sendRequest(Message m) {
 		sendAndReceive(Serializer.serializeMessage(m));
 	}

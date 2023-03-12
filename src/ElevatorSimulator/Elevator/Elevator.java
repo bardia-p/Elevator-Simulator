@@ -45,6 +45,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	// list of lights corresponding to active request for each floor
 	private boolean[] floorLights;
 
+	// Indicates that the elevator has no more incoming requests.
 	private boolean canKill;
 		
 	/**
@@ -370,6 +371,11 @@ public class Elevator extends ClientRPC implements Runnable {
 		}
 	}
 
+	/**
+	 * Returns the number of trips for the elevator.
+	 * 
+	 * @return the number of elevator trips.
+	 */
 	public int getNumTrips() {
 		return trips.size();
 	}
