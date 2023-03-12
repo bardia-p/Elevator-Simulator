@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
-import ElevatorSimulator.Messaging.MessageQueue;
 
 /**
  * The unit tests for the elevator subsystem.
@@ -36,10 +35,10 @@ public class ElevatorTest {
 	 */
 	@BeforeEach
 	void init() {
-		Message messageP = new DoorOpenedMessage(new Date(1000), 1, StopType.PICKUP, DirectionType.UP);
+		Message messageP = new DoorOpenedMessage(new Date(1000), 1, StopType.PICKUP, DirectionType.UP, 0);
 		Message messageArrive = new ArrivedElevatorMessage(new Date(1100), 2);
 		Message messageArrive2 = new ArrivedElevatorMessage(new Date(1100), 3);
-		Message messageD = new DoorOpenedMessage(new Date(1000), 4, StopType.DROPOFF, DirectionType.DOWN);
+		Message messageD = new DoorOpenedMessage(new Date(1000), 4, StopType.DROPOFF, DirectionType.DOWN, 1);
 		
 		messages = new ArrayList<>();	
 		messages.add(messageP);	

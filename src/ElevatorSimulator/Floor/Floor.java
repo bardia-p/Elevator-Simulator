@@ -42,6 +42,8 @@ public class Floor extends ClientRPC implements Runnable {
 	private SimpleDateFormat dateFormat;
 	
 	private String filename;
+	
+	private boolean canKill;
 		
 	/**
 	 * ELevator constructor with a scheduler and a filename.

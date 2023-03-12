@@ -200,7 +200,8 @@ public class Scheduler implements Runnable {
 
 	public void addToQueue(ElevatorInfo e) {
 		this.queue.addElevator(e.getElevatorId(), e);
-
+	}
+	
 	/**
 	 * Stops the scheduler thread from running.
 	 */

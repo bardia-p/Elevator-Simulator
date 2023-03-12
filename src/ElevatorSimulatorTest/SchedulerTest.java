@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Date;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import ElevatorSimulator.Elevator.ElevatorInfo;

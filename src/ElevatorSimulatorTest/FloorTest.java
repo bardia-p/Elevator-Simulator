@@ -2,7 +2,6 @@ package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -13,10 +12,7 @@ import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
 import ElevatorSimulator.Messages.Message;
-import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.StopType;
-import ElevatorSimulator.Messaging.MessageQueue;
-import ElevatorSimulator.Messaging.ServerRPC;
 
 /**
  * The unit tests for the floor subsystem.
@@ -45,8 +41,8 @@ public class FloorTest{
 	void init() {
 		shouldRun = true;
 		
-		DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(1000), DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP);
-		DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(1100), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP);
+		DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(1000), DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP, 0);
+		DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(1100), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 1);
 
 		messages = new ArrayList<>();	
 		messages.add(pickupMessage);
