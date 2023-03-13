@@ -408,6 +408,8 @@ public class Elevator extends ClientRPC implements Runnable {
 				polling();
 			}
 		}
+		
+		close();
 	}
 
 	/**

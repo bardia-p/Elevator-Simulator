@@ -274,6 +274,8 @@ public class Floor extends ClientRPC implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		
+		close();
 	}
 	
 	/**
