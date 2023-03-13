@@ -139,13 +139,4 @@ public class MessageQueue {
 		}
 		return m;	
 	}
-	
-	/**
-	 * Checks if the elevator has a request
-	 * @param id the id of the elevator
-	 * @return a boolean if the elevator has a request
-	 */
-	public boolean elevatorHasRequest(int id) {
-		return !toElevator.get(id).isEmpty();
-	}
 }

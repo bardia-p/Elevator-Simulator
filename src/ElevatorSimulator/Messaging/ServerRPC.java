@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+import ElevatorSimulator.Logger;
 import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Messages.ACKMessage;
 import ElevatorSimulator.Messages.GetUpdateMessage;
@@ -100,8 +101,8 @@ public class ServerRPC implements Runnable {
 			}
 		} else if (receiveMessage.getType() == MessageType.READY) {
 			ReadyMessage readyMessage = (ReadyMessage) receiveMessage;
+			Logger.printMessage(readyMessage, "RECEIVED");
 			queue.addElevator(readyMessage.getElevatorInfo().getElevatorId(),readyMessage.getElevatorInfo());
-			queue.send(receiveMessage);
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage message = (UpdateElevatorInfoMessage) receiveMessage;
