@@ -134,14 +134,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
-		if (!canStart) {
-			return;
-		}
-
-		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(Timer.getTime()) > 0)) {
-			return;
-		}
-		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
 		sendRequest(request);
@@ -256,7 +248,11 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
-			requestElevator();
+			if (canStart) {
+				while (!this.elevatorRequests.isEmpty() && (elevatorRequests.peek().getTimestamp().compareTo(Timer.getTime()) <= 0)) {
+					requestElevator();
+				}
+			}
 			
 			requestUpdate();
 			
@@ -284,7 +280,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 */
 	public static void main(String[] args) {
 		try {
-			
 			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
 			floorThread.start();
 		} catch (ParseException e) {

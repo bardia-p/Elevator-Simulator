@@ -146,9 +146,6 @@ public class Scheduler implements Runnable {
 		return possibleCandidates.stream()
 				.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
 				.getElevatorId();
-		
-		//return -1;
-
 	}
 
 	/**
@@ -192,7 +189,7 @@ public class Scheduler implements Runnable {
 			}
 
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
