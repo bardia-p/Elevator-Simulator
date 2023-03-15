@@ -206,13 +206,15 @@ public class Scheduler implements Runnable {
 		state = newState;
 	}
 
+
 	/**
-	 * Add an elevator to the scheduler queue.
+	 * Updates the message queue for the scheduler.
+	 * Used for testing.
 	 * 
-	 * @param e
+	 * @param queue
 	 */
-	public void addToQueue(ElevatorInfo e) {
-		this.queue.addElevator(e.getElevatorId(), e);
+	public void updateQueue(MessageQueue queue) {
+		this.queue = queue;
 	}
 
 	/**

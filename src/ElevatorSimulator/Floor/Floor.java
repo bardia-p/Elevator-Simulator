@@ -61,7 +61,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param fileName the name of the input file.
 	 * @throws ParseException 
 	 */
-	public Floor(String fileName,int numFloors) throws ParseException{
+	public Floor(String fileName,int numFloors) {
 		super(Scheduler.FLOOR_PORT);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.elevatorRequests = new ArrayDeque<Message>();
@@ -101,7 +101,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param fileName
 	 * @throws ParseException 
 	 */
-	private void readInElevatorRequests(String fileName) throws ParseException {
+	private void readInElevatorRequests(String fileName) {
 		Scanner sc;
 		try {
 			sc = new Scanner(new File(fileName));
@@ -115,6 +115,8 @@ public class Floor extends ClientRPC implements Runnable {
 			
 			sc.close();
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 		
@@ -237,15 +239,31 @@ public class Floor extends ClientRPC implements Runnable {
 	}
 	
 	/**
+	 * Returns all the request elevator messages in the floor.
+	 * Used for testing.
+	 * 
+	 * @return
+	 */
+	public ArrayDeque<Message> getElevatorRequestsList(){
+		return elevatorRequests;
+	}
+	
+	/**
+	 * Returns the list of all the floor dropoffs.
+	 * Used for testing.
+	 * 
+	 * @return
+	 */
+	public ArrayList<Integer> getDropoffsList(){
+		return dropoffs;
+	}
+	
+	/**
 	 * The run function used to logic of the floor.
 	 */
 	@Override
 	public void run() {
-		try {
-			readInElevatorRequests(this.filename);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		readInElevatorRequests(this.filename);
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
 			if (canStart) {
@@ -279,11 +297,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		try {
-			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
-			floorThread.start();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
+		floorThread.start();
 	}
 }

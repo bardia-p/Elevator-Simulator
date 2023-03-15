@@ -37,6 +37,10 @@ public class ServerRPC implements Runnable {
 	// Keeps track of the message queue for the shared data.
 	private MessageQueue queue;
 	
+	// Ensures the server RPC can keep running.
+	private boolean shouldRun;
+	
+	
 	/**
 	 * The constructor for the class.
 	 * 
@@ -51,6 +55,7 @@ public class ServerRPC implements Runnable {
 			// Set a timeout for the socket.
 			sendReceiveSocket.setSoTimeout(TIMEOUT);		
 			this.queue = queue;
+			this.shouldRun = true;
 						
 		} catch (SocketException se) { // Can't create the socket.
 			se.printStackTrace();
@@ -90,6 +95,10 @@ public class ServerRPC implements Runnable {
 	 */
 	private Message processPacket() {
 		Message receiveMessage = Serializer.deserializeMessage(receivePacket.getData());
+		
+		if (receiveMessage == null) {
+			return null;
+		}
 		
 		Message replyMessage;
 		if (receiveMessage.getType() == MessageType.GET_UPDATE) { // for request update packets check the receiving buffer.
@@ -145,17 +154,30 @@ public class ServerRPC implements Runnable {
 	 */
 	public void close() {
 		sendReceiveSocket.close();
+		shouldRun = false;
 	}
 
+	/**
+	 * Kills the server RPC.
+	 */
+	public void kill() {
+		close();
+		shouldRun = false;
+	}
+	
 	/**
 	 * The run function for the server thread.
 	 */
 	@Override
 	public void run() {
-		while(true) {
+		while(shouldRun) {
 			receive();
+			
 			Message replyMessage = processPacket();
-			send(replyMessage);
+			
+			if (replyMessage != null) {
+				send(replyMessage);
+			}
 		}
 	}
 
