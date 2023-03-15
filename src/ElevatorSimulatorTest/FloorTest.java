@@ -102,12 +102,15 @@ public class FloorTest{
 		
 		boolean shouldRun = true;
 		
+		// No dropoffs at first.
+		assertEquals(0, floor.getDropoffsList().size());
+
 		while(shouldRun) {
 			Message newMessage = queue.pop();
 			
+
 			if (newMessage.getType() == MessageType.REQUEST) {
 				assertEquals(0, floor.getElevatorRequestsList().size());
-				assertEquals(0, floor.getDropoffsList().size());
 
 				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
 				
