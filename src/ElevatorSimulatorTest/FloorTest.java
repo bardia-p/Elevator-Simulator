@@ -2,9 +2,9 @@ package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,12 @@ import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
 import ElevatorSimulator.Messages.Message;
+import ElevatorSimulator.Messages.MessageType;
+import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messages.StopType;
+import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Messaging.ServerRPC;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * The unit tests for the floor subsystem.
@@ -22,82 +27,105 @@ import ElevatorSimulator.Messages.StopType;
  * @author Bardia Parmoun
  *
  */
-public class FloorTest{	
+public class FloorTest{		
+	// The message queue used to keep track of the messages.
+	private MessageQueue queue;
+	
+	// Keeps track of the floor object.
+	private Floor floor;
+	
+	// The server RPC thread running in the background to receive UDP messages.
+	private Thread serverRPCThread;
+	
+	// The keeps track of the server RPC used to receive UDP messages.
+	private ServerRPC serverRPC;
+
+	// Test constants.
 	public static int NUM_FLOORS = 4;
 	
 	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
 	
-	private boolean shouldRun;
+	private int PICKUP_FLOOR = 1;
 	
 	private int DESTINATION_FLOOR = 4;
-	private ArrayList<DoorOpenedMessage> messages;
 
 	
 	/**
-	 * Creating the messages and adding to ArrayList
-	 * before each test.
+	 * Initializes the server RPC thread in the background.
 	 */
 	@BeforeEach
-	void init() {
-		shouldRun = true;
+	void init() {	
+		Thread.currentThread().setName("FLOOR TEST THREAD");
+
+		queue = new MessageQueue();
+		serverRPC = new ServerRPC(queue, Scheduler.FLOOR_PORT);		
 		
-		DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(1000), DESTINATION_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
-		DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(1100), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
+		// Creates a floor.
+		floor = new Floor(FILEPATH, NUM_FLOORS);
 
-		messages = new ArrayList<>();	
-		messages.add(pickupMessage);
-		messages.add(dropoffMessage);
+		serverRPCThread = new Thread(serverRPC, "SERVER RPC THREAD");
+		serverRPCThread.start();
 	}
 	
-
 	/**
-	 * Method to retrieve the latest message in the arraylist.
-	 * @return latest message, Message
+	 * Terminates the server RPC thread and closes the socket.
 	 */
-	public Message getFloorUpdate() {
-		DoorOpenedMessage temp = messages.get(0);
-		messages.remove(0);
-		return temp;
+	@AfterEach
+	public void cleanup() {
+		try {
+			serverRPC.kill();	
+			serverRPCThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
-	 * The unit test depicts the receiving of a message to the
-	 * floor. Confirms the time delay between the two messages
-	 * are as expected.
+	 * The unit test depicts the sending of a message from the
+	 * floor to the scheduler and back from the scheduler to floor
+	 * as a confirmation message. Sends kill message at the end 
+	 * to terminate thread.
 	 */
 	@Test
-	void testOneFloorRequest() throws Exception{
-		
+	void testOneFloorRequest() {
 		System.out.println("\n----------testOneFloorRequest----------\n");
-
-		Floor floor = new Floor(FILEPATH, NUM_FLOORS);
 		
-		assertNotNull(floor);
+		// Sends the start message to the floor.
+		queue.replyToFloor(new StartMessage());
+
+		// Starts the floor thread.
+		
+		Thread floorThread = new Thread(floor, "FLOOR");
+		
+		floorThread.start();		
+		
+		
+		boolean shouldRun = true;
+		
+		while(shouldRun) {
+			Message newMessage = queue.pop();
+			
+			if (newMessage.getType() == MessageType.REQUEST) {
+				assertEquals(0, floor.getElevatorRequestsList().size());
+				assertEquals(0, floor.getDropoffsList().size());
+
+				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
 				
-		int count = 0;
-		
-		Date d1 = new Date();
-		Date d2 = new Date();
-			
-		while(this.shouldRun) {
-			
-			if (count == 0) {
-				Message newMessage = this.getFloorUpdate();
+				queue.replyToFloor(pickupMessage);
+				
+				assertEquals(0, floor.getElevatorRequestsList().size());
+				
+				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
 
-				d1 = newMessage.getTimestamp();
+				queue.replyToFloor(dropoffMessage);
+				
+			} else if (newMessage.getType() == MessageType.KILL) {
+				// Only killed when no more dropoffs.
+				assertEquals(0, floor.getElevatorRequestsList().size());
+				assertEquals(0, floor.getDropoffsList().size());
+				
+				shouldRun = false;
 			}
-			else if (count == 1) {
-				Message newMessage = this.getFloorUpdate();
-
-				d2 = newMessage.getTimestamp();
-			}
-			else {
-				this.shouldRun = false;
-			}
-			
-			count++;
 		}
-		
-		assertEquals(d2.getTime() - d1.getTime(), 100); 
 	}
 }

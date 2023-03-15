@@ -2,15 +2,20 @@ package ElevatorSimulatorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 
 import ElevatorSimulator.Elevator.Elevator;
+import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.MessageQueue;
+import ElevatorSimulator.Messaging.ServerRPC;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * The unit tests for the elevator subsystem.
@@ -21,91 +26,117 @@ import ElevatorSimulator.Messages.*;
  *
  */
 public class ElevatorTest {	
+	// The message queue used to keep track of the messages.
+	private MessageQueue queue;
+	
+	// Keeps track of the elevator object.
+	private Elevator elevator;
+	
+	// The server RPC thread running in the background to receive UDP messages.
+	private Thread serverRPCThread;
+	
+	// The keeps track of the server RPC used to receive UDP messages.
+	private ServerRPC serverRPC;
+	
+	// Test constants
 	public static int ELEVATOR_ID = 0;
 	
 	public static int NUM_FLOORS = 4;
 	
-	public boolean shouldRun;
-	
-	private ArrayList<Message> messages;
-	
 	/**
-	 * Creating the messages and adding them to an arraylist.
+	 * Initializes the server RPC thread in the background.
 	 */
 	@BeforeEach
-	void init() {
-		Message messageP = new DoorOpenedMessage(new Date(1000), 1, StopType.PICKUP, DirectionType.UP, 1, 0);
-		Message messageArrive = new ArrivedElevatorMessage(new Date(1100), 2);
-		Message messageArrive2 = new ArrivedElevatorMessage(new Date(1100), 3);
-		Message messageD = new DoorOpenedMessage(new Date(1000), 4, StopType.DROPOFF, DirectionType.DOWN, 0, 1);
+	public void init() {
+		Thread.currentThread().setName("ELEVATOR TEST THREAD");
+
+		queue = new MessageQueue();
+		serverRPC = new ServerRPC(queue, Scheduler.ELEVATOR_PORT);		
 		
-		messages = new ArrayList<>();	
-		messages.add(messageP);	
-		messages.add(messageArrive);
-		messages.add(messageArrive2);
-		messages.add(messageD);
+		// Creates an elevator.
+		elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS);
+		
+		
+		serverRPCThread = new Thread(serverRPC, "SERVER RPC THREAD");
+		serverRPCThread.start();
 	}
 	
 	/**
-	 * Method to get the latest message.
-	 * @return message in the ArrayList, Message
+	 * Terminates the server RPC thread and closes the socket.
 	 */
-	public Message getElevatorUpdate() {
-		Message temp = messages.get(0);
-		messages.remove(0);
-		return temp;
+	@AfterEach
+	public void cleanup() {
+		try {
+			serverRPC.kill();	
+			serverRPCThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
-	 * The unit test depicts the receiving of a message to the 
-	 * elevator to move from floor 1 to 4.
+	 * The unit test depicts the receiving of a message from the
+	 * scheduler to the elevator to move from floor 4 to 1.
 	 * Confirms the expected environments of each 
-	 * state (DOORS_OPENED, PICKUP, ARRIVE). 
+	 * state (DOORS_OPENED, PICKUP, ARRIVE). Sends kill message
+	 * at the end to terminate thread.
 	 * @throws InterruptedException 
 	 */
 	@Test
-	void testOneElevatorRequest() throws InterruptedException {
-		
+	public void testOneElevatorRequest() throws InterruptedException {
 		System.out.println("\n----------testOneElevatorRequest----------\n");
 		
-		Elevator elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS);
-				
+		// Adds the elevator to the queue.
+		queue.addElevator(ELEVATOR_ID, new ElevatorInfo(elevator.getDirection(),
+				elevator.getState(), elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips()));
+		
+		// Assigns the request to the elevator.
+		Message message = new RequestElevatorMessage(new Date(), 4, DirectionType.DOWN, 1);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
 		assertEquals(ElevatorState.POLL, elevator.getState());
-				
-		shouldRun = true;
+		
+		// Starts up the elevator thread.
+		Thread elevatorThread = new Thread(elevator, "ELEVATOR THREAD");
+		elevatorThread.start();
+		
+		boolean shouldRun = true;
 				
 		int expectedFloor = 1;
 		
-		Message newMessage = null;
-		
-		while(this.shouldRun) {
-			newMessage = getElevatorUpdate();
-
+		while(shouldRun) {
+			Message newMessage = queue.pop();
+			
 			if (newMessage.getType() == MessageType.DOORS_OPENED) {
 				DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
 				
 				if (doorsOpenMessage.getStopType() == StopType.PICKUP) {
-					assertEquals(DirectionType.UP, doorsOpenMessage.getDirection());
-					assertEquals(1, doorsOpenMessage.getArrivedFloor());
-				} else {
+					assertEquals(ElevatorState.OPEN, elevator.getState());
 					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
 					assertEquals(4, doorsOpenMessage.getArrivedFloor());
+				} else {
+					assertEquals(ElevatorState.OPEN, elevator.getState());
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(1, doorsOpenMessage.getArrivedFloor());
 					
 					shouldRun = false;
 				}
-				
-			} 
-			else if (newMessage.getType() == MessageType.ARRIVE) {
+			} else if (newMessage.getType() == MessageType.ARRIVE) {
 				if (elevator.getDirection() == DirectionType.UP) {
 					expectedFloor++;
 				} else {
 					expectedFloor--;
 				}
-				// Check passive floors
 				assertEquals(expectedFloor, ((ArrivedElevatorMessage)newMessage).getArrivedFloor());
 			}
-		}		
+		}
+		
+		// Kills the elevator thread.
+		queue.replyToElevator(new KillMessage(SenderType.FLOOR, new Date()), ELEVATOR_ID);	
+		
+		elevatorThread.join();
+
 	}
 }

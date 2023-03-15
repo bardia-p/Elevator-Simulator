@@ -88,15 +88,5 @@ public class ElevatorInfo implements Serializable{
 	public int getNumRequest() {
 		return numRequest;
 	} 
-	
-	/**
-	 * Updates the state of the elevator.
-	 * 
-	 * @param state, the elevator state.
-	 */
-	public void setState(ElevatorState state) {
-		this.state = state;
-	}
-	
 
 }
