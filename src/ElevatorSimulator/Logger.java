@@ -26,15 +26,17 @@ public class Logger {
 		if (m != null && m.getType() != MessageType.EMPTY) {
 			
 			result += "\n---------------------" + Thread.currentThread().getName() +"-----------------------\n";
-			result += String.format("| %-15s | %-10s | %-10s | %-3s |\n", "REQUEST", "ACTION", "RECEIVED", "SENT");
+			result += String.format("| %-30s | %-15s | %-10s | %-10s | %-3s |\n", "TIME", "REQUEST", "ACTION", "RECEIVED", "SENT");
 			result += new String(new char[52]).replace("\0", "-");
 			
+			addResult += String.format("\n| %-30s | ",  m.getTimestamp());
+			
 			if (m.getType() == MessageType.ARRIVE) {
-				addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), ((ArrivedElevatorMessage)m).getArrivedFloor());
+				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), ((ArrivedElevatorMessage)m).getArrivedFloor());
 			} else if (m.getType() == MessageType.DOORS_OPENED) {
-				addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), m.getDirection() + ", " + ((DoorOpenedMessage)m).getArrivedFloor());
+				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), m.getDirection() + ", " + ((DoorOpenedMessage)m).getArrivedFloor());
 			} else {
-				addResult += String.format("\n| %-15s | %-10s | ",  m.getDescription(), m.getDirection());
+				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), m.getDirection());
 			}
 			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");
 			

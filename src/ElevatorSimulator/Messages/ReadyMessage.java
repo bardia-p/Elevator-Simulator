@@ -1,7 +1,5 @@
 package ElevatorSimulator.Messages;
 
-import java.util.Date;
-
 import ElevatorSimulator.Elevator.ElevatorInfo;
 
 /**
@@ -14,8 +12,8 @@ import ElevatorSimulator.Elevator.ElevatorInfo;
 public class ReadyMessage extends Message{
 	private ElevatorInfo elevatorInfo;
 
-	public ReadyMessage( Date timestamp, MessageType type, ElevatorInfo elevatorInfo) {
-		super(SenderType.ELEVATOR, timestamp, type);
+	public ReadyMessage(MessageType type, ElevatorInfo elevatorInfo) {
+		super(SenderType.ELEVATOR, null, type);
 		this.elevatorInfo = elevatorInfo;
 	}
 

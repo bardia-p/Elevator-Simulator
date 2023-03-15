@@ -113,10 +113,12 @@ public class Scheduler implements Runnable {
 		}
 
 		if (possibleCandidates.size() != 0) {
-			// return the one with the least number of passengers.
+			// return the closest elevator.
 			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
-					.getElevatorId();
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
 		}
 
 		// tries to find an empty elevator.
@@ -135,25 +137,6 @@ public class Scheduler implements Runnable {
 					.get().getElevatorId();
 		}
 
-		
-		// tries to find an elevator that can pickup the floor on the way.
-		for (ElevatorInfo elevator : availableElevators) {
-			if (((elevator.getDirection() == DirectionType.UP && elevator.getFloorNumber() <= requestMessage.getFloor())
-					||
-
-					(elevator.getDirection() == DirectionType.DOWN
-							&& elevator.getFloorNumber() >= requestMessage.getFloor()))) {
-				possibleCandidates.add(elevator);
-			}
-		}
-
-		if (possibleCandidates.size() != 0) {
-			// return the one with the least number of passengers.
-			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
-					.getElevatorId();
-		}
-
 		// pick any available elevator.
 		for (ElevatorInfo elevator : availableElevators) {
 			possibleCandidates.add(elevator);
@@ -163,9 +146,6 @@ public class Scheduler implements Runnable {
 		return possibleCandidates.stream()
 				.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
 				.getElevatorId();
-		
-		//return -1;
-
 	}
 
 	/**
@@ -209,7 +189,7 @@ public class Scheduler implements Runnable {
 			}
 
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -34,10 +34,10 @@ public class ElevatorTest {
 	 */
 	@BeforeEach
 	void init() {
-		Message messageP = new DoorOpenedMessage(new Date(1000), 1, StopType.PICKUP, DirectionType.UP, 0);
+		Message messageP = new DoorOpenedMessage(new Date(1000), 1, StopType.PICKUP, DirectionType.UP, 1, 0);
 		Message messageArrive = new ArrivedElevatorMessage(new Date(1100), 2);
 		Message messageArrive2 = new ArrivedElevatorMessage(new Date(1100), 3);
-		Message messageD = new DoorOpenedMessage(new Date(1000), 4, StopType.DROPOFF, DirectionType.DOWN, 1);
+		Message messageD = new DoorOpenedMessage(new Date(1000), 4, StopType.DROPOFF, DirectionType.DOWN, 0, 1);
 		
 		messages = new ArrayList<>();	
 		messages.add(messageP);	

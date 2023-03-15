@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -35,17 +36,14 @@ public class Floor extends ClientRPC implements Runnable {
 	/**
 	 * Floor lights.
 	 */
-	private boolean[] upLights; 
-	private boolean[] downLights; 
+	private int[] upLights; 
+	private int[] downLights; 
 	
 	// The flag used to check if the floor subsystem should keep running.
 	private boolean shouldRun;
 		
 	// Checks to see if the floor subsystem can start sending requests.
 	private boolean canStart;
-
-	// The timer used for sending the requests.
-	private Timer timer;
 	
 	// The date format used for parsing the messages.
 	private SimpleDateFormat dateFormat;
@@ -67,13 +65,15 @@ public class Floor extends ClientRPC implements Runnable {
 		super(Scheduler.FLOOR_PORT);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.elevatorRequests = new ArrayDeque<Message>();
-		this.upLights = new boolean[numFloors];
-		this.downLights = new boolean[numFloors];
+		this.upLights = new int[numFloors];
+		this.downLights = new int[numFloors];
 		this.shouldRun = true;
 		this.canStart = false;
 		this.filename = fileName;
-		this.timer = new Timer();
 		this.dropoffs = new ArrayList<>();
+		
+		Arrays.fill(upLights, 0);
+		Arrays.fill(downLights, 0);
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class Floor extends ClientRPC implements Runnable {
 			e.printStackTrace();
 		}
 		
-		timer.setTime(this.elevatorRequests.peek().getTimestamp());
+		Timer.setTime(this.elevatorRequests.peek().getTimestamp());
 	}
 	
 	/**
@@ -134,14 +134,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 * Sends the requestElevator to the scheduler.
 	 */
 	private void requestElevator() {
-		if (!canStart) {
-			return;
-		}
-
-		if (this.elevatorRequests.isEmpty() || (elevatorRequests.peek().getTimestamp().compareTo(timer.getTime()) > 0)) {
-			return;
-		}
-		
 		Message request = elevatorRequests.poll();
 		updateLights(request);// turns light on
 		sendRequest(request);
@@ -174,7 +166,7 @@ public class Floor extends ClientRPC implements Runnable {
 				updateLights(message); // turns light off
 
 				if (openDoorMessage.getStopType() != StopType.PICKUP) {
-					for (int i = 0; i < openDoorMessage.getNumPassengers(); i++) {
+					for (int i = 0; i < openDoorMessage.getNumDropoffs(); i++) {
 						dropoffs.remove((Integer)openDoorMessage.getArrivedFloor());
 					}
 				}				
@@ -202,9 +194,9 @@ public class Floor extends ClientRPC implements Runnable {
 
 			direction = doorOpened.getDirection();
 			if ( direction == DirectionType.UP) {
-				this.upLights[floorNum-1] = false;
+				this.upLights[floorNum-1] -= doorOpened.getNumPickups();
 			} else {
-				this.downLights[floorNum-1] = false;
+				this.downLights[floorNum-1] -= doorOpened.getNumPickups();
 			}
 			
 		} 
@@ -213,9 +205,9 @@ public class Floor extends ClientRPC implements Runnable {
 			floorNum = request.getFloor();
 			direction = request.getDirection();			
 			if (direction == DirectionType.UP) {
-				this.upLights[floorNum-1] = true;
+				this.upLights[floorNum-1]++;
 			} else {
-				this.downLights[floorNum-1] = true;
+				this.downLights[floorNum-1]++;
 			}
 		}
 		
@@ -228,7 +220,7 @@ public class Floor extends ClientRPC implements Runnable {
 	private void printLightStatus() {
 		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n-------------------------------------------";
 		for(int i = 0; i<this.upLights.length;i++) {			
-			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] ? "on " : "off") + " | DOWN light: " + (this.downLights[i] ? "on " : "off") + " |";
+			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] > 0? "on " : "off") + " | DOWN light: " + (this.downLights[i] != 0 ? "on " : "off") + " |";
 		}
 		floorLightsDisplay += "\n-------------------------------------------\n";
 		System.out.println(floorLightsDisplay);
@@ -239,7 +231,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 */
 	private void kill() {
 		this.shouldRun = false;
-		KillMessage killMessage = new KillMessage(SenderType.FLOOR, timer.getTime());
+		KillMessage killMessage = new KillMessage(SenderType.FLOOR, Timer.getTime());
 		sendRequest(killMessage);
 		Logger.printMessage(killMessage, "SENT");
 	}
@@ -256,7 +248,11 @@ public class Floor extends ClientRPC implements Runnable {
 		}
 
 		while (shouldRun) { // more conditions in the future to ensure all receive messages are accounted for
-			requestElevator();
+			if (canStart) {
+				while (!this.elevatorRequests.isEmpty() && (elevatorRequests.peek().getTimestamp().compareTo(Timer.getTime()) <= 0)) {
+					requestElevator();
+				}
+			}
 			
 			requestUpdate();
 			
@@ -265,7 +261,7 @@ public class Floor extends ClientRPC implements Runnable {
 			}
 			
 			if (canStart) {
-				timer.tick();
+				Timer.tick();
 			}
 			
 			try {
@@ -274,6 +270,8 @@ public class Floor extends ClientRPC implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		
+		close();
 	}
 	
 	/**
@@ -282,7 +280,6 @@ public class Floor extends ClientRPC implements Runnable {
 	 */
 	public static void main(String[] args) {
 		try {
-			
 			Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
 			floorThread.start();
 		} catch (ParseException e) {
