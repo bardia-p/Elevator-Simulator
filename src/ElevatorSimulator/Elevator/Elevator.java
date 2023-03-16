@@ -279,20 +279,6 @@ public class Elevator extends ClientRPC implements Runnable {
 
 		DirectionType stopDirection = direction;
 
-		for (ElevatorTrip trip : trips) {
-			if (trip.getDropoff() == floor && trip.isPickedUp()) { // checking isPickedUp is redundant if only good
-																	// requests are sent
-				isDropoff = true;
-				this.stopType = StopType.DROPOFF;
-				this.floorLights[floor - 1] = false;
-				removalList.add(trip);
-				numDropoffs++;
-				stopDirection = trip.getDirectionType();
-			}
-		}
-
-		trips.removeAll(removalList);
-
 		// check for pickups in the same direction.
 		for (ElevatorTrip trip : trips) {
 			// Only pickup if the trip is in your direction OR you no longer have trips in
@@ -325,6 +311,19 @@ public class Elevator extends ClientRPC implements Runnable {
 				}
 			}
 		}
+		
+		for (ElevatorTrip trip : trips) {
+			if (trip.getDropoff() == floor && trip.isPickedUp()) {
+				isDropoff = true;
+				this.stopType = StopType.DROPOFF;
+				this.floorLights[floor - 1] = false;
+				removalList.add(trip);
+				numDropoffs++;
+				stopDirection = trip.getDirectionType();
+			}
+		}
+
+		trips.removeAll(removalList);
 
 		if (isPickUp && isDropoff) {
 			this.stopType = StopType.PICKUP_AND_DROPOFF;
