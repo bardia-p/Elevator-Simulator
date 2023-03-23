@@ -20,6 +20,12 @@ public class RequestElevatorMessage extends Message {
 	// The direction that was requested.
 	private DirectionType direction;
 	
+	// Time of error.
+	private int errorTime;
+	
+	// Error type.
+	private ErrorType error;
+	
 	/**
 	 * The constructor for the request elevator message.
 	 * 
@@ -27,12 +33,16 @@ public class RequestElevatorMessage extends Message {
 	 * @param floorNumber the floor number.
 	 * @param direction the request direction.
 	 * @param destination the destination.
+	 * @param errorTime the time of error.
+	 * @param error the error.
 	 */
-	public RequestElevatorMessage(Date timestamp, int floorNumber,  DirectionType direction, int destination) {
+	public RequestElevatorMessage(Date timestamp, int floorNumber,  DirectionType direction, int destination, int errorTime, ErrorType error) {
 		super(SenderType.FLOOR, timestamp, MessageType.REQUEST);
 		this.floorNumber = floorNumber;
 		this.destination = destination;
 		this.direction = direction;
+		this.errorTime = errorTime;
+		this.error = error;
 	}
 	
 	/**
@@ -40,9 +50,26 @@ public class RequestElevatorMessage extends Message {
 	 */
 	@Override
 	public String getDescription() {
-		return "From: " + floorNumber + " To: " + destination;
+		return "From: " + floorNumber + " To: " + destination + " With " + String.valueOf(error) + " at time: " + errorTime;
 	}
 	
+	/**
+	 * Returns the error time.
+	 * 
+	 * @return the error time.
+	 */
+	public int getErrorTime() {
+		return this.errorTime;
+	}
+	
+	/**
+	 * Returns the error.
+	 * 
+	 * @return the error.
+	 */
+	public ErrorType getError() {
+		return this.error;
+	}
 	
 	/**
 	 * Returns the requested destination.
