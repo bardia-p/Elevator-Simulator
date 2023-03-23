@@ -13,6 +13,7 @@ import java.util.Scanner;
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;
+import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
@@ -89,10 +90,12 @@ public class Floor extends ClientRPC implements Runnable {
 		
 		int floor = Integer.parseInt(entry[1]);
 		int destination = Integer.parseInt(entry[3]);
+		int timeError = Integer.parseInt(entry[4]);
 		
 		DirectionType direction = DirectionType.valueOf(entry[2]);
+		ErrorType error = ErrorType.valueOf(entry[5]);
 		
-		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination);
+		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination, timeError, error);
 	}
 	
 	/**
@@ -130,6 +133,16 @@ public class Floor extends ClientRPC implements Runnable {
 	 */
 	private void addRequest(RequestElevatorMessage request) {
 		this.elevatorRequests.offer(request);
+	}
+	
+	/**
+	 * Resolves when an elevator is stuck.
+	 * @param currentTrips trips currently held by the stuck elevator.
+	 */
+	private void resolveStuckPassengers(ArrayList<ElevatorTrip> currentTrips) {
+		for (ElevatorTrip trip : currentTrips) {
+			dropoffs.remove((Integer)trip.getDropoff());
+		}
 	}
 	
 	/**
@@ -174,7 +187,10 @@ public class Floor extends ClientRPC implements Runnable {
 				}				
  
 			}else if (message.getType() == MessageType.START) {
-				canStart = true;
+				this.canStart = true;
+			}else if (message.getType() == MessageType.ELEVATOR_STUCK) {
+				ElevatorStuckMessage elevatorStuckMessage = (ElevatorStuckMessage)message;
+				this.resolveStuckPassengers(elevatorStuckMessage.getCurrentTrips());
 			}
 		}
 		

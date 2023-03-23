@@ -35,7 +35,9 @@ public class Logger {
 				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), ((ArrivedElevatorMessage)m).getArrivedFloor());
 			} else if (m.getType() == MessageType.DOORS_OPENED) {
 				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), m.getDirection() + ", " + ((DoorOpenedMessage)m).getArrivedFloor());
-			} else {
+			} else if (m.getType() == MessageType.ELEVATOR_STUCK) {
+				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), "");
+			}else {
 				addResult += String.format("%-15s | %-10s | ",  m.getDescription(), m.getDirection());
 			}
 			addResult += String.format(" %-10s | %-3s |", type == "RECEIVED" ? "*" : " ", type == "RECEIVED" ? " " : "*");

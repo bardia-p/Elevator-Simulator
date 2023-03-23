@@ -15,5 +15,6 @@ public enum MessageType {
 	GET_UPDATE,
 	ACKMessage,
 	UPDATE_ELEVATOR_INFO,
-	EMPTY
+	EMPTY,
+	ELEVATOR_STUCK
 }
