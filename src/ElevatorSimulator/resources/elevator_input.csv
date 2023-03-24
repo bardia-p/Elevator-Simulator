@@ -1,6 +1,7 @@
-Time,Floor,Floor Button,Car Button, TimeError, Error
+Time,Floor,Floor Button,Car Button,TimeError,Error
 14:33:44.5,2,UP,4,0,null
 14:33:46.2,4,DOWN,3,1000,DOOR_INTERRUPT
 14:33:50.0,3,DOWN,1,3000,ELEVATOR_STUCK
 14:33:56.8,1,UP,3,0,null
 14:34:00.6,3,UP,4,2200,DOOR_INTERRUPT
+14:34:02.6,2,DOWN,1,1500,DOOR_INTERRUPT

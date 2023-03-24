@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
 
-import org.junit.jupiter.params.provider.NullEnum;
-
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;

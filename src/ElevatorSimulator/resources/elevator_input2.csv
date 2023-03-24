@@ -1,4 +1,4 @@
-Time,Floor,Floor Button,Car Button
-14:33:40.5,4,DOWN,1
-14:33:42.5,3,UP,5
-14:33:47.5,2,DOWN,1
+Time,Floor,Floor Button,Car Button,TimeError,Error
+14:33:40.5,4,DOWN,1,1000,DOOR_INTERRUPT
+14:33:42.5,3,UP,5,2500,ELEVATOR_STUCK
+14:33:47.5,2,DOWN,1,0,null

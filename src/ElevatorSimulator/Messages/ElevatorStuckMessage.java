@@ -61,4 +61,12 @@ public class ElevatorStuckMessage extends Message{
 	public ArrayList<ElevatorTrip> getRemainingTrips(){
 		return this.remainingTrips;
 	}
+	
+	/**
+	 * Returns the id of the elevator.
+	 * @return
+	 */
+	public int getElevatorId() {
+		return elevatorId;
+	}
 }

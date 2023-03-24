@@ -16,6 +16,9 @@ public class ElevatorInfo implements Serializable{
 	// Keeps track of the direction of the elevator.
 	private DirectionType directionType;
 	
+	// Keeps track of the parent state of the elevator.
+	private ElevatorState parentState; 
+	
 	// Keeps track of the state of the elevator.
 	private ElevatorState state; 
 	
@@ -30,14 +33,15 @@ public class ElevatorInfo implements Serializable{
 	 * The constructor for elevator info.
 	 * 
 	 * @param directionType, the direction of the elevator.
+	 * @param parentState, the parent state of the elevator.
 	 * @param state, the state of the elevator.
 	 * @param curFloor, the current floor for the elevator.
 	 * @param elevatorId, the elevator id.
 	 * @param numRequest, number of requests for the elevator.
 	 */
-	public ElevatorInfo(DirectionType directionType, ElevatorState state, int curFloor, int elevatorId,
-			int numRequest) {
+	public ElevatorInfo(DirectionType directionType, ElevatorState parentState, ElevatorState state, int curFloor, int elevatorId, int numRequest) {
 		this.directionType = directionType;
+		this.parentState = parentState;
 		this.state = state;
 		this.curFloor = curFloor;
 		this.elevatorId = elevatorId;
@@ -52,6 +56,16 @@ public class ElevatorInfo implements Serializable{
 	public DirectionType getDirection() {
 		return directionType;
 	}
+	
+	/**
+	 * Return the elevator parent state.
+	 * 
+	 * @return the elevator parent state.
+	 */
+	public ElevatorState getParentState() {
+		return parentState;
+	}
+	
 	
 	/**
 	 * Return the elevator state.

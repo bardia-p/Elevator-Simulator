@@ -3,6 +3,8 @@
  */
 package ElevatorSimulator.Elevator;
 
+import java.io.Serializable;
+
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.ErrorType;
 
@@ -12,7 +14,8 @@ import ElevatorSimulator.Messages.ErrorType;
  * @author Andre Hazim
  * @author Guy Morgenshtern
  */
-public class ElevatorTrip {
+@SuppressWarnings("serial")
+public class ElevatorTrip implements Serializable{
 	// Pickup and dropoff floors for the elevator.
 	private int pickup, dropoff; 
 	
