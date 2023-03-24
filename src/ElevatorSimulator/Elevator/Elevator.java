@@ -3,6 +3,7 @@ package ElevatorSimulator.Elevator;
 import java.util.ArrayList;
 import java.util.Date;
 
+import ElevatorSimulator.ErrorThread;
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
@@ -19,11 +20,12 @@ import ElevatorSimulator.Scheduler.Scheduler;
  *
  */
 public class Elevator extends ClientRPC implements Runnable {
-	// Elevator's current state
-	private ElevatorState state;
 
-	// Check if the elevator is to continue running.
-	private boolean shouldRun;
+	// Elevator's current state
+	private ElevatorState childState;
+
+	// parent state for elevator denoting upper most state
+	private ElevatorState parentState;
 
 	// elevator's current floor
 	private int floor;
@@ -51,9 +53,13 @@ public class Elevator extends ClientRPC implements Runnable {
 
 	public static int MOVE_DELAY = 5000;
 
+	private static final int MAX_FAULT_TIME = 1000000;
+
 	public static int DOOR_DELAY = 1000;
 
-	public static int BOARDING_DELAY = 1000;
+	public static int BOARDING_DELAY = 3000;
+
+	public static int DOOR_INTERRUPT_DELAY = 1000;
 
 	/**
 	 * Constructor for the elevator.
@@ -62,9 +68,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	public Elevator(int id, int numFloors) {
 		super(Scheduler.ELEVATOR_PORT);
-		this.shouldRun = true;
-		this.state = null;
-		this.floor = 1; // not sure if we should pass in start position
+		this.childState = null;
+		this.parentState = ElevatorState.OPERATIONAL;
+		this.floor = 1;
 		this.direction = DirectionType.UP;
 		this.elevatorNumber = id;
 
@@ -108,7 +114,8 @@ public class Elevator extends ClientRPC implements Runnable {
 		} else if (message.getType() == MessageType.REQUEST) {
 			RequestElevatorMessage requestElevatorMessage = (RequestElevatorMessage) message;
 			ElevatorTrip elevatorTrip = new ElevatorTrip(requestElevatorMessage.getFloor(),
-					requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection());
+					requestElevatorMessage.getDestination(), requestElevatorMessage.getDirection(),
+					requestElevatorMessage.getError(), requestElevatorMessage.getErrorTime());
 			trips.add(elevatorTrip);
 
 			// pick the direction of the first assigned message.
@@ -129,8 +136,8 @@ public class Elevator extends ClientRPC implements Runnable {
 		// cannot fulfill requests in the direction, toggle directions.
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 
-		sendRequest(
-				new UpdateElevatorInfoMessage(new ElevatorInfo(direction, state, floor, elevatorNumber, trips.size())));
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
@@ -176,7 +183,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * Kills the elevator subsystem.
 	 */
 	private void kill() {
-		this.shouldRun = false;
+		this.parentState = null;
 	}
 
 	/**
@@ -185,7 +192,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @return ElevatorState
 	 */
 	public ElevatorState getState() {
-		return state;
+		return childState;
 	}
 
 	/**
@@ -226,17 +233,19 @@ public class Elevator extends ClientRPC implements Runnable {
 		}
 
 		try {
-			currentEventTime.setTime(currentEventTime.getTime() + MOVE_DELAY);
 			Thread.sleep(MOVE_DELAY);
-			changeState(ElevatorState.ARRIVED);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return;
 		}
+		
+		currentEventTime.setTime(currentEventTime.getTime() + MOVE_DELAY);
+		changeState(ElevatorState.ARRIVED);
 
 	}
 
 	/**
 	 * Checks to see if the elevator can perform a pickup.
+	 * 
 	 * @return
 	 */
 	private boolean canPerformPickup() {
@@ -273,6 +282,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		boolean isPickUp = false;
 		boolean isDropoff = false;
 		ArrayList<ElevatorTrip> removalList = new ArrayList<>();
+		int timeToFault = MAX_FAULT_TIME;
 
 		int numDropoffs = 0;
 		int numPickups = 0;
@@ -290,6 +300,9 @@ public class Elevator extends ClientRPC implements Runnable {
 				this.floorLights[trip.getDropoff() - 1] = true;
 				stopDirection = trip.getDirectionType();
 				numPickups++;
+				if (trip.getFault() == ErrorType.ELEVATOR_STUCK) {
+					timeToFault = timeToFault > trip.getTimeToFault() ? trip.getTimeToFault() : timeToFault;
+				}
 			}
 		}
 
@@ -308,10 +321,14 @@ public class Elevator extends ClientRPC implements Runnable {
 					this.floorLights[trip.getDropoff() - 1] = true;
 					stopDirection = trip.getDirectionType();
 					numPickups++;
+					if (trip.getFault() == ErrorType.ELEVATOR_STUCK) {
+
+						timeToFault = timeToFault > trip.getTimeToFault() ? trip.getTimeToFault() : timeToFault;
+					}
 				}
 			}
 		}
-		
+
 		for (ElevatorTrip trip : trips) {
 			if (trip.getDropoff() == floor && trip.isPickedUp()) {
 				isDropoff = true;
@@ -342,8 +359,13 @@ public class Elevator extends ClientRPC implements Runnable {
 			changeState(ElevatorState.POLL);
 		}
 
-		sendRequest(
-				new UpdateElevatorInfoMessage(new ElevatorInfo(direction, state, floor, elevatorNumber, trips.size())));
+		System.out.println(timeToFault + " isPickUp " + isPickUp);
+		if (isPickUp && timeToFault < MAX_FAULT_TIME) {
+			(new Thread(new ErrorThread(timeToFault, ErrorType.ELEVATOR_STUCK, this, Thread.currentThread()))).start();
+		}
+
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
@@ -351,27 +373,36 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	private void open() {
 		try {
-			currentEventTime.setTime(currentEventTime.getTime() + DOOR_DELAY);
 			Thread.sleep(DOOR_DELAY); // change to calculated time
-			changeState(ElevatorState.BOARDING);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return;
 		}
 
+		currentEventTime.setTime(currentEventTime.getTime() + DOOR_DELAY);
+		changeState(ElevatorState.BOARDING);
 	}
 
 	/**
 	 * boarding state behaviour - add boarding delay of X seconds boarding -> close
 	 */
 	private void boarding() {
+		
+		for (ElevatorTrip trip : trips) {
+			if (trip.getFault() == ErrorType.DOOR_INTERRUPT && trip.isPickedUp() && trip.getPickup() == this.floor) {
+				(new Thread(new ErrorThread(trip.getTimeToFault(), trip.getFault(), this, Thread.currentThread()))).start();
+				trip.setFault(null);
+			}
+		}
+		
 		try {
-			currentEventTime.setTime(currentEventTime.getTime() + BOARDING_DELAY);
 			Thread.sleep(BOARDING_DELAY);
-			changeState(ElevatorState.CLOSE);
 
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return;
 		}
+
+		currentEventTime.setTime(currentEventTime.getTime() + BOARDING_DELAY);
+		changeState(ElevatorState.CLOSE);
 	}
 
 	/**
@@ -381,14 +412,15 @@ public class Elevator extends ClientRPC implements Runnable {
 		printFloorLightStatus();
 
 		try {
-			currentEventTime.setTime(currentEventTime.getTime() + DOOR_DELAY);
 			Thread.sleep(DOOR_DELAY);
-			changeState(ElevatorState.POLL);
-			sendRequest(new UpdateElevatorInfoMessage(
-					new ElevatorInfo(direction, state, floor, elevatorNumber, trips.size())));
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return;
 		}
+
+		currentEventTime.setTime(currentEventTime.getTime() + DOOR_DELAY);
+		changeState(ElevatorState.POLL);
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
@@ -405,16 +437,26 @@ public class Elevator extends ClientRPC implements Runnable {
 			}
 			processMessage(incoming);
 		} else if (trips.size() != 0) {
-			
+
 			if (canPerformPickup()) {
 				changeState(ElevatorState.ARRIVED);
 			} else {
 				changeState(ElevatorState.MOVING);
 			}
-			
+
 			sendRequest(new UpdateElevatorInfoMessage(
-					new ElevatorInfo(direction, state, floor, elevatorNumber, trips.size())));
+					new ElevatorInfo(direction, childState, floor, elevatorNumber, trips.size())));
 		}
+	}
+
+	private void doorInterrupt() {
+		try {
+			Thread.sleep(DOOR_INTERRUPT_DELAY);
+		} catch (InterruptedException e) {
+			return;
+		}
+		currentEventTime.setTime(currentEventTime.getTime() + DOOR_INTERRUPT_DELAY);
+		changeState(ElevatorState.BOARDING);
 	}
 
 	/**
@@ -422,25 +464,28 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	@Override
 	public void run() {
-		while (this.shouldRun) {
-			if (state.equals(ElevatorState.MOVING)) {
+		while (this.parentState == ElevatorState.OPERATIONAL) {
+			if (childState.equals(ElevatorState.MOVING)) {
 				moving();
-			} else if (state.equals(ElevatorState.ARRIVED)) {
+			} else if (childState.equals(ElevatorState.ARRIVED)) {
 				arrived();
 
-			} else if (state.equals(ElevatorState.OPEN)) {
+			} else if (childState.equals(ElevatorState.OPEN)) {
 				open();
 
-			} else if (state.equals(ElevatorState.BOARDING)) {
+			} else if (childState.equals(ElevatorState.BOARDING)) {
 				boarding();
 
-			} else if (state.equals(ElevatorState.CLOSE)) {
+			} else if (childState.equals(ElevatorState.CLOSE)) {
 				closeDoors();
+
+			} else if (childState.equals(ElevatorState.DOOR_INTERRUPT)) {
+				doorInterrupt();
 
 			} else {
 				polling();
 			}
-			
+
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -448,7 +493,35 @@ public class Elevator extends ClientRPC implements Runnable {
 			}
 		}
 
+		if (parentState == ElevatorState.ELEVATOR_STUCK) {
+			sendRequest(
+					new ElevatorStuckMessage(currentEventTime, getCurrentTrips(), getRemainingTrips(), elevatorNumber));
+		}
 		close();
+	}
+
+	private ArrayList<ElevatorTrip> getRemainingTrips() {
+		ArrayList<ElevatorTrip> remainingTrips = new ArrayList<>();
+
+		for (ElevatorTrip trip : trips) {
+			if (!trip.isPickedUp()) {
+				remainingTrips.add(trip);
+			}
+		}
+
+		return remainingTrips;
+	}
+
+	private ArrayList<ElevatorTrip> getCurrentTrips() {
+
+		ArrayList<ElevatorTrip> currentTrips = new ArrayList<>();
+		for (ElevatorTrip trip : trips) {
+			if (trip.isPickedUp()) {
+				currentTrips.add(trip);
+			}
+		}
+
+		return currentTrips;
 	}
 
 	/**
@@ -458,6 +531,14 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	public int getNumTrips() {
 		return trips.size();
+	}
+
+	public void handleElevatorStuck() {
+		changeParentState(ElevatorState.ELEVATOR_STUCK);
+	}
+
+	public void handleDoorFault() {
+		changeState(ElevatorState.DOOR_INTERRUPT);
 	}
 
 	/**
@@ -477,9 +558,14 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * 
 	 * @param newState
 	 */
-	private void changeState(ElevatorState newState) {
+	private synchronized void changeState(ElevatorState newState) {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
-		state = newState;
+		childState = newState;
+	}
+
+	private void changeParentState(ElevatorState newState) {
+		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		this.parentState = newState;
 	}
 
 }

@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
 
+import org.junit.jupiter.params.provider.NullEnum;
+
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Timer;
@@ -93,7 +95,7 @@ public class Floor extends ClientRPC implements Runnable {
 		int timeError = Integer.parseInt(entry[4]);
 		
 		DirectionType direction = DirectionType.valueOf(entry[2]);
-		ErrorType error = ErrorType.valueOf(entry[5]);
+		ErrorType error = entry[5].equals("null") ? null : ErrorType.valueOf(entry[5]);
 		
 		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination, timeError, error);
 	}

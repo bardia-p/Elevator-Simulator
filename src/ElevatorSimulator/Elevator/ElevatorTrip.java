@@ -4,6 +4,7 @@
 package ElevatorSimulator.Elevator;
 
 import ElevatorSimulator.Messages.DirectionType;
+import ElevatorSimulator.Messages.ErrorType;
 
 /**
  * Class defining an elevator trip in a given flow.
@@ -19,6 +20,9 @@ public class ElevatorTrip {
 	private boolean pickedUp;
 	private DirectionType directionType;
 	
+	private ErrorType fault;
+	private int timeToFault;
+	
 	/**
 	 * Constructor of the elevator trip class.
 	 * @param pickUp floor to pick up
@@ -26,10 +30,24 @@ public class ElevatorTrip {
 	 * @param directionType direction required
 	 */
 	public ElevatorTrip(int pickUp, int dropOff, DirectionType directionType) {
+		this(pickUp, dropOff, directionType, null, -1);
+	}
+	
+	/**
+	 * Constructor of the elevator trip class.
+	 * @param pickUp floor to pick up
+	 * @param dropOff floor to drop off
+	 * @param directionType direction required
+	 * @param fault denotes a fault the trip should have
+	 * @param timeToFault time before fault should occur relative to pickup time
+	 */
+	public ElevatorTrip(int pickUp, int dropOff, DirectionType directionType, ErrorType fault, int timeToFault) {
 		this.directionType = directionType;
 		this.dropoff = dropOff;
 		this.pickup = pickUp;
 		this.pickedUp = false;
+		this.fault = fault;
+		this.timeToFault = timeToFault;
 		
 	}
 
@@ -72,4 +90,26 @@ public class ElevatorTrip {
 	public DirectionType getDirectionType() {
 		return directionType;
 	}
+
+	/**
+	 * Getter for Elevator error type
+	 * @return ErrorType indicating error
+	 */
+	public ErrorType getFault() {
+		return fault;
+	}
+
+	/**
+	 * Getter for time to fault
+	 * @return int denoting time until fault occurs relative to pickup
+	 */
+	public int getTimeToFault() {
+		return timeToFault;
+	}
+	
+	public void setFault(ErrorType error) {
+		this.fault = error;
+	}
+	
+	
 }
