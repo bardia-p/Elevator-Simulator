@@ -398,7 +398,6 @@ public class Elevator extends ClientRPC implements Runnable {
 			Thread.sleep(BOARDING_DELAY);
 
 		} catch (InterruptedException e) {
-			System.out.println("Eghsikuse");
 			return;
 		}
 
