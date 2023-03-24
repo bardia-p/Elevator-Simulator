@@ -50,6 +50,9 @@ public class Elevator extends ClientRPC implements Runnable {
 
 	// Indicates that the elevator has no more incoming requests.
 	private boolean canKill;
+	
+	// Logger object.
+	private Logger logger;
 
 	public static int MOVE_DELAY = 5000;
 
@@ -72,6 +75,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		this.parentState = ElevatorState.OPERATIONAL;
 		this.floor = 1;
 		this.direction = DirectionType.UP;
+		this.logger = new Logger();
 		this.elevatorNumber = id;
 
 		this.trips = new ArrayList<>();
@@ -420,7 +424,7 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * close state behaviour - add doors closing delay of X seconds close -> poll
 	 */
 	private void closeDoors() {
-		printFloorLightStatus();
+		logger.printLightStatus(this.elevatorNumber, this.floorLights);
 
 		try {
 			Thread.sleep(DOOR_DELAY);
@@ -569,18 +573,6 @@ public class Elevator extends ClientRPC implements Runnable {
 	 */
 	public void handleDoorFault() {
 		changeState(ElevatorState.DOOR_INTERRUPT);
-	}
-
-	/**
-	 * prints floor light statuses
-	 */
-	private void printFloorLightStatus() {
-		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n----------------------";
-		for (int i = 0; i < this.floorLights.length; i++) {
-			elevatorLights += "\n| Floor " + (i + 1) + " light: " + (this.floorLights[i] ? "on " : "off") + " |";
-		}
-		elevatorLights += "\n----------------------\n";
-		System.out.println(elevatorLights);
 	}
 
 	/**

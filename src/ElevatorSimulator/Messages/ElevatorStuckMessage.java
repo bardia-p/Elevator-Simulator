@@ -37,14 +37,6 @@ public class ElevatorStuckMessage extends Message{
 	}
 	
 	/**
-	 * Method to print description of elevator stuck message.
-	 */
-	@Override
-	public String getDescription() {
-		return super.getType() + " Elevator ID: " + this.elevatorId;
-	}
-	
-	/**
 	 * Method to get the current trips.
 	 * 
 	 * @return ArrayList of current trips.
@@ -60,6 +52,15 @@ public class ElevatorStuckMessage extends Message{
 	 */
 	public ArrayList<ElevatorTrip> getRemainingTrips(){
 		return this.remainingTrips;
+	}
+	
+	/**
+	 * Method to get the name of the error.
+	 * 
+	 * @return name of error.
+	 */
+	public String getError() {
+		return "STUCK";
 	}
 	
 	/**
