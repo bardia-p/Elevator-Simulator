@@ -67,12 +67,12 @@ public class FloorParseTest{
 	}
 	
 	/**
-	 * This tests the Floor's functionality for parsing a request CSV that has elevator stuck faults within it
+	 * This tests the Floor's functionality for parsing a request CSV that has elevator door interrupt faults within it
 	 *
 	 */
 	@Test
 	void testParseRequestsWithInterruptFaults() {
-		System.out.println("\n----------testParseRequestsWithFaults----------\n");
+		System.out.println("\n----------testParseRequestsWithInterruptFaults----------\n");
 
 		Thread.currentThread().setName("FLOOR TEST THREAD");
 		
