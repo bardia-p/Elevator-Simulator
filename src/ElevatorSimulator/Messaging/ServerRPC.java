@@ -23,7 +23,7 @@ import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
  */
 public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
-	private DatagramPacket sendPacket, receivePacket;
+	protected DatagramPacket sendPacket, receivePacket;
 	
 	// The socket used for sending and receiving packet.
 	private DatagramSocket sendReceiveSocket;
@@ -35,11 +35,10 @@ public class ServerRPC implements Runnable {
 	public static final int TIMEOUT = 30000;
 	
 	// Keeps track of the message queue for the shared data.
-	private MessageQueue queue;
+	protected MessageQueue queue;
 	
 	// Ensures the server RPC can keep running.
 	private boolean shouldRun;
-	
 	
 	/**
 	 * The constructor for the class.
@@ -55,8 +54,7 @@ public class ServerRPC implements Runnable {
 			// Set a timeout for the socket.
 			sendReceiveSocket.setSoTimeout(TIMEOUT);		
 			this.queue = queue;
-			this.shouldRun = true;
-						
+			this.shouldRun = true;						
 		} catch (SocketException se) { // Can't create the socket.
 			se.printStackTrace();
 			System.exit(1);
@@ -66,7 +64,7 @@ public class ServerRPC implements Runnable {
 	/**
 	 * Receives a packet and from a source (either client or host)
 	 */
-	private void receive() {
+	protected void receive() {
 		// Construct a DatagramPacket for receiving packets up
 		// to 100 bytes long (the length of the byte array).
 		byte data[] = new byte[100000];
@@ -93,9 +91,9 @@ public class ServerRPC implements Runnable {
 	 * 
 	 * @return the proper reply for the packet.
 	 */
-	private Message processPacket() {
+	protected synchronized Message processPacket() {
 		Message receiveMessage = Serializer.deserializeMessage(receivePacket.getData());
-		
+				
 		if (receiveMessage == null) {
 			return null;
 		}
@@ -140,7 +138,7 @@ public class ServerRPC implements Runnable {
 	 * 
 	 * @param content, the contents of the packet to send back.
 	 */
-	private void send(Message replyMessage) {
+	protected void send(Message replyMessage) {
 		byte[] content = Serializer.serializeMessage(replyMessage);
 		
 		// Create a new datagram packet to reply to the source.
@@ -159,7 +157,7 @@ public class ServerRPC implements Runnable {
 	/**
 	 * Closes the appropriate sockets.
 	 */
-	public void close() {
+	protected void close() {
 		sendReceiveSocket.close();
 		shouldRun = false;
 	}
