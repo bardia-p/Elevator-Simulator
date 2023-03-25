@@ -49,7 +49,7 @@ public class ElevatorIntegrationTest {
 	 */
 	@BeforeEach
 	public void init() {
-		Thread.currentThread().setName("ELEVATOR TEST THREAD");
+		Thread.currentThread().setName("ELEVATOR INTEGRATION TEST THREAD");
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.ELEVATOR_PORT);
@@ -89,7 +89,7 @@ public class ElevatorIntegrationTest {
 	 */
 	@Test
 	public void testOneElevatorRequest() throws InterruptedException {
-		System.out.println("\n----------testOneElevatorRequest----------\n");
+		System.out.println("\n----------IntegrationTest.testOneElevatorRequest----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -121,32 +121,28 @@ public class ElevatorIntegrationTest {
 				if (newMessage.getType() == MessageType.DOORS_OPENED) {
 					DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
 					
-					if (doorsOpenMessage.getStopType() == StopType.PICKUP) {						
-						assertEquals(ElevatorState.OPEN, elevator.getState());
-						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
-						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
-					} else {						
-						assertEquals(ElevatorState.OPEN, elevator.getState());
-						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
-						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					
+					if (doorsOpenMessage.getStopType() == StopType.DROPOFF) {						
 						canKill = true;
 					}
 				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
-					ElevatorInfo elevator = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
 					
 					// The update caused the floor to change
-					if (elevator.getFloorNumber() != expectedFloors[floorIterator]){
+					if (elevatorInfo.getFloorNumber() != expectedFloors[floorIterator]){
 						floorIterator++;
 					}
 					
 					// Confirm individual states.
-					if (elevator.getState() == ElevatorState.ARRIVED) {
-						assertEquals(expectedFloors[floorIterator], elevator.getFloorNumber());
-					} else if (elevator.getState() == ElevatorState.OPEN) {
+					if (elevatorInfo.getState() == ElevatorState.ARRIVED) {
+						assertEquals(expectedFloors[floorIterator], elevatorInfo.getFloorNumber());
+					} else if (elevatorInfo.getState() == ElevatorState.OPEN) {
 						numDoorOpen++;
-					} else if (elevator.getState() == ElevatorState.BOARDING) {
+					} else if (elevatorInfo.getState() == ElevatorState.BOARDING) {
 						numBoarding++;
-					} else if (elevator.getState() == ElevatorState.CLOSE) {
+					} else if (elevatorInfo.getState() == ElevatorState.CLOSE) {
 						numDoorClosed++;
 						
 						// dropped off the last request.
@@ -170,6 +166,179 @@ public class ElevatorIntegrationTest {
 	}
 	
 	/**
+	 * The unit test depicts the elevator picking up multiple requests at once.
+	 * It confirms that the elevator will travel in the most efficient flow.
+	 * 
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testMultipleElevatorRequest() throws InterruptedException {
+		System.out.println("\n----------IntegrationTest.testMultipleElevatorRequest----------\n");
+
+		assertNotNull(elevator);
+		assertEquals(1, elevator.getFloorNumber());
+		assertEquals(ElevatorState.POLL, elevator.getState());
+
+		// Starts up the elevator thread.
+		Thread elevatorThread = new Thread(elevator, "ELEVATOR THREAD");
+		elevatorThread.start();
+
+		// Assigns the requests to the elevator.
+		// The elevator should have the following flow
+		// Pickup 4 -> Pickup and Dropoff at 2 -> Dropoff at 1.
+		Message message = new RequestElevatorMessage(new Date(), 4, DirectionType.DOWN, 2, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		
+		message = new RequestElevatorMessage(new Date(), 2, DirectionType.DOWN, 1, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		
+		boolean shouldRun = true;
+		boolean canKill = false;
+
+		// Parameters used to validate to test elevator states.
+		int[] expectedFloors = {1, 2, 3, 4, 3, 2, 1};
+		int floorIterator = 0;
+		int numDoorOpen = 0;
+		int numDoorClosed = 0;
+		int numBoarding = 0;
+
+		while (shouldRun) {
+			Message newMessage = serverRPC.getCurrentMessage();
+			
+			if (newMessage != null) {
+				// Confirm the door open messages.
+				if (newMessage.getType() == MessageType.DOORS_OPENED) {
+					DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
+					
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					
+					if (doorsOpenMessage.getStopType() == StopType.DROPOFF) {						
+						canKill = true;
+					}
+				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
+					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+					
+					// The update caused the floor to change
+					if (elevatorInfo.getFloorNumber() != expectedFloors[floorIterator]){
+						floorIterator++;
+					}
+					
+					// Confirm individual states.
+					if (elevatorInfo.getState() == ElevatorState.ARRIVED) {
+						assertEquals(expectedFloors[floorIterator], elevatorInfo.getFloorNumber());
+					} else if (elevatorInfo.getState() == ElevatorState.OPEN) {
+						numDoorOpen++;
+					} else if (elevatorInfo.getState() == ElevatorState.BOARDING) {
+						numBoarding++;
+					} else if (elevatorInfo.getState() == ElevatorState.CLOSE) {
+						numDoorClosed++;
+						
+						// dropped off the last request.
+						if (canKill) {
+							shouldRun = false;
+						}
+					}
+				}
+			}
+		}
+		// Kills the elevator thread.
+		queue.replyToElevator(new KillMessage(SenderType.FLOOR, new Date()), ELEVATOR_ID);
+
+		// Wait for the elevator thread to die.
+		elevatorThread.join();
+		
+		// Check the number of states the elevator went through.
+		assertEquals(3, numDoorOpen);
+		assertEquals(3, numBoarding);
+		assertEquals(3, numDoorClosed);
+	}
+	
+	/**
+	 * The unit test depicts the elevator picking up a request with the same pickup and destination.
+	 * It confirms that the elevator will proceed as expected.
+	 * 
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testElevatorRequestSameFloor() throws InterruptedException {
+		System.out.println("\n----------IntegrationTest.testElevatorRequestSameFloor----------\n");
+
+		assertNotNull(elevator);
+		assertEquals(1, elevator.getFloorNumber());
+		assertEquals(ElevatorState.POLL, elevator.getState());
+
+		// Starts up the elevator thread.
+		Thread elevatorThread = new Thread(elevator, "ELEVATOR THREAD");
+		elevatorThread.start();
+
+		// Assigns the requests to the elevator.
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		
+		boolean shouldRun = true;
+		boolean canKill = false;
+
+		// Parameters used to validate to test elevator states.
+		int[] expectedFloors = {1,1};
+		int floorIterator = 0;
+		int numDoorOpen = 0;
+		int numDoorClosed = 0;
+		int numBoarding = 0;
+
+		while (shouldRun) {
+			Message newMessage = serverRPC.getCurrentMessage();
+			
+			if (newMessage != null) {
+				// Confirm the door open messages.
+				if (newMessage.getType() == MessageType.DOORS_OPENED) {
+					DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
+					
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					
+					if (doorsOpenMessage.getStopType() == StopType.PICKUP_AND_DROPOFF) {						
+						canKill = true;
+					}
+				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
+					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+					
+					// The update caused the floor to change
+					if (elevatorInfo.getFloorNumber() != expectedFloors[floorIterator]){
+						floorIterator++;
+					}
+					
+					// Confirm individual states.
+					if (elevatorInfo.getState() == ElevatorState.ARRIVED) {
+						assertEquals(expectedFloors[floorIterator], elevatorInfo.getFloorNumber());
+					} else if (elevatorInfo.getState() == ElevatorState.OPEN) {
+						numDoorOpen++;
+					} else if (elevatorInfo.getState() == ElevatorState.BOARDING) {
+						numBoarding++;
+					} else if (elevatorInfo.getState() == ElevatorState.CLOSE) {
+						numDoorClosed++;
+						
+						// dropped off the last request.
+						if (canKill) {
+							shouldRun = false;
+						}
+					}
+				}
+			}
+		}
+		// Kills the elevator thread.
+		queue.replyToElevator(new KillMessage(SenderType.FLOOR, new Date()), ELEVATOR_ID);
+
+		// Wait for the elevator thread to die.
+		elevatorThread.join();
+		
+		// Check the number of states the elevator went through.
+		assertEquals(1, numDoorOpen);
+		assertEquals(1, numBoarding);
+		assertEquals(1, numDoorClosed);
+	}
+	
+	/**
 	 * Tests the elevator in the presence of a transient fault.
 	 * Confirms the elevator still goes through its request as expect.
 	 * Confirms the elevator did an extra boarding state.
@@ -178,7 +347,7 @@ public class ElevatorIntegrationTest {
 	 */
 	@Test
 	public void testElevatorTransientFault() throws InterruptedException {
-		System.out.println("\n----------testElevatorTransientFault----------\n");
+		System.out.println("\n----------IntegrationTest.testElevatorTransientFault----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -211,34 +380,30 @@ public class ElevatorIntegrationTest {
 				if (newMessage.getType() == MessageType.DOORS_OPENED) {
 					DoorOpenedMessage doorsOpenMessage = (DoorOpenedMessage) newMessage;
 					
-					if (doorsOpenMessage.getStopType() == StopType.PICKUP) {						
-						assertEquals(ElevatorState.OPEN, elevator.getState());
-						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
-						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
-					} else {						
-						assertEquals(ElevatorState.OPEN, elevator.getState());
-						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
-						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
+					assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
+					
+					if (doorsOpenMessage.getStopType() == StopType.DROPOFF) {						
 						canKill = true;
 					}
 				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
-					ElevatorInfo elevator = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
 					
 					// The update caused the floor to change
-					if (elevator.getFloorNumber() != expectedFloors[floorIterator]){
+					if (elevatorInfo.getFloorNumber() != expectedFloors[floorIterator]){
 						floorIterator++;
 					}
 					
 					// Confirm individual states.
-					if (elevator.getState() == ElevatorState.ARRIVED) {
-						assertEquals(expectedFloors[floorIterator], elevator.getFloorNumber());
-					} else if (elevator.getState() == ElevatorState.OPEN) {
+					if (elevatorInfo.getState() == ElevatorState.ARRIVED) {
+						assertEquals(expectedFloors[floorIterator], elevatorInfo.getFloorNumber());
+					} else if (elevatorInfo.getState() == ElevatorState.OPEN) {
 						numDoorOpen++;
-					} else if (elevator.getState() == ElevatorState.BOARDING) {
+					} else if (elevatorInfo.getState() == ElevatorState.BOARDING) {
 						numBoarding++;
-					} else if (elevator.getState() == ElevatorState.DOOR_INTERRUPT) {
+					} else if (elevatorInfo.getState() == ElevatorState.DOOR_INTERRUPT) {
 						numDoorInterrupt++; 
-					} else if (elevator.getState() == ElevatorState.CLOSE) {
+					} else if (elevatorInfo.getState() == ElevatorState.CLOSE) {
 						numDoorClosed++;
 						
 						// dropped off the last request.
@@ -254,7 +419,7 @@ public class ElevatorIntegrationTest {
 
 		// Wait for the elevator thread to die.
 		elevatorThread.join();
-		
+				
 		// Check the number of states the elevator went through.
 		assertEquals(2, numDoorOpen);
 		assertEquals(3, numBoarding); // one more boarding state due to the transient fault.
@@ -270,7 +435,7 @@ public class ElevatorIntegrationTest {
 	 */
 	@Test
 	public void testElevatorSystemFault() throws InterruptedException {
-		System.out.println("\n----------testElevatorSystemFault----------\n");
+		System.out.println("\n----------IntegrationTest.testElevatorSystemFault----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -300,21 +465,20 @@ public class ElevatorIntegrationTest {
 					
 					// Picked up the request.
 					if (doorsOpenMessage.getStopType() == StopType.PICKUP) {						
-						assertEquals(ElevatorState.OPEN, elevator.getState());
 						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
 						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
 					}
 				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
-					ElevatorInfo elevator = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
 					
 					// The update caused the floor to change
-					if (elevator.getFloorNumber() != expectedFloors[floorIterator]){
+					if (elevatorInfo.getFloorNumber() != expectedFloors[floorIterator]){
 						floorIterator++;
 					}
 					
 					// Confirm individual states.
-					if (elevator.getState() == ElevatorState.ARRIVED) {
-						assertEquals(expectedFloors[floorIterator], elevator.getFloorNumber());
+					if (elevatorInfo.getState() == ElevatorState.ARRIVED) {
+						assertEquals(expectedFloors[floorIterator], elevatorInfo.getFloorNumber());
 					}
 				} else if (newMessage.getType() == MessageType.ELEVATOR_STUCK) {
 					ElevatorStuckMessage stuckMessage = (ElevatorStuckMessage) newMessage;
