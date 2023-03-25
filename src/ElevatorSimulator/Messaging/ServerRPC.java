@@ -23,7 +23,8 @@ import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
  */
 public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
-	protected DatagramPacket sendPacket, receivePacket;
+	private DatagramPacket sendPacket;
+	private DatagramPacket receivePacket;
 	
 	// The socket used for sending and receiving packet.
 	protected DatagramSocket sendReceiveSocket;
@@ -31,15 +32,15 @@ public class ServerRPC implements Runnable {
 	// The port used to send the packets to.
 	private int sourcePort;
 	
-	// The timeout used for closing the socket.
-	public static final int TIMEOUT = 30000;
-	
 	// Keeps track of the message queue for the shared data.
 	protected MessageQueue queue;
 	
 	// Ensures the server RPC can keep running.
 	private boolean shouldRun;
 	
+  // The timeout used for closing the socket.
+	public static final int TIMEOUT = 30000;
+
 	/**
 	 * The constructor for the class.
 	 * 
