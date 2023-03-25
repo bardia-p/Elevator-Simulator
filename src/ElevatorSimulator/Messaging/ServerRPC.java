@@ -18,13 +18,13 @@ import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 /**
  * The ServerRPC class in charge of receiving elevator/floor requests and forwarding them.
  * 
- * @author bardiaparmoun
+ * @author Bardia Parmoun
  *
  */
 public class ServerRPC implements Runnable {
 	// Used to hold the send and receive packets.
 	private DatagramPacket sendPacket;
-	private DatagramPacket receivePacket;
+	protected DatagramPacket receivePacket;
 	
 	// The socket used for sending and receiving packet.
 	protected DatagramSocket sendReceiveSocket;
