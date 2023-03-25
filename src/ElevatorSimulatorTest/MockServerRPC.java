@@ -1,5 +1,7 @@
 package ElevatorSimulatorTest;
 
+import java.net.SocketException;
+
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Serializer;
 import ElevatorSimulator.Messages.ACKMessage;
@@ -31,6 +33,11 @@ public class MockServerRPC extends ServerRPC {
 	public MockServerRPC(MessageQueue queue, int port) {
 		super(queue, port);
 		currentMessage = null;
+		try {
+			this.sendReceiveSocket.setSoTimeout(10000);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

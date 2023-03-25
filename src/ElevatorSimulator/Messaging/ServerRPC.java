@@ -26,7 +26,7 @@ public class ServerRPC implements Runnable {
 	protected DatagramPacket sendPacket, receivePacket;
 	
 	// The socket used for sending and receiving packet.
-	private DatagramSocket sendReceiveSocket;
+	protected DatagramSocket sendReceiveSocket;
 	
 	// The port used to send the packets to.
 	private int sourcePort;
@@ -76,12 +76,9 @@ public class ServerRPC implements Runnable {
 			sendReceiveSocket.receive(receivePacket);
 		} catch (IOException e) {
 			close();
-			e.printStackTrace();
-			System.exit(1);
+			shouldRun = false;
+			return;
 		}
-
-		// Process the received datagram.
-		//System.out.println(Thread.currentThread().getName() + ": Packet received:\n");
 		
 		sourcePort = receivePacket.getPort();
 	}
@@ -159,14 +156,18 @@ public class ServerRPC implements Runnable {
 	 */
 	protected void close() {
 		sendReceiveSocket.close();
-		shouldRun = false;
 	}
 
 	/**
 	 * Kills the server RPC.
 	 */
 	public void kill() {
-		close();
+		// Decrease the timeout.
+		try {
+			sendReceiveSocket.setSoTimeout(1000);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}	
 		shouldRun = false;
 	}
 	
@@ -184,6 +185,8 @@ public class ServerRPC implements Runnable {
 				send(replyMessage);
 			}
 		}
+		
+		close();		
 	}
 
 }
