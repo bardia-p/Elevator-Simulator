@@ -33,7 +33,7 @@ public class Serializer {
 			
 			result = outputStream.toByteArray();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WARNING: INTERRUPTING SERIALIZATION!");
 		}
 
 		return result;
@@ -54,7 +54,7 @@ public class Serializer {
 			in = new ObjectInputStream(inputStream);
 			result = (Message)in.readObject();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WARNING: INTERRUPTING DESERIALIZATION!");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

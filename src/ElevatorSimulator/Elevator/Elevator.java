@@ -374,9 +374,6 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp && timeToFault < MAX_FAULT_TIME) {
 			(new Thread(new ErrorGenerator(timeToFault, ErrorType.ELEVATOR_STUCK, this, Thread.currentThread()))).start();
 		}
-
-		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
@@ -430,8 +427,6 @@ public class Elevator extends ClientRPC implements Runnable {
 
 		currentEventTime.setTime(currentEventTime.getTime() + DOOR_DELAY);
 		changeState(ElevatorState.POLL);
-		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
@@ -455,8 +450,7 @@ public class Elevator extends ClientRPC implements Runnable {
 				changeState(ElevatorState.MOVING);
 			}
 
-			sendRequest(new UpdateElevatorInfoMessage(
-					new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+
 		}
 	}
 
@@ -511,7 +505,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (parentState == ElevatorState.ELEVATOR_STUCK) {
 			sendRequest(new ElevatorStuckMessage(currentEventTime, getCurrentTrips(), getRemainingTrips(), elevatorNumber));
 		}
-		//close();
+		close();
 	}
 
 	/**
@@ -591,6 +585,8 @@ public class Elevator extends ClientRPC implements Runnable {
 	private synchronized void changeState(ElevatorState newState) {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		childState = newState;
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
 	}
 
 	/**
