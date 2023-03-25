@@ -54,6 +54,9 @@ public class Floor extends ClientRPC implements Runnable {
 	
 	// Checks to see if the floor subsystem can die.
 	private boolean canKill;
+	
+	// Logger object
+	private Logger logger;
 		
 	/**
 	 * ELevator constructor with a scheduler and a filename.
@@ -72,6 +75,7 @@ public class Floor extends ClientRPC implements Runnable {
 		this.canStart = false;
 		this.filename = fileName;
 		this.dropoffs = new ArrayList<>();
+		this.logger = new Logger();
 		
 		Arrays.fill(upLights, 0);
 		Arrays.fill(downLights, 0);
@@ -229,20 +233,10 @@ public class Floor extends ClientRPC implements Runnable {
 			}
 		}
 		
-		printLightStatus();
+		logger.printLightStatus(this.upLights, this.downLights);
 	}
 	
-	/**
-	 * A display of the light status
-	 */
-	private void printLightStatus() {
-		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n-------------------------------------------";
-		for(int i = 0; i<this.upLights.length;i++) {			
-			floorLightsDisplay += "\n| Floor " + (i + 1) + " UP light: " + (this.upLights[i] > 0? "on " : "off") + " | DOWN light: " + (this.downLights[i] != 0 ? "on " : "off") + " |";
-		}
-		floorLightsDisplay += "\n-------------------------------------------\n";
-		System.out.println(floorLightsDisplay);
-	}
+
 	
 	/**
 	 * Kills the current running instance of the floor.
