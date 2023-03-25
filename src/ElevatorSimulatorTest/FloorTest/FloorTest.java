@@ -1,4 +1,4 @@
-package ElevatorSimulatorTest;
+package ElevatorSimulatorTest.FloorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
