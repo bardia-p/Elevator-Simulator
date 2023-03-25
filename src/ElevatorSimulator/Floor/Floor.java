@@ -54,9 +54,6 @@ public class Floor extends ClientRPC implements Runnable {
 	
 	// Checks to see if the floor subsystem can die.
 	private boolean canKill;
-	
-	// Logger object
-	private Logger logger;
 		
 	/**
 	 * ELevator constructor with a scheduler and a filename.
@@ -75,7 +72,6 @@ public class Floor extends ClientRPC implements Runnable {
 		this.canStart = false;
 		this.filename = fileName;
 		this.dropoffs = new ArrayList<>();
-		this.logger = new Logger();
 		
 		Arrays.fill(upLights, 0);
 		Arrays.fill(downLights, 0);
@@ -233,7 +229,7 @@ public class Floor extends ClientRPC implements Runnable {
 			}
 		}
 		
-		logger.printLightStatus(this.upLights, this.downLights);
+		Logger.printLightStatus(this.upLights, this.downLights);
 	}
 	
 
