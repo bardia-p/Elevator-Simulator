@@ -61,7 +61,7 @@ public class Logger {
 	/**
 	 * A display of the light status for floor.
 	 */
-	public void printLightStatus(int[] upLights, int[] downLights) {
+	public static void printLightStatus(int[] upLights, int[] downLights) {
 		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n---------------------------------";
 		for(int i = 0; i<upLights.length;i++) {			
 			floorLightsDisplay += "\n| Floor " + (i + 1) + " | UP: " + (upLights[i] > 0? "on " : "off") + " | DOWN: " + (downLights[i] != 0 ? "on " : "off") + " |";
@@ -73,7 +73,7 @@ public class Logger {
 	/**
 	 * A display of the light status for elevator.
 	 */
-	public void printLightStatus(int elevatorNumber, boolean[] floorLights) {
+	public static void printLightStatus(int elevatorNumber, boolean[] floorLights) {
 		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n----------------";
 		for (int i = 0; i < floorLights.length; i++) {
 			elevatorLights += "\n| Floor " + (i + 1) + ": " + (floorLights[i] ? "on " : "off") + " |";
