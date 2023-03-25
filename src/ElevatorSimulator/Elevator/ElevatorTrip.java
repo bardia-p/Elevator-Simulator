@@ -17,7 +17,8 @@ import ElevatorSimulator.Messages.ErrorType;
 @SuppressWarnings("serial")
 public class ElevatorTrip implements Serializable{
 	// Pickup and dropoff floors for the elevator.
-	private int pickup, dropoff; 
+	private int pickup;
+	private int dropoff; 
 	
 	// Checks to see if the trip was picked up.
 	private boolean pickedUp;
@@ -110,6 +111,10 @@ public class ElevatorTrip implements Serializable{
 		return timeToFault;
 	}
 	
+	/**
+	 * Setter for fault error.
+	 * @param error error to set
+	 */
 	public void setFault(ErrorType error) {
 		this.fault = error;
 	}

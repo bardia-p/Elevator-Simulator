@@ -22,7 +22,8 @@ import ElevatorSimulator.Messages.SenderType;
  */
 public class ClientRPC {
 	// Used to hold the send and receive packets.
-	private DatagramPacket sendPacket, receivePacket;
+	private DatagramPacket sendPacket;
+	private DatagramPacket receivePacket;
 	
 	// The socket used for sending and receiving packet.
 	private DatagramSocket sendReceiveSocket;
@@ -39,7 +40,7 @@ public class ClientRPC {
 	 * 
 	 * @param sendPort, the port used to send the packets to.
 	 */
-	public ClientRPC( int sendPort) {
+	public ClientRPC(int sendPort) {
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine.
 			// This socket will be used to send and receive UDP Datagram packets.

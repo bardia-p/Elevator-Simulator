@@ -53,13 +53,13 @@ public class Elevator extends ClientRPC implements Runnable {
 
 	public static int MOVE_DELAY = 5000;
 
-	private static final int MAX_FAULT_TIME = 1000000;
-
 	public static int DOOR_DELAY = 1000;
 
 	public static int BOARDING_DELAY = 3000;
 
 	public static int DOOR_INTERRUPT_DELAY = 1000;
+
+	private static final int MAX_FAULT_TIME = 1000000;
 
 	/**
 	 * Constructor for the elevator.
