@@ -22,7 +22,7 @@ import ElevatorSimulator.Scheduler.Scheduler;
  */
 public class SchedulerTest {
 	// Keeps track of the scheduler object.
-	private Scheduler scheduler = new Scheduler();;
+	private Scheduler scheduler = new Scheduler();
 	
 	// The message queue object for the scheduler.
 	private MessageQueue queue;
@@ -75,14 +75,6 @@ public class SchedulerTest {
 		
 		// No available elevators.
 		assertEquals(-1, id3); 
-		
-		// Set elevator 1 to POLL.
-		queue.updateInfo(0, new ElevatorInfo(DirectionType.UP, ElevatorState.OPERATIONAL, ElevatorState.POLL, 2, 0, 1));
-		
-		int id4 = scheduler.getClosestElevator(message3);
-		
-		// Elevator 1 was selected again.
-		assertEquals(0, id4);
 	}
 	
 	/**
@@ -98,23 +90,56 @@ public class SchedulerTest {
 		// Set elevator 1 to MOVING.
 		queue.updateInfo(0, new ElevatorInfo(DirectionType.UP, ElevatorState.OPERATIONAL, ElevatorState.MOVING, 1, 0, 1));
 		
-		// Only second elevator is available now.
-		assertEquals(1, scheduler.getAvailableElevators().size());
-		assertEquals(1, scheduler.getAvailableElevators().get(0).getElevatorId());
+		// Both elevators are available, neither is stuck.
+		assertEquals(2, scheduler.getAvailableElevators().size());
+		assertEquals(0, scheduler.getAvailableElevators().get(0).getElevatorId());
 		
 		// Set elevator 2 to MOVING.
 		queue.updateInfo(1, new ElevatorInfo(DirectionType.UP, ElevatorState.OPERATIONAL, ElevatorState.MOVING, 1, 1, 1));
 		
-		// No available elevators.
-		assertEquals(0, scheduler.getAvailableElevators().size());
+		// Both elevators are available, neither is stuck.
+		assertEquals(2, scheduler.getAvailableElevators().size());
 		
 		// Set elevator 1 back to POLL.
 		queue.updateInfo(0, new ElevatorInfo(DirectionType.UP, ElevatorState.OPERATIONAL, ElevatorState.POLL, 1, 0, 1));
 		
-		// Only first elevator is available now.
-		assertEquals(1, scheduler.getAvailableElevators().size());
+		// Both elevators are available, neither is stuck.
+		assertEquals(2, scheduler.getAvailableElevators().size());
 		assertEquals(0, scheduler.getAvailableElevators().get(0).getElevatorId());
 		
+		// Set elevator 1 to STUCK.
+		queue.updateInfo(0, new ElevatorInfo(DirectionType.UP, ElevatorState.ELEVATOR_STUCK, ElevatorState.POLL, 1, 0, 1));
+		
+		// Only one elevator is available.
+		assertEquals(1, scheduler.getAvailableElevators().size());
+		assertEquals(1, scheduler.getAvailableElevators().get(0).getElevatorId());
 	}
-
+	
+	/**
+	 * Test re-routing the request in an elevator stuck event.
+	 */
+	@Test
+	public void testReroutingElevator() {
+		// Elevator request.
+		RequestElevatorMessage message1 = new RequestElevatorMessage(new Date(1000), 4, DirectionType.DOWN, 1, 0, null);
+			
+		// Two available elevators at the beginning.
+		assertEquals(2, scheduler.getAvailableElevators().size());	
+		
+		int id1 = scheduler.getClosestElevator(message1);
+		
+		// Elevator 1 was selected.
+		assertEquals(0, id1); 
+		
+		// Set elevator 1 to STUCK.
+		queue.updateInfo(0, new ElevatorInfo(DirectionType.UP, ElevatorState.ELEVATOR_STUCK, ElevatorState.POLL, 1, 0, 1));
+		
+		// Only one available elevator.
+		assertEquals(1, scheduler.getAvailableElevators().size());	
+		
+		int id2 = scheduler.getClosestElevator(message1);
+		
+		// Elevator 2 was selected.
+		assertEquals(1, id2); 
+	}
 }
