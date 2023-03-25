@@ -76,6 +76,64 @@ public class ElevatorUnitTest {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Tests to see if the elevator stays moving for the proper time.
+	 * 
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testElevatorMoving() throws InterruptedException {
+		System.out.println("\n----------UnitTest.testElevatorMoving----------\n");
+
+		assertNotNull(elevator);
+		assertEquals(1, elevator.getFloorNumber());
+		assertEquals(ElevatorState.POLL, elevator.getState());
+
+		// Starts up the elevator thread.
+		Thread elevatorThread = new Thread(elevator, "ELEVATOR THREAD");
+		elevatorThread.start();
+
+		// Assigns the request to the elevator.
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.UP, 2, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		
+		boolean shouldRun = true;
+
+		while (shouldRun) {
+			Message newMessage = serverRPC.getCurrentMessage();
+			
+			// Waits for the elevator to start moving
+			if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
+				ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+				
+				if (elevatorInfo.getState() == ElevatorState.MOVING) {
+					shouldRun = false; // it is starting to move
+				}
+			}
+		}
+
+		long startTime = System.currentTimeMillis();
+		
+		// Wait to get the door interrupt message.
+		Message newMessage = serverRPC.getCurrentMessage();
+		assertEquals(MessageType.UPDATE_ELEVATOR_INFO, newMessage.getType());
+		
+		ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
+		assertEquals(ElevatorState.ARRIVED, elevatorInfo.getState());
+
+		long endTime = System.currentTimeMillis();
+
+		// Confirm the elevator was moving for the proper amount.
+		assertEquals(Elevator.MOVE_DELAY, endTime - startTime, 1000);
+		
+		// Kills the elevator thread.
+		queue.replyToElevator(new KillMessage(SenderType.FLOOR, new Date()), ELEVATOR_ID);
+		
+		// Wait for the elevator thread to die.
+		elevatorThread.join();
+	}
+
 		
 	/**
 	 * Tests to see if the elevator opens its doors after a specified time.
@@ -95,7 +153,7 @@ public class ElevatorUnitTest {
 		elevatorThread.start();
 
 		// Assigns the request to the elevator.
-		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 1000, ErrorType.DOOR_INTERRUPT);
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
 		
 		boolean shouldRun = true;
@@ -150,7 +208,7 @@ public class ElevatorUnitTest {
 		elevatorThread.start();
 
 		// Assigns the request to the elevator.
-		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 1000, ErrorType.DOOR_INTERRUPT);
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
 		
 		boolean shouldRun = true;
@@ -209,7 +267,7 @@ public class ElevatorUnitTest {
 		elevatorThread.start();
 
 		// Assigns the request to the elevator.
-		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 1000, ErrorType.DOOR_INTERRUPT);
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
 		
 		boolean shouldRun = true;
