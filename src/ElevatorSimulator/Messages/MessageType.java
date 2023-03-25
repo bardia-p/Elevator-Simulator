@@ -13,7 +13,7 @@ public enum MessageType {
 	READY,
 	START,
 	GET_UPDATE,
-	ACKMessage,
+	ACKMESSAGE,
 	UPDATE_ELEVATOR_INFO,
 	EMPTY,
 	ELEVATOR_STUCK

@@ -21,13 +21,21 @@ public class ElevatorInfo implements Serializable{
 	
 	// Keeps track of the state of the elevator.
 	private ElevatorState state; 
+
+	/**
+	 * The current floor for the elevator
+	 */
+	private int curFloor;
 	
 	/**
-	 * - curFloor: The current floor for the elevator
-	 * - elevatorId: The elevator id.
-	 * - numRequest: The number of elevator requests.
+	 * The elevator id.
 	 */
-	private int curFloor, elevatorId, numRequest;
+	private int elevatorId;
+	
+	/**
+	 * The number of elevator requests.
+	 */
+	private int numRequest;
 	
 	/**
 	 * The constructor for elevator info.

@@ -49,10 +49,20 @@ public class DoorOpenedMessage extends Message{
 		return arrivedFloor;
 	}
 	
+	/**
+	 * Getter for numPickups.
+	 * 
+	 * @return numPickups value
+	 */
 	public int getNumPickups(){
 		return numPickups;
 	}
 	
+	/**
+	 * Getter for numDropoffs.
+	 * 
+	 * @return numDropoffs value
+	 */
 	public int getNumDropoffs(){
 		return numDropoffs;
 	}
@@ -60,17 +70,19 @@ public class DoorOpenedMessage extends Message{
 	/**
 	 * Gets the direction of the elevator 
 	 * 
-	 * @return the direction
+	 * @return the direction, DirectionType
 	 */
 	@Override
 	public DirectionType getDirection() {
 		return direction;
 	}
 	
-	
 	/**
-     * @Override
-     */
+	 * Override method to get description.
+	 * 
+	 * @return the description, String
+	 */
+	@Override
     public String getDescription() {
         return String.valueOf(this.type);
     }

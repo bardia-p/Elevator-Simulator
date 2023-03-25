@@ -27,12 +27,15 @@ public class Scheduler implements Runnable {
 
 	// Keeps track of the current request for the scheduler.
 	private Message currentRequest;
-
-	// The scheduler ports used for UDP.
-	public static final int ELEVATOR_PORT = 23, FLOOR_PORT = 69;
-
+	
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
+	
+	// The scheduler ports used for UDP.
+	public static final int ELEVATOR_PORT = 23;
+	public static final int FLOOR_PORT = 69;
+
+
 
 	/**
 	 * Default constructor for the Scheduler.
