@@ -13,7 +13,7 @@ import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Messaging.ServerRPC;
 
 /**
- * The ServerRPC class in charge of receiving elevator/floor requests and forwarding them.
+ * A mock version of the ServerRPC class with a work queue in the background which holds the latest request.
  * 
  * @author Bardia Parmoun
  *
@@ -34,6 +34,8 @@ public class MockServerRPC extends ServerRPC {
 	}
 	
 	/**
+	 * Overriding the processPacket() function of the ServerRPC to add custom functionality.
+	 * 
 	 * Process the received back and prepare the proper reply.
 	 * 
 	 * @return the proper reply for the packet.
@@ -46,11 +48,11 @@ public class MockServerRPC extends ServerRPC {
 			return null;
 		}
 		
+		// We don't need the GET_UPDATE messages.
 		if (receiveMessage.getType() != MessageType.GET_UPDATE) {
 			updateCurrentMessage(receiveMessage);
 		}
 						
-
 		Message replyMessage;
 		if (receiveMessage.getType() == MessageType.GET_UPDATE) { // for request update packets check the receiving buffer.
 			GetUpdateMessage updateMessage = (GetUpdateMessage) receiveMessage;
@@ -87,7 +89,8 @@ public class MockServerRPC extends ServerRPC {
 	}
 	
 	/**
-	 * Returns the current message in the server.
+	 * Returns the current message in ServerRPC.
+	 * 
 	 * @return
 	 */
 	public synchronized Message getCurrentMessage() {
@@ -98,15 +101,19 @@ public class MockServerRPC extends ServerRPC {
 				e.printStackTrace();
 			}
 		}
-		return currentMessage;
+		
+		Message toReturn = currentMessage;
+		currentMessage = null;
+		return toReturn;
 	}
 	
+	/**
+	 * Updates the latest message in the ServerRPC.
+	 * 
+	 * @param newMessage
+	 */
 	private synchronized void updateCurrentMessage(Message newMessage) {
 		this.currentMessage = newMessage;
 		notifyAll();
-	}
-	
-	public synchronized void clearCurrentMessage() {
-		currentMessage = null;
 	}
 }

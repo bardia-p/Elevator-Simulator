@@ -115,7 +115,6 @@ public class ElevatorIntegrationTest {
 
 		while (shouldRun) {
 			Message newMessage = serverRPC.getCurrentMessage();
-			serverRPC.clearCurrentMessage();
 			
 			if (newMessage != null) {
 				// Confirm the door open messages.
@@ -206,7 +205,6 @@ public class ElevatorIntegrationTest {
 
 		while (shouldRun) {
 			Message newMessage = serverRPC.getCurrentMessage();
-			serverRPC.clearCurrentMessage();
 			
 			if (newMessage != null) {
 				// Confirm the door open messages.
@@ -294,7 +292,6 @@ public class ElevatorIntegrationTest {
 
 		while (shouldRun) {
 			Message newMessage = serverRPC.getCurrentMessage();
-			serverRPC.clearCurrentMessage();
 			
 			if (newMessage != null) {
 				// Confirm the door open messages.
@@ -334,10 +331,11 @@ public class ElevatorIntegrationTest {
 				}
 			} 
 		}
-		// Kills the elevator thread.
-		queue.replyToElevator(new KillMessage(SenderType.FLOOR, new Date()), ELEVATOR_ID);
 
 		// Wait for the elevator thread to die.
 		elevatorThread.join();
+		
+		// Assert the elevator's parent state is no longer operational.
+		assertTrue(elevator.getParentState() == ElevatorState.ELEVATOR_STUCK);
 	}
 }
