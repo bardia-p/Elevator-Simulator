@@ -104,7 +104,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param fileName
 	 * @throws ParseException 
 	 */
-	private void readInElevatorRequests(String fileName) {
+	public void readInElevatorRequests(String fileName) {
 		Scanner sc;
 		try {
 			sc = new Scanner(new File(fileName));

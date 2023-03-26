@@ -16,8 +16,8 @@ import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messaging.MessageQueue;
-import ElevatorSimulator.Messaging.ServerRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
+import ElevatorSimulatorTest.MockServerRPC;
 
 /**
  * The unit tests for the floor subsystem.
@@ -38,7 +38,7 @@ public class FloorTest{
 	private Thread serverRPCThread;
 	
 	// The keeps track of the server RPC used to receive UDP messages.
-	private ServerRPC serverRPC;
+	private MockServerRPC serverRPC;
 
 	// Test constants.
 	public static int NUM_FLOORS = 4;
@@ -58,7 +58,7 @@ public class FloorTest{
 		Thread.currentThread().setName("FLOOR TEST THREAD");
 
 		queue = new MessageQueue();
-		serverRPC = new ServerRPC(queue, Scheduler.FLOOR_PORT);		
+		serverRPC = new MockServerRPC(queue, Scheduler.FLOOR_PORT);		
 		
 		// Creates a floor.
 		floor = new Floor(FILEPATH, NUM_FLOORS);
