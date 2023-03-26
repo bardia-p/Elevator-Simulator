@@ -22,11 +22,14 @@ Iteration 5: Measuring the Scheduler and predicting the performance
 
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
- - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labelled "class_diagram_iter4.png".
- - The sequence diagrams is located in "./diagram/sequence_diagrams" labelled: "iter4_sequence_diagram.jpg".
- - The state diagrams are located in "./diagrams/state_diagrams" as follows:
+ - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter4.png".
+ - The sequence diagrams is located in "./diagram/sequence_diagrams" labeled: "iter4_sequence_diagram.jpg".
+ - The state diagrams are located in "./diagrams/state_diagrams/Iteration4" as follows:
       - "elevator_state_machine.jpg"
       - "scheduler_state_machine.jpg"
+- The timing diagrams are located in "./diagrams/timing_diagrams" as follows:
+      - "transient_fault_timing_diagram.jpg"
+      - "system_fault_timing-diagram.jpg"
 
 Contents:
  - Package ElevatorSimulator
@@ -83,10 +86,13 @@ Contents:
       - ElevatorUnitTest.java : Unit Tests for the elevator.
  - Package ElevatorSimulatorTest.FloorTest
       - FloorTest.java : The unit tests for the floor subsystem.
+      - FloorParserTest.java : The unit tests to validate the parsing aspect of the floor.
  - Package ElevatorSimulatorTest.SchedulerTest
       - SchedulerTest.java : The unit tests for the scheduler subsystem.
  - Package ElevatorSimulator.TestFiles
       - elevator_test-1.csv : csv file with commands for testing purposes.
+      - elevator_test-interrupt.csv : csv file with commands for testing door interrupt.
+      - elevator_test-stuck.csv : csv file with commands for testing elevator stuck.
 
 
 * Note: if you notice any ".DS_STORE" files, they are automatically created and are related to the internal file structure of macOS. 
@@ -138,15 +144,19 @@ Iteration 3:
 
 Iteration 4:
  - Andre Hazim:
-	- Elevator error detection
+	- Updating the elevator to handle door interrupts and elevator stuck.
+	- Added regression and unit tests for the tests.
  - Bardia Parmoun:
-	- Scheduler updates, Elevator test
+	- Updated the scheduler to handle elevator faults.
+	- Added regression and unit tests for the elevator.
  - Guy Morgenshtern:
-	- Elevator error detection
+ 	- Updating the elevator to handle door interrupts and elevator stuck.
+ 	- Added regression and unit tests for the tests.
  - Kyra Lothrop:
-	- Floor updates, Scheduler test
+	- Updated the floor to handle sending files with error.
+	- Added unit tests for the scheduler.
  - Sarah Chow:
-      - Floor updates, Floor test
+ 	- Updated the floor to handle sending files with error.
 
 
 Setup instructions:
