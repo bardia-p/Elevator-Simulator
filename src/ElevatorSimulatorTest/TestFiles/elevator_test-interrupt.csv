@@ -1,0 +1,4 @@
+Time,Floor,Floor Button,Car Button,TimeError,Error
+12:34:56.789,1,UP,4,0,null
+12:36:56.789,2,DOWN,1,3000,DOOR_INTERRUPT
+12:37:56.789,1,UP,4,0,null

@@ -2,6 +2,7 @@ package ElevatorSimulatorTest.FloorTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,10 +47,13 @@ public class FloorParseTest{
 		
 		floor.readInElevatorRequests(STUCK_FILEPATH);
 
+
 		RequestElevatorMessage msgWithFault = null;
 		for(Message message : floor.getElevatorRequestsList()) {
 			if (((RequestElevatorMessage)message).getError() == ErrorType.ELEVATOR_STUCK) {
 					msgWithFault = (RequestElevatorMessage)message;
+				msgWithFault = (RequestElevatorMessage)message;
+
 			}
 		}
 		
@@ -71,6 +75,7 @@ public class FloorParseTest{
 
 		Thread.currentThread().setName("FLOOR TEST THREAD");
 		
+
 		floor.readInElevatorRequests(INTERRUPT_FILEPATH);
 
 		RequestElevatorMessage msgWithFault = null;
