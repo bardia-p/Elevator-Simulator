@@ -1,4 +1,4 @@
-Elevator Simulator Project - Iteration 3
+Elevator Simulator Project - Iteration 4
 
 Authors (Group L1G3)
  - Andre Hazim - 101141843
@@ -15,21 +15,25 @@ Deliverables:
 Iteration 0: Measure a Real Elevator (completed)
 Iteration 1: Establish Connections between the three subsystems (completed)
 Iteration 2: Adding the scheduler and Elevator Subsystem (completed)
-Iteration 3: Multiple Cars and System Distribution (current version)
- - Divide the program so that is can run on three seperate computers and communicate using UDP.
-Iteration 4: Adding Error detection and correction
+Iteration 3: Multiple Cars and System Distribution (completed)
+Iteration 4: Adding Error detection and correction (current version)
+ - Adding Error detection and correction.
 Iteration 5: Measuring the Scheduler and predicting the performance
 
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
- - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labelled "class_diagram_iter3.png".
- - The sequence diagrams is located in "./diagram/sequence_diagrams" labelled: "iter3_sequence_diagram.jpg".
- - The state diagrams are located in "./diagrams/state_diagrams" as follows:
+ - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter4.png".
+ - The sequence diagrams is located in "./diagram/sequence_diagrams" labeled: "iter4_sequence_diagram.jpg".
+ - The state diagrams are located in "./diagrams/state_diagrams/Iteration4" as follows:
       - "elevator_state_machine.jpg"
       - "scheduler_state_machine.jpg"
+- The timing diagrams are located in "./diagrams/timing_diagrams" as follows:
+      - "transient_fault_timing_diagram.jpg"
+      - "system_fault_timing-diagram.jpg"
 
 Contents:
  - Package ElevatorSimulator
+      - ErrorGenerator.java : The class in charge of generating an elevator for the elevator.
       - Logger.java : Format the message to print to the console.
       - Serializer.java : serialize or deserialize a given message.
       - Simulator.java : The class containing static variables.
@@ -37,7 +41,9 @@ Contents:
  - Package ElevatorSimulator.Elevator
       - Elevator.java : The elevator subsystem, receives and replies to messages.
       - ElevatorController.java : Responsible for controlling the multiple elevators.
+      - ElevatorInfo.java : The class in charge of holding the elevator status used for transferring to the scheduler.
       - ElevatorState.java : Enum for The possible states of the elevator.
+      - ElevatorTrip.java : Class defining an elevator trip in a given flow.
  - Package ElevatorSimulator.Floor
       - Floor.java : The floor subsystem.
  - Package ElevatorSimulator.Messages
@@ -45,6 +51,10 @@ Contents:
       - ArrivedElevatorMessage.java : Message to indicate the elevator has arrived.
       - DirectionType.java : Enum for the possible directions of the elevator.
       - DoorOpenedMessage.java : Message to indicate that the doors have opened.
+      - ElevatorStuckMessage.java : Depicts when an elevator is stuck.
+      - EmptyMessage.java : The empty message returned when there are no requests to send to the subsystem.
+      - ErrorType.java : Error types for the Elevator.
+      - GetUpdateMessage.java : The message sent by the subsystem to get an update.
       - KillMessage.java : Message used to kill the system.
       - Message.java : The default message class for holding the information that is passed to the buffers.
       - MessageType.java : Enum for the possible message types passed in the buffer. 
@@ -65,15 +75,24 @@ Contents:
       - elevator_input4.csv : Different test case commands.
       - elevator_input5.csv : Different test case commands.
       - elevator_input6.csv : Different test case commands.
+      - elevator_input7.csv : Different test case commands.
  - Package ElevatorSimulator.Scheduler
       - Scheduler.java : The scheduler subsystem that removes a message from the elevator and sends it to the floor and removes a message from the floor and sends it to the elevator.
       - SchedulerState.java : Enum for the possible scheduler states.
  - Package ElevatorSimulatorTest
-      - ElevatorTest.java : The unit tests for the elevator subsystem.
+	- MockServerRPC.java : A mock version of the ServerRPC class with a work queue in the background which holds the latest request.
+ - Package ElevatorSimulatorTest.ElevatorTest
+      - ElevatorIntegrationTest.java : Tests the general flow for the elevator.
+      - ElevatorUnitTest.java : Unit Tests for the elevator.
+ - Package ElevatorSimulatorTest.FloorTest
       - FloorTest.java : The unit tests for the floor subsystem.
+      - FloorParserTest.java : The unit tests to validate the parsing aspect of the floor.
+ - Package ElevatorSimulatorTest.SchedulerTest
       - SchedulerTest.java : The unit tests for the scheduler subsystem.
  - Package ElevatorSimulator.TestFiles
       - elevator_test-1.csv : csv file with commands for testing purposes.
+      - elevator_test-interrupt.csv : csv file with commands for testing door interrupt.
+      - elevator_test-stuck.csv : csv file with commands for testing elevator stuck.
 
 
 * Note: if you notice any ".DS_STORE" files, they are automatically created and are related to the internal file structure of macOS. 
@@ -123,6 +142,22 @@ Iteration 3:
  - Sarah Chow:
     - JUnit testing and Scheduler updates.
 
+Iteration 4:
+ - Andre Hazim:
+	- Updating the elevator to handle door interrupts and elevator stuck.
+	- Added regression and unit tests for the tests.
+ - Bardia Parmoun:
+	- Updated the scheduler to handle elevator faults.
+	- Added regression and unit tests for the elevator.
+ - Guy Morgenshtern:
+ 	- Updating the elevator to handle door interrupts and elevator stuck.
+ 	- Added regression and unit tests for the tests.
+ - Kyra Lothrop:
+	- Updated the floor to handle sending files with error.
+	- Added unit tests for the scheduler.
+ - Sarah Chow:
+ 	- Updated the floor to handle sending files with error.
+
 
 Setup instructions:
 1. Unzip the submission file.
@@ -141,8 +176,9 @@ Test Instructions:
 The ElevatorSimulator.Test package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
 
 For each subsystem there is a dedicated test class to test them separately.
+- ElevatorIntegrationTest: Tests the general flow for the elevator.
+- ElevatorUnitTest: Unit Tests for the elevator.
 - FloorTest: testing the floor subsystem alone.
-- ElevatorTest: testing the elevator subsystem alone.
 - SchedulerTest: testing the scheduler subsystem alone.
 
 Navigate to any of these classes and run them as a JUnit test to confirm that the system is

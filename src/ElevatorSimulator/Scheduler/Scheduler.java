@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
+import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Messaging.ServerRPC;
@@ -26,12 +27,15 @@ public class Scheduler implements Runnable {
 
 	// Keeps track of the current request for the scheduler.
 	private Message currentRequest;
-
-	// The scheduler ports used for UDP.
-	public static final int ELEVATOR_PORT = 23, FLOOR_PORT = 69;
-
+	
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
+	
+	// The scheduler ports used for UDP.
+	public static final int ELEVATOR_PORT = 23;
+	public static final int FLOOR_PORT = 69;
+
+
 
 	/**
 	 * Default constructor for the Scheduler.
@@ -43,13 +47,18 @@ public class Scheduler implements Runnable {
 		this.currentRequest = null;
 		this.state = null;
 
+		changeState(SchedulerState.POLL);
+	}
+
+	/**
+	 * Initializes the server RPC threads.
+	 */
+	private void initializeServerRPCs() {
 		Thread floorThread = new Thread(new ServerRPC(queue, FLOOR_PORT), "FLOOR MESSAGE THREAD");
 		Thread elevatorThread = new Thread(new ServerRPC(queue, ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
 
 		floorThread.start();
 		elevatorThread.start();
-
-		changeState(SchedulerState.POLL);
 	}
 
 	/**
@@ -68,14 +77,12 @@ public class Scheduler implements Runnable {
 	 * 
 	 * @return A list of availble elevators
 	 */
-	private ArrayList<ElevatorInfo> getAvailableElevators() {
+	public ArrayList<ElevatorInfo> getAvailableElevators() {
 		ArrayList<ElevatorInfo> availableElevators = new ArrayList<>();
 
 		for (ElevatorInfo e : queue.getElevatorInfos().values()) {
 
-			if (e.getState() == ElevatorState.POLL) {
-
-				// System.out.println(e.getElevatorId());
+			if (e.getParentState() == ElevatorState.OPERATIONAL) {
 				availableElevators.add(e);
 			}
 
@@ -135,37 +142,8 @@ public class Scheduler implements Runnable {
 					.get().getElevatorId();
 		}
 
-		
-		// tries to find an elevator that can pickup the floor on the way.
-		for (ElevatorInfo elevator : availableElevators) {
-			if (((elevator.getDirection() == DirectionType.UP && elevator.getFloorNumber() <= requestMessage.getFloor())
-					||
-
-					(elevator.getDirection() == DirectionType.DOWN
-							&& elevator.getFloorNumber() >= requestMessage.getFloor()))) {
-				possibleCandidates.add(elevator);
-			}
-		}
-
-		if (possibleCandidates.size() != 0) {
-			// return the one with the least number of passengers.
-			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
-					.getElevatorId();
-		}
-
-		// pick any available elevator.
-		for (ElevatorInfo elevator : availableElevators) {
-			possibleCandidates.add(elevator);
-		}
-
-		// return the one with the least number of passengers.
-		return possibleCandidates.stream()
-				.min((first, second) -> Integer.compare(first.getNumRequest(), second.getNumRequest())).get()
-				.getElevatorId();
-		
-		//return -1;
-
+		// Could not find a suitable elevator.
+		return -1;
 	}
 
 	/**
@@ -184,12 +162,42 @@ public class Scheduler implements Runnable {
 				return;
 			}
 
-		} else if (currentRequest.getType() == MessageType.DOORS_OPENED) {
-			DoorOpenedMessage request = (DoorOpenedMessage) currentRequest;
-			queue.replyToFloor(request);
+		} else if (currentRequest.getType() == MessageType.ELEVATOR_STUCK) {
+			ElevatorStuckMessage message = (ElevatorStuckMessage) currentRequest;
+			rerouteTrips(message.getElevatorId(), message.getRemainingTrips());
 		}
 
 		changeState(SchedulerState.POLL);
+	}
+
+	/**
+	 * Reroute all the trips assigned to that elevator and send them back to the scheduler.
+	 * Reassigns the given trips back the scheduler.
+	 * Also checks the outgoing queue for the elevator and removes the trips from there.
+	 * 
+	 * @param elevatorId, the elevator id.
+	 * @param trips, the trips to reroute.
+	 */
+	private void rerouteTrips(int elevatorId, ArrayList<ElevatorTrip> trips) {
+		// Send all the new requests back to the queue.
+		for (ElevatorTrip trip : trips) {
+			RequestElevatorMessage newRequest = new RequestElevatorMessage(null, trip.getPickup(),
+					trip.getDirectionType(), trip.getDropoff(), trip.getTimeToFault(), trip.getFault());
+			queue.send(newRequest);
+		}
+		
+		// Check to queue to ensure no new messages were going to be sent to the elevator.
+		// If there are any message send them back to the scheduler.
+		boolean elevatorHasMessage = true;
+		do {
+			Message m = queue.receiveFromElevator(elevatorId);
+			
+			if (m.getType() == MessageType.EMPTY) {
+				elevatorHasMessage = false;
+			} else if (m.getType() == MessageType.REQUEST) {
+				queue.send((RequestElevatorMessage)m);
+			}
+		} while (elevatorHasMessage);
 	}
 
 	/**
@@ -197,6 +205,8 @@ public class Scheduler implements Runnable {
 	 */
 	@Override
 	public void run() {
+		initializeServerRPCs();
+
 		while (this.shouldRun) {
 			if (state == SchedulerState.POLL) {
 				currentRequest = checkForNewMessages();
@@ -209,7 +219,7 @@ public class Scheduler implements Runnable {
 			}
 
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -227,12 +237,12 @@ public class Scheduler implements Runnable {
 	}
 
 	/**
-	 * Add an elevator to the scheduler queue.
+	 * Updates the message queue for the scheduler. Used for testing.
 	 * 
-	 * @param e
+	 * @param queue
 	 */
-	public void addToQueue(ElevatorInfo e) {
-		this.queue.addElevator(e.getElevatorId(), e);
+	public void updateQueue(MessageQueue queue) {
+		this.queue = queue;
 	}
 
 	/**

@@ -14,20 +14,20 @@ public class Timer {
 	public static int INCREMENT = 1000;
 	
 	// The current time for the timer.
-	private Date currentTime;
+	private static Date currentTime;
 	
 	/**
 	 * Setter for the time.
 	 * @param time value to be set
 	 */
-	public void setTime(Date time) {
-		this.currentTime = time;
+	public static void setTime(Date time) {
+		currentTime = time;
 	}
 	
 	/**
 	 * Increment the timer.
 	 */
-	public void tick() {
+	public static void tick() {
 		currentTime.setTime(currentTime.getTime() + INCREMENT);
 	}
 	
@@ -35,7 +35,7 @@ public class Timer {
 	 * Getter for the time.
 	 * @return the current time
 	 */
-	public Date getTime() {
+	public static Date getTime() {
 		return currentTime;
 	}
 }

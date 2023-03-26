@@ -22,7 +22,7 @@ public class Serializer {
 	 * 
 	 * @return the byte array contents of the message.
 	 */
-	public static byte[] serializeMessage(Message m) {
+	public static synchronized byte[] serializeMessage(Message m) {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ObjectOutputStream out;
 		byte[] result = new byte[100];
@@ -33,7 +33,7 @@ public class Serializer {
 			
 			result = outputStream.toByteArray();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WARNING: INTERRUPTING SERIALIZATION!");
 		}
 
 		return result;
@@ -46,7 +46,7 @@ public class Serializer {
 	 * 
 	 * @return the deserialized message.
 	 */
-	public static Message deserializeMessage(byte[] content) {
+	public static synchronized Message deserializeMessage(byte[] content) {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(content);
 		ObjectInputStream in;
 		Message result = null;
@@ -54,7 +54,7 @@ public class Serializer {
 			in = new ObjectInputStream(inputStream);
 			result = (Message)in.readObject();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("WARNING: INTERRUPTING DESERIALIZATION!");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}

@@ -14,7 +14,8 @@ public class DoorOpenedMessage extends Message{
 	
 	private int arrivedFloor;
 	private DirectionType direction;
-	private int numPassengers;
+	private int numPickups;
+	private int numDropoffs;
 	
 	/**
 	 * The constructor 
@@ -22,12 +23,13 @@ public class DoorOpenedMessage extends Message{
 	 * @param arrivedFloor the floor it arrived at
 	 * @param type the type of message
 	 */
-	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction, int numPassengers){
+	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction, int numPickups, int numDropoffs){
 		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;
 		this.direction = direction;
-		this.numPassengers = numPassengers;
+		this.numPickups = numPickups;
+		this.numDropoffs = numDropoffs;
 		
 	}
 	/**
@@ -47,24 +49,40 @@ public class DoorOpenedMessage extends Message{
 		return arrivedFloor;
 	}
 	
-	public int getNumPassengers(){
-		return numPassengers;
+	/**
+	 * Getter for numPickups.
+	 * 
+	 * @return numPickups value
+	 */
+	public int getNumPickups(){
+		return numPickups;
+	}
+	
+	/**
+	 * Getter for numDropoffs.
+	 * 
+	 * @return numDropoffs value
+	 */
+	public int getNumDropoffs(){
+		return numDropoffs;
 	}
 	
 	/**
 	 * Gets the direction of the elevator 
 	 * 
-	 * @return the direction
+	 * @return the direction, DirectionType
 	 */
 	@Override
 	public DirectionType getDirection() {
 		return direction;
 	}
 	
-	
 	/**
-     * @Override
-     */
+	 * Override method to get description.
+	 * 
+	 * @return the description, String
+	 */
+	@Override
     public String getDescription() {
         return String.valueOf(this.type);
     }

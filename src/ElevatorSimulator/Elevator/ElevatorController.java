@@ -1,7 +1,6 @@
 package ElevatorSimulator.Elevator;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
@@ -21,10 +20,10 @@ import ElevatorSimulator.Scheduler.Scheduler;
 public class ElevatorController extends ClientRPC implements Runnable {
 	// Keeps track of all the elevators.
 	private ArrayList<Elevator> elevators;
-	
+
 	// Keeps track of the number of elevators.
 	private int numElevators;
-	
+
 	// Keeps track of the number of floors.
 	private int numFloors;
 
@@ -48,9 +47,10 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	private void initializeElevators() {
 		for (int i = 0; i < numElevators; i++) {
 			Elevator elevator = new Elevator(i, this.numFloors);
-			ReadyMessage readyMessage = new ReadyMessage(new Date(), MessageType.READY,
-					new ElevatorInfo(elevator.getDirection(), elevator.getState(), elevator.getFloorNumber(),
-							elevator.getID(), elevator.getNumTrips()));
+			ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(),
+					elevator.getState(), elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips());
+
+			ReadyMessage readyMessage = new ReadyMessage(MessageType.READY, info);
 			sendRequest(readyMessage);
 			Logger.printMessage(readyMessage, "SENT");
 			elevators.add(elevator);
@@ -66,7 +66,6 @@ public class ElevatorController extends ClientRPC implements Runnable {
 			elevatorThread.start();
 		}
 	}
-	
 
 	@Override
 	/**
@@ -74,10 +73,12 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public void run() {
 		initializeElevators();
+		close();
 	}
 
 	/**
 	 * The main program for the elevator controller.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
