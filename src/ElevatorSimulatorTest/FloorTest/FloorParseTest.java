@@ -11,6 +11,7 @@ import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.ErrorType;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messaging.ConnectionType;
 
 /**
  * The unit tests for the floor subsystem.
@@ -33,7 +34,7 @@ public class FloorParseTest{
 	
 	@BeforeEach
 	void init() {
-		floor = new Floor(STUCK_FILEPATH, NUM_FLOORS);
+		floor = new Floor(STUCK_FILEPATH, NUM_FLOORS, ConnectionType.LOCAL);
 	}
 	/**
 	 * This tests the Floor's functionality for parsing a request CSV that has elevator stuck faults within it

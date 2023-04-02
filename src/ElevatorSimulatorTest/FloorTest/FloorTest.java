@@ -15,6 +15,7 @@ import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messages.StopType;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 import ElevatorSimulatorTest.MockServerRPC;
@@ -61,7 +62,7 @@ public class FloorTest{
 		serverRPC = new MockServerRPC(queue, Scheduler.FLOOR_PORT);		
 		
 		// Creates a floor.
-		floor = new Floor(FILEPATH, NUM_FLOORS);
+		floor = new Floor(FILEPATH, NUM_FLOORS, ConnectionType.LOCAL);
 
 		serverRPCThread = new Thread(serverRPC, "SERVER RPC THREAD");
 		serverRPCThread.start();

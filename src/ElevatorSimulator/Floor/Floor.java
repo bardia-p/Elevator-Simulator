@@ -16,6 +16,7 @@ import ElevatorSimulator.Timer;
 import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -62,8 +63,8 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param fileName the name of the input file.
 	 * @throws ParseException 
 	 */
-	public Floor(String fileName,int numFloors) {
-		super(Scheduler.FLOOR_PORT);
+	public Floor(String fileName,int numFloors, ConnectionType connectionType) {
+		super(Scheduler.FLOOR_PORT, connectionType);
 		this.dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 		this.elevatorRequests = new ArrayDeque<Message>();
 		this.upLights = new int[numFloors];
@@ -303,7 +304,7 @@ public class Floor extends ClientRPC implements Runnable {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS), "FLOOR THREAD");
+		Thread  floorThread = new Thread(new Floor(Simulator.INPUT, Simulator.NUM_FLOORS, ConnectionType.LOCAL), "FLOOR THREAD");
 		floorThread.start();
 	}
 }

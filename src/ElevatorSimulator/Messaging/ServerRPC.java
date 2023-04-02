@@ -38,8 +38,11 @@ public class ServerRPC implements Runnable {
 	// Ensures the server RPC can keep running.
 	private boolean shouldRun;
 	
-  // The timeout used for closing the socket.
+	// The timeout used for closing the socket.
 	public static final int TIMEOUT = 30000;
+	
+	// The public ip for the server.
+	public static final String PUBLIC_IP = "xx.xx.xx.xx";
 
 	/**
 	 * The constructor for the class.
