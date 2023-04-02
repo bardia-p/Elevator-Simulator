@@ -8,6 +8,7 @@ import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.ReadyMessage;
 import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -34,8 +35,8 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 * @param numElevators The number of Elevators
 	 * @param numFloors    The number of Floors
 	 */
-	public ElevatorController(int numElevators, int numFloors) {
-		super(Scheduler.ELEVATOR_PORT);
+	public ElevatorController(int numElevators, int numFloors, ConnectionType connectionType) {
+		super(Scheduler.ELEVATOR_PORT, connectionType);
 		this.elevators = new ArrayList<>();
 		this.numElevators = numElevators;
 		this.numFloors = numFloors;
@@ -83,7 +84,7 @@ public class ElevatorController extends ClientRPC implements Runnable {
 	 */
 	public static void main(String[] args) {
 		Thread elevatorControllerThread = new Thread(
-				new ElevatorController(Simulator.NUM_ELEVATORS, Simulator.NUM_FLOORS), "ELEVATOR CONTROLLER");
+				new ElevatorController(Simulator.NUM_ELEVATORS, Simulator.NUM_FLOORS, ConnectionType.LOCAL), "ELEVATOR CONTROLLER");
 		elevatorControllerThread.start();
 	}
 }

@@ -30,6 +30,8 @@ public class ClientRPC {
 	
 	// The port used to send the packets to.
 	private int sendPort;
+	
+	private ConnectionType connectionType;
 		
 	// The timeout used for closing the socket.
 	public static final int TIMEOUT = 30000;
@@ -41,6 +43,16 @@ public class ClientRPC {
 	 * @param sendPort, the port used to send the packets to.
 	 */
 	public ClientRPC(int sendPort) {
+		this(sendPort, ConnectionType.LOCAL);
+	}
+	
+	/**
+	 * The constructor for the ClientRPC class with a connection type.
+	 * 
+	 * @param sendPort, the port to send to the server.
+	 * @param connectionType, the connection type to create local or remote connections.
+	 */
+	public ClientRPC(int sendPort, ConnectionType connectionType) {
 		try {
 			// Construct a datagram socket and bind it to any available port on the local host machine.
 			// This socket will be used to send and receive UDP Datagram packets.
@@ -53,6 +65,7 @@ public class ClientRPC {
 			
 			this.sendPort = sendPort;
 			
+			this.connectionType = connectionType;
 		} catch (SocketException se) { // Can't create the socket.
 			se.printStackTrace();
 			System.exit(1);
@@ -67,7 +80,13 @@ public class ClientRPC {
 	private byte[] sendAndReceive(byte[] request) {		
 		// Tries to initialize the packet to send to the host.
 		try {
-			sendPacket = new DatagramPacket(request, request.length, InetAddress.getLocalHost(), sendPort);
+			InetAddress receiveingAddress;
+			if (connectionType == ConnectionType.LOCAL) {
+				receiveingAddress = InetAddress.getLocalHost();
+			} else {
+				receiveingAddress = InetAddress.getByName(ServerRPC.PUBLIC_IP);
+			}
+			sendPacket = new DatagramPacket(request, request.length, receiveingAddress, sendPort);
 		} catch (UnknownHostException e) {
 			close();
 			e.printStackTrace();
