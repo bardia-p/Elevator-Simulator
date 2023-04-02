@@ -126,6 +126,18 @@ public class ClientRPC {
 	}
 	
 	/**
+	 * A specific form of the sendAndReceive request.
+	 * Sends a "REQUEST UPDATE" request and obtains the reply.
+	 * 
+	 * Used by the UI.
+	 * 
+	 * @return the update received from the host.
+	 */
+	public Message getUIUpdate() {
+		return Serializer.deserializeMessage(sendAndReceive(Serializer.serializeMessage(new GetUpdateMessage(null, SenderType.UI))));
+	}
+	
+	/**
 	 * Send a message request.
 	 * 
 	 * @param m, the message to send over UDP.

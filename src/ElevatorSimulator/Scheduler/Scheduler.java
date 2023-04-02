@@ -36,7 +36,6 @@ public class Scheduler implements Runnable {
 	public static final int FLOOR_PORT = 69;
 
 
-
 	/**
 	 * Default constructor for the Scheduler.
 	 * 

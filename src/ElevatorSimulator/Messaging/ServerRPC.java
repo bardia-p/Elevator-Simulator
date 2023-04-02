@@ -101,6 +101,8 @@ public class ServerRPC implements Runnable {
 			GetUpdateMessage updateMessage = (GetUpdateMessage) receiveMessage;
 			if (updateMessage.getSender() == SenderType.FLOOR) {
 				replyMessage = queue.receiveFromFloor();
+			} else if (updateMessage.getSender() == SenderType.UI) {
+				replyMessage = queue.receiveFromUI();
 			} else {
 				replyMessage = queue.receiveFromElevator(updateMessage.getElevatorNumber());
 			}
@@ -112,6 +114,7 @@ public class ServerRPC implements Runnable {
 		} else if (receiveMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage message = (UpdateElevatorInfoMessage) receiveMessage;
 			queue.updateInfo(message.getInfo().getElevatorId(), message.getInfo());
+			queue.updateUI(message);
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.START) {
 			queue.replyToFloor(receiveMessage);
@@ -122,7 +125,11 @@ public class ServerRPC implements Runnable {
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.DOORS_OPENED) {
 			queue.replyToFloor(receiveMessage);
+			queue.updateUI(receiveMessage);
 			replyMessage = new ACKMessage();
+		} else if (receiveMessage.getType() == MessageType.REQUEST) {
+			queue.updateUI(receiveMessage);
+			return null;
 		} else { // for data packets, send an acknowledgement message and update the send buffer.
 			queue.send(receiveMessage);
 			replyMessage = new ACKMessage();
@@ -141,7 +148,7 @@ public class ServerRPC implements Runnable {
 		
 		// Create a new datagram packet to reply to the source.
 		sendPacket = new DatagramPacket(content, content.length, receivePacket.getAddress(), sourcePort);
-
+		
 		// Try to send the packet to the source.
 		try {
 			sendReceiveSocket.send(sendPacket);
@@ -151,7 +158,7 @@ public class ServerRPC implements Runnable {
 			System.exit(1);
 		}
 	}
-	
+
 	/**
 	 * Closes the appropriate sockets.
 	 */
@@ -185,6 +192,8 @@ public class ServerRPC implements Runnable {
 			if (replyMessage != null) {
 				send(replyMessage);
 			}
+			
+			//forwardToUI();
 		}
 		
 		close();		
