@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
@@ -57,6 +58,7 @@ public class FloorTest{
 	@BeforeEach
 	void init() {	
 		Thread.currentThread().setName("FLOOR TEST THREAD");
+		Simulator.DEBUG_MODE = false;
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.FLOOR_PORT);		

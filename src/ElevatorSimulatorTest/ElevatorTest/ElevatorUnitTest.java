@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
@@ -48,6 +49,7 @@ public class ElevatorUnitTest {
 	@BeforeEach
 	public void init() {
 		Thread.currentThread().setName("ELEVATOR UNIT TEST THREAD");
+		Simulator.DEBUG_MODE = false;
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.ELEVATOR_PORT);

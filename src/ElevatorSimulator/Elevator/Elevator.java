@@ -5,6 +5,7 @@ import java.util.Date;
 
 import ElevatorSimulator.ErrorGenerator;
 import ElevatorSimulator.Logger;
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
@@ -571,7 +572,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @param newState
 	 */
 	private synchronized void changeState(ElevatorState newState) {
-		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		}
 		childState = newState;
 		sendRequest(new UpdateElevatorInfoMessage(
 				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
@@ -583,7 +586,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @param newState, the new state for the elevator.
 	 */
 	private void changeParentState(ElevatorState newState) {
-		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		}
 		this.parentState = newState;
 	}
 
