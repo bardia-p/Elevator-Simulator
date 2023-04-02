@@ -1,7 +1,5 @@
 package ElevatorSimulator.UI;
 
-import java.util.ArrayList;
-
 import ElevatorSimulator.Messages.DoorOpenedMessage;
 import ElevatorSimulator.Messages.ElevatorStuckMessage;
 import ElevatorSimulator.Messages.Message;
