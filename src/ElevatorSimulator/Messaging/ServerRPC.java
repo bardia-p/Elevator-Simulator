@@ -127,11 +127,16 @@ public class ServerRPC implements Runnable {
 			queue.replyToFloor(receiveMessage);
 			queue.updateUI(receiveMessage);
 			replyMessage = new ACKMessage();
-		} else if (receiveMessage.getType() == MessageType.REQUEST) {
+		} else if (receiveMessage.getType() == MessageType.DOOR_INTERRUPT) {
 			queue.updateUI(receiveMessage);
-			return null;
+			replyMessage = new ACKMessage();
 		} else { // for data packets, send an acknowledgement message and update the send buffer.
 			queue.send(receiveMessage);
+			
+			if (receiveMessage.getType() == MessageType.REQUEST) {
+				queue.updateUI(receiveMessage);
+			}
+			
 			replyMessage = new ACKMessage();
 		}
 		

@@ -1,5 +1,6 @@
 package ElevatorSimulator.UI;
 
+import ElevatorSimulator.Messages.DoorInterruptMessage;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
 import ElevatorSimulator.Messages.ElevatorStuckMessage;
 import ElevatorSimulator.Messages.Message;
@@ -23,6 +24,10 @@ public class UIClient extends ClientRPC implements Runnable{
 		this.ui = ui;
 	}
 	
+	/**
+	 * processes the update message received by calling specific functions within UI view
+	 * @param m - Message 
+	 */
 	private void processUpdate(Message m) {
 		
 		//call methods within the actual UI class to update the view (Observer pattern)
@@ -39,6 +44,9 @@ public class UIClient extends ClientRPC implements Runnable{
 		} else if (m.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage updateElevatorMessage = (UpdateElevatorInfoMessage) m;
 			//ui.updateElevatorInfo(updateElevatorMessage.getInfo(), updateElevatorMessage.getDirection(), updateElevatorMessage.getTimestamp());
+		} else if (m.getType() == MessageType.DOOR_INTERRUPT) {
+			DoorInterruptMessage doorInterruptMessage = (DoorInterruptMessage) m;
+			//ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp());
 		}
 	}
 	

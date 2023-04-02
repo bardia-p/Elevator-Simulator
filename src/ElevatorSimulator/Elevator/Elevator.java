@@ -459,6 +459,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * boarding -> boorInterrupt
 	 */
 	private void doorInterrupt() {
+		
+		sendRequest(new DoorInterruptMessage(elevatorNumber, currentEventTime, MessageType.DOOR_INTERRUPT));
+		
 		try {
 			Thread.sleep(DOOR_INTERRUPT_DELAY);
 		} catch (InterruptedException e) {
