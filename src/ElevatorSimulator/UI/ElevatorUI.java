@@ -78,7 +78,7 @@ public class ElevatorUI {
 	
 	public void doorOpened(int elevatorID, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(elevatorID);
-		String message = "ARRIVED: " + arrivedFloor + " PICKUP: " + numPickups + " DROPOFF: " + numDropoffs;
+		String message = "AT: " + arrivedFloor + "PICK: " + numPickups + " DROP: " + numDropoffs;
 		
 		elevatorPanel.addEvent(message);
 	}

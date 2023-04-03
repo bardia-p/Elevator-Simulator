@@ -125,7 +125,6 @@ public class ElevatorPanel extends JPanel {
 	
 	public void elevatorStuck() {
 		elevatorAction.setForeground(Color.RED);
-		elevatorAction.setBackground(Color.RED);
 	}
 	
 	public void addEvent(String message) {
@@ -140,7 +139,7 @@ public class ElevatorPanel extends JPanel {
 		} else if (state == ElevatorState.BOARDING) {
 			elevatorAction.setText("|]  [|");
 		} else if (state == ElevatorState.DOOR_INTERRUPT) {
-			elevatorAction.setText("|] andre fucking sucks [|");
+			elevatorAction.setText("|] | [|");
 		} else {
 			elevatorAction.setText("|][|");
 		}
@@ -165,7 +164,7 @@ public class ElevatorPanel extends JPanel {
 		
 		for (int i=0; i < elevatorLights.length; i++) {
 			m += "f" + (i+1) + " ";
-			m += elevatorLights[i] ? " ON\n" : "OFF\n";
+			m += elevatorLights[i] ? "ON\n" : "OFF\n";
 		}
 		return m;
 	}

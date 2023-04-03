@@ -121,6 +121,7 @@ public class ServerRPC implements Runnable {
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.ELEVATOR_STUCK) {
 			queue.replyToFloor(receiveMessage); // forward to floor
+			queue.updateUI(receiveMessage);
 			queue.send(receiveMessage); // also forward to the scheduler.
 			replyMessage = new ACKMessage();
 		} else if (receiveMessage.getType() == MessageType.DOORS_OPENED) {

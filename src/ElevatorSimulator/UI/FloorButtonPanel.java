@@ -1,30 +1,35 @@
 package ElevatorSimulator.UI;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class FloorButtonPanel extends JPanel{
-	private JCheckBox upLight;
-	private JCheckBox downLight;
+	private JTextField upLight;
+	private JTextField downLight;
+	private Font logFont;
 
 	public FloorButtonPanel(int floor) {
 		this.setLayout(new BorderLayout());
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(1, 2));
+		logFont = new Font("Helvetica", Font.PLAIN, 14);
 		
 		this.add(buttons, BorderLayout.CENTER);
 		this.add(new JLabel("f" + floor), BorderLayout.WEST);
+		this.setFont(logFont);
 		
 		this.setVisible(true);
 		
-		upLight = new JCheckBox("up");
-		downLight = new JCheckBox("down");
-		upLight.setEnabled(false);
-		downLight.setEnabled(false);
+		upLight = new JTextField("");
+		downLight = new JTextField("");
+
 		
 		buttons.add(upLight);
 		buttons.add(downLight);
@@ -32,10 +37,18 @@ public class FloorButtonPanel extends JPanel{
 	}
 	
 	public void setUpLight(boolean value) {
-		upLight.setSelected(value);
+		if (value) {
+			upLight.setText("UP");
+		} else {
+			upLight.setText("");
+		}
 	}
 	
 	public void setDownLight(boolean value) {
-		upLight.setSelected(value);
+		if (value) {
+			downLight.setText("DOWN");
+		} else {
+			downLight.setText("");
+		}
 	}
 }

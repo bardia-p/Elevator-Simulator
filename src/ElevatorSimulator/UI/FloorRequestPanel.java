@@ -19,6 +19,8 @@ public class FloorRequestPanel extends JPanel {
 	
 	public FloorRequestPanel() {
 		super();
+		
+		this.setLayout(new GridLayout(Simulator.NUM_FLOORS, 1));
         
 		floors = new FloorButtonPanel[Simulator.NUM_FLOORS];
 		
