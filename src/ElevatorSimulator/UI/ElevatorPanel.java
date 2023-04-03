@@ -22,23 +22,28 @@ import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Elevator.ElevatorTrip;
 
+/**
+ * each panel represents 1 elevator moving up and down the shaft
+ * @author guymorgenshtern
+ *
+ */
 public class ElevatorPanel extends JPanel {
 	
-	JPanel headerJPanel;
-	JPanel eventLogJPanel;
-	Font titleFont;
-	Font headerFont;
-	Font logFont;
-	Font stateFont;
-	Font actionFont;
+	private JPanel headerJPanel;
+	private JPanel eventLogJPanel;
+	private Font titleFont;
+	private Font headerFont;
+	private Font logFont;
+	private Font stateFont;
+	private Font actionFont;
 	
 	
-	JTextArea log;
-	JTextArea stateArea;
-	JTextArea currArea;
-	JPanel midPanel;
-	JTextField elevatorAction;
-	JPanel logPanel;
+	private JTextArea log;
+	private JTextArea stateArea;
+	private JTextArea currArea;
+	private JPanel midPanel;
+	private JTextField elevatorAction;
+	private JPanel logPanel;
 	
 	private boolean elevatorLights[];
 	
@@ -128,17 +133,28 @@ public class ElevatorPanel extends JPanel {
         setVisible(true);
 	}
 	
+	/**
+	 * Changes state and colour of elevator UI to reflect stuck state
+	 */
 	public void elevatorStuck() {
 		setState(ElevatorState.ELEVATOR_STUCK);
 		elevatorAction.setForeground(Color.RED);
 	}
 	
+	/**
+	 * adds event to the current event text box and refreshes the elevator light log
+	 * @param message
+	 */
 	public void addEvent(String message) {
 		log.setText(getLightStatus());
 		currArea.setText(">" + message);
 
 	}
 	
+	/**
+	 * sets graphical state of elevator
+	 * @param state
+	 */
 	public void setElevatorAction(ElevatorState state) {
 		if (state == ElevatorState.OPEN) {
 			elevatorAction.setText("|      []  []      |");
@@ -151,6 +167,10 @@ public class ElevatorPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * changes state text area of elevator UI
+	 * @param newState
+	 */
 	public void setState(ElevatorState newState) {
 		stateArea.setText(newState.toString());
 		if (newState == ElevatorState.DOOR_INTERRUPT) {
@@ -160,6 +180,10 @@ public class ElevatorPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * determines elevator lamps that should be on based on current trips
+	 * @param trips
+	 */
 	public void addTripsLights(ArrayList<ElevatorTrip> trips) {
 		Arrays.fill(elevatorLights, false);
 		for (ElevatorTrip trip : trips) {
@@ -170,6 +194,10 @@ public class ElevatorPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * returns a formatted string of all elevator lights with their statuses 
+	 * @return
+	 */
 	private String getLightStatus() {
 		String m = "";
 		

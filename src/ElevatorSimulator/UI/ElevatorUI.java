@@ -23,6 +23,11 @@ import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorInterruptMessage;
 import ElevatorSimulator.Messages.StopType;
 
+/**
+ * main graphical class for the Elevator Simulator UI, made up of more components
+ * @author guymorgenshtern
+ *
+ */
 public class ElevatorUI {
 	
 	private JFrame frame;
@@ -68,14 +73,35 @@ public class ElevatorUI {
 
 	}
 	
+	/**
+	 * edits floor request panel based on request passed
+	 * @param floor
+	 * @param destination
+	 * @param direction
+	 * @param timestamp
+	 */
 	public void floorRequested(int floor, int destination, DirectionType direction, Date timestamp) {
 		this.requestJPanel.addRequest(floor, direction);
 	}
 	
+	/**
+	 * calls elevator stuck on the ElevatorPanel representing that elevator
+	 * @param id
+	 * @param timestamp
+	 */
 	public void elevatorStuck(int id, Date timestamp) {
 		elevators.get(id).elevatorStuck();
 	}
 	
+	/**
+	 * Adds event to ElevatorPanel based DoorsOpened message
+	 * @param elevatorID
+	 * @param arrivedFloor
+	 * @param numPickups
+	 * @param numDropoffs
+	 * @param stopType
+	 * @param timestamp
+	 */
 	public void doorOpened(int elevatorID, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(elevatorID);
 		String message = "AT: " + arrivedFloor + " PICK: " + numPickups + " DROP: " + numDropoffs;
@@ -83,10 +109,21 @@ public class ElevatorUI {
 		elevatorPanel.addEvent(message);
 	}
 	
+	/**
+	 * edits floor request panel when passenger is picked up in order to turn off request light
+	 * @param floor
+	 * @param direction
+	 */
 	public void pickupPerformed(int floor, DirectionType direction) {
 		this.requestJPanel.removeRequest(floor, direction);
 	}
 	
+	/**
+	 * used to update the state and elevator lamps of a given elevator
+	 * @param info
+	 * @param direction
+	 * @param timestamp
+	 */
 	public void updateElevatorInfo(ElevatorInfo info, DirectionType direction, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(info.getElevatorId());
 		elevatorPanel.setState(info.getState());
@@ -98,6 +135,11 @@ public class ElevatorUI {
 		}
 	}
 	
+	/**
+	 * changes graphical state to doors interrupted 
+	 * @param id
+	 * @param timestamp
+	 */
 	public void doorInterrupted(int id, Date timestamp) {
 		elevators.get(id).setElevatorAction(ElevatorState.DOOR_INTERRUPT);
 	}

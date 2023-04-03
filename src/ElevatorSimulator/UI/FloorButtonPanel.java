@@ -10,6 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+/**
+ * each instance represents the state of the up and down buttons of the given floor
+ * @author guymorgenshtern
+ *
+ */
 public class FloorButtonPanel extends JPanel{
 	private JTextField upLight;
 	private JTextField downLight;
@@ -36,6 +41,10 @@ public class FloorButtonPanel extends JPanel{
 		this.setVisible(true);
 	}
 	
+	/**
+	 * sets value of the up lamp
+	 * @param value
+	 */
 	public void setUpLight(boolean value) {
 		if (value) {
 			upLight.setText("UP");
@@ -44,6 +53,10 @@ public class FloorButtonPanel extends JPanel{
 		}
 	}
 	
+	/**
+	 * sets value of the down lamp
+	 * @param value
+	 */
 	public void setDownLight(boolean value) {
 		if (value) {
 			downLight.setText("DOWN");
