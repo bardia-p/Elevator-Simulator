@@ -21,6 +21,10 @@ public class Logger {
 	 * @param type, the type status to print.
 	 */
 	public static void printMessage(Message m, String type) {
+		if (!Simulator.DEBUG_MODE) {
+			return;
+		}
+		
 		String result = "";
 				
 		if (m != null && m.getType() != MessageType.EMPTY) {
@@ -62,6 +66,10 @@ public class Logger {
 	 * A display of the light status for floor.
 	 */
 	public static void printLightStatus(int[] upLights, int[] downLights) {
+		if (!Simulator.DEBUG_MODE) {
+			return;
+		}
+		
 		String floorLightsDisplay = "\nFLOOR LIGHTS STATUS\n---------------------------------";
 		for(int i = 0; i<upLights.length;i++) {			
 			floorLightsDisplay += "\n| Floor " + (i + 1) + " | UP: " + (upLights[i] > 0? "on " : "off") + " | DOWN: " + (downLights[i] != 0 ? "on " : "off") + " |";
@@ -74,6 +82,10 @@ public class Logger {
 	 * A display of the light status for elevator.
 	 */
 	public static void printLightStatus(int elevatorNumber, boolean[] floorLights) {
+		if (!Simulator.DEBUG_MODE) {
+			return;
+		}
+		
 		String elevatorLights = "\nELEVATOR " + (elevatorNumber + 1) + " LIGHTS STATUS\n----------------";
 		for (int i = 0; i < floorLights.length; i++) {
 			elevatorLights += "\n| Floor " + (i + 1) + ": " + (floorLights[i] ? "on " : "off") + " |";

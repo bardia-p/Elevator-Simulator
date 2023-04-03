@@ -7,6 +7,7 @@ import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
@@ -22,7 +23,7 @@ import ElevatorSimulator.Scheduler.Scheduler;
  */
 public class SchedulerTest {
 	// Keeps track of the scheduler object.
-	private Scheduler scheduler = new Scheduler();
+	private Scheduler scheduler;
 	
 	// The message queue object for the scheduler.
 	private MessageQueue queue;
@@ -33,10 +34,11 @@ public class SchedulerTest {
 	@BeforeEach
 	void init() {
 		Thread.currentThread().setName("SCHEDULER THREAD");
-
-		queue = new MessageQueue();
-		scheduler.updateQueue(queue);
+		Simulator.DEBUG_MODE = false;
 		
+		queue = new MessageQueue();
+		scheduler = new Scheduler(queue, false);
+
 		// Creates 2 elevators for the queue.
 		queue.addElevator(0, new ElevatorInfo(DirectionType.UP, ElevatorState.OPERATIONAL, ElevatorState.POLL, 1, 0, 0));
 		queue.addElevator(1, new ElevatorInfo(DirectionType.UP,ElevatorState.OPERATIONAL, ElevatorState.POLL, 1, 1, 0));

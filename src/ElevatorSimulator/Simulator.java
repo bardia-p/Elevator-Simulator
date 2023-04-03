@@ -17,4 +17,5 @@ public class Simulator {
 	// Keeps track of the number of floors.
 	public static int NUM_FLOORS = 5; 
 
+	public static boolean DEBUG_MODE = true;
 }

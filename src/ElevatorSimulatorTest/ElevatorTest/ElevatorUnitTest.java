@@ -9,10 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 import ElevatorSimulatorTest.MockServerRPC;
@@ -48,6 +50,7 @@ public class ElevatorUnitTest {
 	@BeforeEach
 	public void init() {
 		Thread.currentThread().setName("ELEVATOR UNIT TEST THREAD");
+		Simulator.DEBUG_MODE = false;
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.ELEVATOR_PORT);
@@ -56,7 +59,7 @@ public class ElevatorUnitTest {
 		serverRPCThread.start();
 		
 		// Creates an elevator.
-		elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS);
+		elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS, ConnectionType.LOCAL);
 
 		// Adds the elevator to the queue.
 		ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(), elevator.getState(),
