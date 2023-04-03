@@ -53,7 +53,7 @@ public class ElevatorPanel extends JPanel {
 		headerFont = new Font("Helvetica", Font.PLAIN, 18);
 		logFont = new Font("Helvetica", Font.PLAIN, 14);
 		stateFont = new Font("Helvetica", Font.PLAIN, 18);
-		actionFont = new Font("Helvetica", Font.PLAIN, 48);
+		actionFont = new Font("Helvetica", Font.PLAIN, 32);
 		
 		this.id = id;
 		
@@ -93,6 +93,7 @@ public class ElevatorPanel extends JPanel {
         elevatorAction = new JTextField();
         elevatorAction.setFont(actionFont);
         elevatorAction.setHorizontalAlignment(JTextField.CENTER);
+        elevatorAction.setEditable(false);
         setElevatorAction(ElevatorState.CLOSE);
         
         midPanel.add(elevatorAction);
@@ -128,6 +129,7 @@ public class ElevatorPanel extends JPanel {
 	}
 	
 	public void elevatorStuck() {
+		setState(ElevatorState.ELEVATOR_STUCK);
 		elevatorAction.setForeground(Color.RED);
 	}
 	
@@ -139,18 +141,23 @@ public class ElevatorPanel extends JPanel {
 	
 	public void setElevatorAction(ElevatorState state) {
 		if (state == ElevatorState.OPEN) {
-			elevatorAction.setText("|] [|");
+			elevatorAction.setText("|      []  []      |");
 		} else if (state == ElevatorState.BOARDING) {
-			elevatorAction.setText("|]  [|");
+			elevatorAction.setText("|     []    []     |");
 		} else if (state == ElevatorState.DOOR_INTERRUPT) {
-			elevatorAction.setText("|] | [|");
+			elevatorAction.setText("|     []  |  []    |");
 		} else {
-			elevatorAction.setText("|][|");
+			elevatorAction.setText("|       [][]       |");
 		}
 	}
 	
 	public void setState(ElevatorState newState) {
 		stateArea.setText(newState.toString());
+		if (newState == ElevatorState.DOOR_INTERRUPT) {
+			elevatorAction.setForeground(Color.ORANGE);
+		} else {
+			elevatorAction.setForeground(Color.BLACK);
+		}
 	}
 	
 	public void addTripsLights(ArrayList<ElevatorTrip> trips) {
