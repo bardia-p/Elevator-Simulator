@@ -8,8 +8,8 @@ import ElevatorSimulator.Elevator.ElevatorController;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Messaging.MessageQueue;
-import ElevatorSimulator.Messaging.ServerRPC;
 import ElevatorSimulator.Scheduler.Scheduler;
+import ElevatorSimulatorTest.MockServerRPC;
 
 /**
  * Measuring the performance of different parts of the system.
@@ -37,8 +37,8 @@ public class PerformanceIntegrationTest {
 		Simulator.DEBUG_MODE = false;
 		
 		queue = new MessageQueue();
-		floorServerRPC = new Thread(new ServerRPC(queue, Scheduler.FLOOR_PORT), "FLOOR MESSAGE THREAD");
-		elevatorServerRPC = new Thread(new ServerRPC(queue, Scheduler.ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
+		floorServerRPC = new Thread(new MockServerRPC(queue, Scheduler.FLOOR_PORT), "FLOOR MESSAGE THREAD");
+		elevatorServerRPC = new Thread(new MockServerRPC(queue, Scheduler.ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
 
 		floorServerRPC.start();
 		elevatorServerRPC.start();
