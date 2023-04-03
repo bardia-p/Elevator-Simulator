@@ -6,8 +6,10 @@ import ElevatorSimulator.Messages.ElevatorStuckMessage;
 import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.RequestElevatorMessage;
+import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
  * responsible for getting UI update messages and processing them
@@ -16,11 +18,10 @@ import ElevatorSimulator.Messaging.ClientRPC;
 
 public class UIClient extends ClientRPC implements Runnable{
 
-	private static final int port = 4445;
 	private ElevatorUI ui;
 	
 	public UIClient(ElevatorUI ui) {
-		super(port);
+		super(Scheduler.UI_PORT);
 		this.ui = ui;
 	}
 	
@@ -34,19 +35,22 @@ public class UIClient extends ClientRPC implements Runnable{
 		
 		if (m.getType() == MessageType.REQUEST) {
 			RequestElevatorMessage requestMessage = (RequestElevatorMessage) m;
-			//ui.floorRequested(requestMessage.getFloor(), requestMessage.getDestination(), requestMessage.getDirection(), requestMessage.getTimestamp());
+			ui.floorRequested(requestMessage.getFloor(), requestMessage.getDestination(), requestMessage.getDirection(), requestMessage.getTimestamp());
 		} else if (m.getType() == MessageType.ELEVATOR_STUCK) {
 			ElevatorStuckMessage stuckMessage = (ElevatorStuckMessage) m;
-			//ui.elevatorStuck(stuckMessage.getElevatorId(), stuckMessage.getTimestamp());
+			ui.elevatorStuck(stuckMessage.getElevatorId(), stuckMessage.getTimestamp());
 		} else if (m.getType() == MessageType.DOORS_OPENED) {
 			DoorOpenedMessage openMessage = (DoorOpenedMessage) m;
-			//ui.doorOpened(openMessage.getArrivedFloor(), openMessage.getNumPickups(), openMessage.getNumDropoffs(), openMessage.getStopType(), openMessage.getTimestamp());
+			ui.doorOpened(openMessage.getID(), openMessage.getArrivedFloor(), openMessage.getNumPickups(), openMessage.getNumDropoffs(), openMessage.getStopType(), openMessage.getTimestamp());
+			if (openMessage.getStopType() == StopType.PICKUP || openMessage.getStopType() == StopType.PICKUP_AND_DROPOFF) {
+				ui.pickupPerformed(openMessage.getArrivedFloor(), openMessage.getDirection());
+			}
 		} else if (m.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage updateElevatorMessage = (UpdateElevatorInfoMessage) m;
-			//ui.updateElevatorInfo(updateElevatorMessage.getInfo(), updateElevatorMessage.getDirection(), updateElevatorMessage.getTimestamp());
+			ui.updateElevatorInfo(updateElevatorMessage.getInfo(), updateElevatorMessage.getDirection(), updateElevatorMessage.getTimestamp());
 		} else if (m.getType() == MessageType.DOOR_INTERRUPT) {
 			DoorInterruptMessage doorInterruptMessage = (DoorInterruptMessage) m;
-			//ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp());
+			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp());
 		}
 	}
 	

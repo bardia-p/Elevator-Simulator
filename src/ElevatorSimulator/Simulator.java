@@ -12,9 +12,9 @@ public class Simulator {
 	public static String INPUT = "src/ElevatorSimulator/Resources/elevator_input.csv";
 	
 	// Keeps track of the number of elevators.
-	public static int NUM_ELEVATORS = 2;
+	public static int NUM_ELEVATORS = 4;
 	
 	// Keeps track of the number of floors.
-	public static int NUM_FLOORS = 5; 
+	public static int NUM_FLOORS = 22; 
 
 }

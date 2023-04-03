@@ -362,7 +362,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp || isDropoff) {
 			changeState(ElevatorState.OPEN);
 
-			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, floor, stopType, stopDirection,
+			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, this.getID(), floor, stopType, stopDirection,
 					numPickups, numDropoffs);
 			sendRequest(doorOpen);
 			Logger.printMessage(doorOpen, "SENT");
