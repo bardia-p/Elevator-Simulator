@@ -78,7 +78,7 @@ public class ElevatorUI {
 	
 	public void doorOpened(int elevatorID, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(elevatorID);
-		String message = "AT: " + arrivedFloor + "PICK: " + numPickups + " DROP: " + numDropoffs;
+		String message = "AT: " + arrivedFloor + " PICK: " + numPickups + " DROP: " + numDropoffs;
 		
 		elevatorPanel.addEvent(message);
 	}
@@ -90,7 +90,7 @@ public class ElevatorUI {
 	public void updateElevatorInfo(ElevatorInfo info, DirectionType direction, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(info.getElevatorId());
 		elevatorPanel.setState(info.getState());
-		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + "\nDIR: " + info.getDirection());
+		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + " DIR: " + info.getDirection());
 		elevatorPanel.addTripsLights(info.getElevatorTrips());
 		
 		if (info.getState() == ElevatorState.OPEN || info.getState() == ElevatorState.BOARDING || info.getState() == ElevatorState.CLOSE) {

@@ -35,17 +35,17 @@ public class FloorRequestPanel extends JPanel {
 	
 	public void addRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
-			floors[floor].setUpLight(true);
+			floors[floor-1].setUpLight(true);
 		} else {
-			floors[floor].setDownLight(true);
+			floors[floor-1].setDownLight(true);
 		}	
 	}
 	
 	public void removeRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
-			floors[floor].setUpLight(false);
+			floors[floor-1].setUpLight(false);
 		} else {
-			floors[floor].setDownLight(false);
+			floors[floor-1].setDownLight(false);
 		}	
 	}
 

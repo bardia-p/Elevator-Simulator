@@ -90,12 +90,12 @@ public class Floor extends ClientRPC implements Runnable {
 		
 		int floor = Integer.parseInt(entry[1]);
 		int destination = Integer.parseInt(entry[3]);
-		int timeError = Integer.parseInt(entry[4]);
+		//int timeError = Integer.parseInt(entry[4]);
 		
 		DirectionType direction = DirectionType.valueOf(entry[2]);
-		ErrorType error = entry[5].equals("null") ? null : ErrorType.valueOf(entry[5]);
+		//ErrorType error = entry[5].equals("null") ? null : ErrorType.valueOf(entry[5]);
 		
-		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination, timeError, error);
+		return new RequestElevatorMessage((Date) dateFormat.parse(entry[0]), floor, direction, destination, -1, null);
 	}
 	
 	/**

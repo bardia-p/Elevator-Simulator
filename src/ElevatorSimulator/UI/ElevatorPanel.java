@@ -35,7 +35,7 @@ public class ElevatorPanel extends JPanel {
 	
 	JTextArea log;
 	JTextArea stateArea;
-	JTextField currArea;
+	JTextArea currArea;
 	JPanel midPanel;
 	JTextField elevatorAction;
 	JPanel logPanel;
@@ -113,7 +113,7 @@ public class ElevatorPanel extends JPanel {
         eventLogJPanel.add(stateArea, BorderLayout.SOUTH);
         stateArea.setFont(stateFont);
         
-        currArea = new JTextField("");
+        currArea = new JTextArea("");
         eventLogJPanel.add(currArea, BorderLayout.NORTH);
         currArea.setFont(headerFont);
         
@@ -157,7 +157,7 @@ public class ElevatorPanel extends JPanel {
 		Arrays.fill(elevatorLights, false);
 		for (ElevatorTrip trip : trips) {
 			if (trip.isPickedUp()) {
-				elevatorLights[trip.getDropoff()] = true;
+				elevatorLights[trip.getDropoff()-1] = true;
 			}
 			
 		}
