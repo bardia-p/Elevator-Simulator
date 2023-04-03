@@ -1,5 +1,7 @@
 package ElevatorSimulator.Scheduler;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import ElevatorSimulator.Logger;
@@ -268,6 +270,13 @@ public class Scheduler implements Runnable {
 	}
 
 	public static void main(String[] args) {
+		if (Simulator.DEBUG_MODE) {
+			try {
+				System.out.println("The scheduler IP is: " + InetAddress.getLocalHost());
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 		Thread schedulerThread = new Thread(new Scheduler(), "SCHEDULER THREAD");
 		schedulerThread.start();
 	}
