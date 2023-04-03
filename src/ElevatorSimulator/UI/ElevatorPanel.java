@@ -2,6 +2,7 @@ package ElevatorSimulator.UI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagLayout;
@@ -77,13 +78,15 @@ public class ElevatorPanel extends JPanel {
         //event content
         log = new JTextArea();
         log.setEditable(false);
-        log.setAlignmentX(0.0f);
+       
+        log.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         midPanel = new JPanel(new GridLayout(2, 1));
         midPanel.setSize(this.getSize());
         
-        logPanel = new JPanel();
-        logPanel.add(log);
+        logPanel = new JPanel(new BorderLayout());
+        logPanel.add(log, BorderLayout.WEST);
+        
         logPanel.setBackground(Color.WHITE);
  
         
@@ -97,7 +100,8 @@ public class ElevatorPanel extends JPanel {
         log.setFont(logFont);
 
       
-        JScrollPane scrollPane = new JScrollPane(logPanel);        
+        JScrollPane scrollPane = new JScrollPane(logPanel);  
+        
         midPanel.add(scrollPane);
         
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
