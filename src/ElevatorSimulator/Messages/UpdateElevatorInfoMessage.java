@@ -13,6 +13,7 @@ public class UpdateElevatorInfoMessage extends Message{
 	// The elevator info kept in the message.
 	private ElevatorInfo info;
 	
+	
 	/**
 	 * The constructor for the elevator message.
 	 * 

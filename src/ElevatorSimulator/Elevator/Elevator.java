@@ -137,7 +137,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -577,7 +577,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		childState = newState;
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -588,6 +588,10 @@ public class Elevator extends ClientRPC implements Runnable {
 	private void changeParentState(ElevatorState newState) {
 		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		this.parentState = newState;
+	}
+	
+	public ArrayList<ElevatorTrip> getTrips() {
+		return trips;
 	}
 
 }

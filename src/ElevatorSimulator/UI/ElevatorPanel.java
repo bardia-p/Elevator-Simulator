@@ -2,10 +2,13 @@ package ElevatorSimulator.UI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.lang.System.Logger;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -16,6 +19,7 @@ import javax.swing.JTextPane;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorState;
+import ElevatorSimulator.Elevator.ElevatorTrip;
 
 public class ElevatorPanel extends JPanel {
 	
@@ -35,9 +39,14 @@ public class ElevatorPanel extends JPanel {
 	JTextField elevatorAction;
 	JPanel logPanel;
 	
+	private boolean elevatorLights[];
+	
 	private int id;
 	public ElevatorPanel(int id) {
 		super();
+		
+		elevatorLights = new boolean[Simulator.NUM_FLOORS];
+		Arrays.fill(elevatorLights, false);
 		titleFont = new Font("Helvetica", Font.PLAIN, 24);
 		this.setFont(titleFont);
 		headerFont = new Font("Helvetica", Font.PLAIN, 18);
@@ -47,7 +56,7 @@ public class ElevatorPanel extends JPanel {
 		
 		this.id = id;
 		
-        setLayout(new BorderLayout());
+        this.setLayout(new BorderLayout());
         setSize(1200/Simulator.NUM_ELEVATORS,1000);
         
         //Main elevator panel format
@@ -68,6 +77,7 @@ public class ElevatorPanel extends JPanel {
         //event content
         log = new JTextArea();
         log.setEditable(false);
+        log.setAlignmentX(0.0f);
         
         midPanel = new JPanel(new GridLayout(2, 1));
         midPanel.setSize(this.getSize());
@@ -75,6 +85,7 @@ public class ElevatorPanel extends JPanel {
         logPanel = new JPanel();
         logPanel.add(log);
         logPanel.setBackground(Color.WHITE);
+ 
         
         elevatorAction = new JTextField();
         elevatorAction.setFont(actionFont);
@@ -83,7 +94,6 @@ public class ElevatorPanel extends JPanel {
         
         midPanel.add(elevatorAction);
         
-        log.setSize(log.getParent().getSize().width, 0);
         log.setFont(logFont);
 
       
@@ -106,8 +116,10 @@ public class ElevatorPanel extends JPanel {
         
         currArea.setEditable(false);
         stateArea.setEditable(false);
-        
-        
+
+        JPanel filler = new JPanel();
+        this.add(filler, BorderLayout.SOUTH);
+        filler.setPreferredSize(new Dimension(0, 0));
         setVisible(true);
 	}
 	
@@ -117,10 +129,7 @@ public class ElevatorPanel extends JPanel {
 	}
 	
 	public void addEvent(String message) {
-		if (!currArea.getText().isBlank()) {
-			log.setText(currArea.getText().substring(1) + "\n" + log.getText());
-		}
-		
+		log.setText(getLightStatus());
 		currArea.setText(">" + message);
 
 	}
@@ -141,4 +150,23 @@ public class ElevatorPanel extends JPanel {
 		stateArea.setText(newState.toString());
 	}
 	
+	public void addTripsLights(ArrayList<ElevatorTrip> trips) {
+		Arrays.fill(elevatorLights, false);
+		for (ElevatorTrip trip : trips) {
+			if (trip.isPickedUp()) {
+				elevatorLights[trip.getDropoff()] = true;
+			}
+			
+		}
+	}
+	
+	private String getLightStatus() {
+		String m = "";
+		
+		for (int i=0; i < elevatorLights.length; i++) {
+			m += "f" + (i+1) + " ";
+			m += elevatorLights[i] ? " ON\n" : "OFF\n";
+		}
+		return m;
+	}
 }

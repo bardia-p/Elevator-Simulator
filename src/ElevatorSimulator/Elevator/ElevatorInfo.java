@@ -1,6 +1,7 @@
 package ElevatorSimulator.Elevator;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import ElevatorSimulator.Messages.DirectionType;
 
@@ -21,6 +22,8 @@ public class ElevatorInfo implements Serializable{
 	
 	// Keeps track of the state of the elevator.
 	private ElevatorState state; 
+	
+	private ArrayList<ElevatorTrip> trips;
 
 	/**
 	 * The current floor for the elevator
@@ -47,13 +50,14 @@ public class ElevatorInfo implements Serializable{
 	 * @param elevatorId, the elevator id.
 	 * @param numRequest, number of requests for the elevator.
 	 */
-	public ElevatorInfo(DirectionType directionType, ElevatorState parentState, ElevatorState state, int curFloor, int elevatorId, int numRequest) {
+	public ElevatorInfo(DirectionType directionType, ElevatorState parentState, ElevatorState state, int curFloor, int elevatorId, int numRequest, ArrayList<ElevatorTrip> trips) {
 		this.directionType = directionType;
 		this.parentState = parentState;
 		this.state = state;
 		this.curFloor = curFloor;
 		this.elevatorId = elevatorId;
 		this.numRequest = numRequest;
+		this.trips = trips;
 	}
 	
 	/**
@@ -109,6 +113,10 @@ public class ElevatorInfo implements Serializable{
 	 */
 	public int getNumRequest() {
 		return numRequest;
-	} 
+	}
+	
+	public ArrayList<ElevatorTrip> getElevatorTrips() {
+		return trips;
+	}
 
 }

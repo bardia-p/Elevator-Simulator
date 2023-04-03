@@ -18,6 +18,7 @@ import javax.swing.border.Border;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
+import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorInterruptMessage;
 import ElevatorSimulator.Messages.StopType;
@@ -60,8 +61,6 @@ public class ElevatorUI {
 		
 		requestJPanel = new FloorRequestPanel();
 		mainPanel.add(requestJPanel);
-		
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,100,10));
         
 		mainPanel.setBackground(Color.gray);
 
@@ -79,7 +78,7 @@ public class ElevatorUI {
 	
 	public void doorOpened(int elevatorID, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(elevatorID);
-		String message = "ARRIVED: " + arrivedFloor + " PICKUP: " + numPickups + " DROPOFF: " + numDropoffs;;
+		String message = "ARRIVED: " + arrivedFloor + " PICKUP: " + numPickups + " DROPOFF: " + numDropoffs;
 		
 		elevatorPanel.addEvent(message);
 	}
@@ -91,7 +90,8 @@ public class ElevatorUI {
 	public void updateElevatorInfo(ElevatorInfo info, DirectionType direction, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(info.getElevatorId());
 		elevatorPanel.setState(info.getState());
-		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + "\nDIR: " + info.getDirection() + "\n" +info.getState());
+		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + "\nDIR: " + info.getDirection());
+		elevatorPanel.addTripsLights(info.getElevatorTrips());
 		
 		if (info.getState() == ElevatorState.OPEN || info.getState() == ElevatorState.BOARDING || info.getState() == ElevatorState.CLOSE) {
 			elevatorPanel.setElevatorAction(info.getState());
