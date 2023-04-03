@@ -8,6 +8,7 @@ import ElevatorSimulator.Logger;
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -65,10 +66,12 @@ public class Elevator extends ClientRPC implements Runnable {
 	/**
 	 * Constructor for the elevator.
 	 * 
-	 * @param queue, the message queue.
+	 * @param id, the elevator id,
+	 * @param numFloors, the number of floors on the elevator.
+	 * @param connectionType, used to indicate which mode the device is running on.
 	 */
-	public Elevator(int id, int numFloors) {
-		super(Scheduler.ELEVATOR_PORT);
+	public Elevator(int id, int numFloors, ConnectionType connectionType) {
+		super(Scheduler.ELEVATOR_PORT, connectionType);
 		this.childState = null;
 		this.parentState = ElevatorState.OPERATIONAL;
 		this.floor = 1;
