@@ -15,13 +15,13 @@ import ElevatorSimulator.Scheduler.Scheduler;
 import ElevatorSimulatorTest.MockServerRPC;
 
 /**
- * Test the elevator timing measurements.
+ * Measuring specific elevator events.
  * 
  * @author Kyra Lothrop
  * @author Bardia Parmoun
  */
 
-public class PerformanceTest {
+public class PerformanceUnitTest {
 	// The message queue used to keep track of the messages.
 	private MessageQueue queue;
 
@@ -44,7 +44,7 @@ public class PerformanceTest {
 	 */
 	@BeforeEach
 	public void init() {
-		Thread.currentThread().setName("ELEVATOR UNIT TEST THREAD");
+		Thread.currentThread().setName("PERFORMANCE UNIT TEST THREAD");
 		Simulator.DEBUG_MODE = false;
 		
 		queue = new MessageQueue();
@@ -74,7 +74,7 @@ public class PerformanceTest {
 		queue.replyToElevator(message, ELEVATOR_ID);
 		message = new RequestElevatorMessage(new Date(), 3, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
-		message = new RequestElevatorMessage(new Date(), 2, DirectionType.UP, 1, 0, null);
+		message = new RequestElevatorMessage(new Date(), 2, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
 	}
 
@@ -98,7 +98,7 @@ public class PerformanceTest {
 	 */
 	@Test
 	public void testElevatorMoving() throws InterruptedException {
-		System.out.println("\n----------TestTiming.testElevatorMoving----------\n");
+		System.out.println("\n----------UnitTest.testElevatorMoving----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -140,7 +140,7 @@ public class PerformanceTest {
 					// Confirm the elevator was moving for the proper amount.
 					assertEquals(Elevator.MOVE_DELAY, endTime - startTime, 1000);
 					
-					System.out.println("Move Time at: " + elevatorInfo.getFloorNumber() + " is: " + (endTime - startTime));
+					System.out.println("Move time at: " + elevatorInfo.getFloorNumber() + " is: " + (endTime - startTime));
 				}
 			}
 		}
@@ -159,7 +159,7 @@ public class PerformanceTest {
 	 */
 	@Test
 	public void testOpenDoor() throws InterruptedException {
-		System.out.println("\n----------TestTiming.testOpenDoor----------\n");
+		System.out.println("\n----------UnitTest.testOpenDoor----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -213,7 +213,7 @@ public class PerformanceTest {
 	 */
 	@Test
 	public void testCloseDoor() throws InterruptedException {
-		System.out.println("\n----------TestTiming.testCloseDoor----------\n");
+		System.out.println("\n----------UnitTest.testCloseDoor----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());
@@ -278,7 +278,7 @@ public class PerformanceTest {
 	 */
 	@Test
 	public void testBoarding() throws InterruptedException {
-		System.out.println("\n----------TestTiming.testBoarding----------\n");
+		System.out.println("\n----------UnitTest.testBoarding----------\n");
 
 		assertNotNull(elevator);
 		assertEquals(1, elevator.getFloorNumber());

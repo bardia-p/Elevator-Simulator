@@ -3,6 +3,7 @@ package ElevatorSimulator.Scheduler;
 import java.util.ArrayList;
 
 import ElevatorSimulator.Logger;
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Elevator.ElevatorTrip;
@@ -31,6 +32,9 @@ public class Scheduler implements Runnable {
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
 	
+	// Keeps track of whether or not the servers are started externally or not.
+	private boolean initializeServers;
+	
 	// The scheduler ports used for UDP.
 	public static final int ELEVATOR_PORT = 23;
 	public static final int FLOOR_PORT = 69;
@@ -42,10 +46,21 @@ public class Scheduler implements Runnable {
 	 * 
 	 */
 	public Scheduler() {
-		this.queue = new MessageQueue();
+		this(new MessageQueue(), true);
+	}
+	
+	/**
+	 * Scheduler constructor with the option of an external queue.
+	 * 
+	 * @param external message queue.
+	 * 
+	 */
+	public Scheduler(MessageQueue queue, boolean initializeServers) {
+		this.queue = queue;
 		this.shouldRun = true;
 		this.currentRequest = null;
 		this.state = null;
+		this.initializeServers = initializeServers;
 
 		changeState(SchedulerState.POLL);
 	}
@@ -205,7 +220,9 @@ public class Scheduler implements Runnable {
 	 */
 	@Override
 	public void run() {
-		initializeServerRPCs();
+		if (initializeServers) {
+			initializeServerRPCs();
+		}
 
 		while (this.shouldRun) {
 			if (state == SchedulerState.POLL) {
@@ -232,17 +249,10 @@ public class Scheduler implements Runnable {
 	 * @param newState
 	 */
 	private void changeState(SchedulerState newState) {
-		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
+		}
 		state = newState;
-	}
-
-	/**
-	 * Updates the message queue for the scheduler. Used for testing.
-	 * 
-	 * @param queue
-	 */
-	public void updateQueue(MessageQueue queue) {
-		this.queue = queue;
 	}
 
 	/**
