@@ -116,11 +116,11 @@ public class ElevatorUI {
 	public void updateElevatorInfo(ElevatorInfo info, DirectionType direction, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(info.getElevatorId());
 		elevatorPanel.setState(info.getState());
-		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + " DIR: " + info.getDirection());
+		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + "\n DIR: " + info.getDirection());
 		elevatorPanel.addTripsLights(info.getElevatorTrips());
 		
 		if (info.getState() == ElevatorState.OPEN || info.getState() == ElevatorState.BOARDING || info.getState() == ElevatorState.CLOSE) {
-			elevatorPanel.setElevatorAction(info.getState());
+			elevatorPanel.setElevatorAction(info.getState(), info.getDirection());
 		}
 	}
 	
@@ -129,8 +129,8 @@ public class ElevatorUI {
 	 * @param id
 	 * @param timestamp
 	 */
-	public void doorInterrupted(int id, Date timestamp) {
-		elevators.get(id).setElevatorAction(ElevatorState.DOOR_INTERRUPT);
+	public void doorInterrupted(int id, Date timestamp, DirectionType directionType) {
+		elevators.get(id).setElevatorAction(ElevatorState.DOOR_INTERRUPT, directionType);
 	}
 	
 	

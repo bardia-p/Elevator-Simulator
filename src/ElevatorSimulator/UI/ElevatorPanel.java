@@ -13,11 +13,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Elevator.ElevatorTrip;
+import ElevatorSimulator.Messages.DirectionType;
 
 /**
  * each panel represents 1 elevator moving up and down the shaft
@@ -40,7 +44,7 @@ public class ElevatorPanel extends JPanel {
 	private JTextArea stateArea;
 	private JTextArea currArea;
 	private JPanel midPanel;
-	private JTextField elevatorAction;
+	private JTextPane elevatorAction;
 	private JPanel logPanel;
 	
 	private boolean elevatorLights[];
@@ -90,11 +94,14 @@ public class ElevatorPanel extends JPanel {
         logPanel.setBackground(Color.WHITE);
  
         
-        elevatorAction = new JTextField();
+        elevatorAction = new JTextPane();
         elevatorAction.setFont(actionFont);
-        elevatorAction.setHorizontalAlignment(JTextField.CENTER);
+        StyledDocument doc = elevatorAction.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
         elevatorAction.setEditable(false);
-        setElevatorAction(ElevatorState.CLOSE);
+        setElevatorAction(ElevatorState.CLOSE, DirectionType.UP);
         
         midPanel.add(elevatorAction);
         
@@ -150,16 +157,30 @@ public class ElevatorPanel extends JPanel {
 	 * sets graphical state of elevator
 	 * @param state
 	 */
-	public void setElevatorAction(ElevatorState state) {
-		if (state == ElevatorState.OPEN) {
-			elevatorAction.setText("|      []  []      |");
-		} else if (state == ElevatorState.BOARDING) {
-			elevatorAction.setText("|     []    []     |");
-		} else if (state == ElevatorState.DOOR_INTERRUPT) {
-			elevatorAction.setText("|     []  |  []    |");
+	public void setElevatorAction(ElevatorState state, DirectionType direction) {
+		String elevatorRopeString = "";
+		
+		if (state == ElevatorState.CLOSE) {
+			elevatorRopeString = (direction == DirectionType.DOWN) ? "\n|\n|\n|\n|\n|\n" : "\n|\n|\n|\n";
 		} else {
-			elevatorAction.setText("|       [][]       |");
+			elevatorRopeString = "\n|\n|\n|\n|\n";
 		}
+		
+		String elevatorTextString = "--------------\n";
+		
+		if (state == ElevatorState.OPEN) {
+			elevatorTextString += "|     []  []     |\n|     []  []     |\n";
+		} else if (state == ElevatorState.BOARDING) {
+			elevatorTextString += "|    []    []    |\n|    []    []    |\n";
+		} else if (state == ElevatorState.DOOR_INTERRUPT) {
+			elevatorTextString += "|   []  |  []   |\n|   []  |  []   |\n";
+		} else {
+			elevatorTextString += "|      [][]      |\n|      [][]      |\n";
+		}
+		
+		elevatorTextString += "--------------\n";
+		
+		elevatorAction.setText(elevatorRopeString + elevatorTextString);
 	}
 	
 	/**

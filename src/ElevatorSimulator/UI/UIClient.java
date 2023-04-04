@@ -51,7 +51,7 @@ public class UIClient extends ClientRPC implements Runnable{
 			ui.updateElevatorInfo(updateElevatorMessage.getInfo(), updateElevatorMessage.getDirection(), updateElevatorMessage.getTimestamp());
 		} else if (m.getType() == MessageType.DOOR_INTERRUPT) {
 			DoorInterruptMessage doorInterruptMessage = (DoorInterruptMessage) m;
-			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp());
+			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp(), doorInterruptMessage.getDirection());
 		}
 	}
 	
