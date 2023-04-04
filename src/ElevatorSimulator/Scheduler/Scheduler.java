@@ -40,7 +40,7 @@ public class Scheduler implements Runnable {
 	// The scheduler ports used for UDP.
 	public static final int ELEVATOR_PORT = 23;
 	public static final int FLOOR_PORT = 69;
-
+	public static final int UI_PORT = 4445;
 
 
 	/**
@@ -73,9 +73,11 @@ public class Scheduler implements Runnable {
 	private void initializeServerRPCs() {
 		Thread floorThread = new Thread(new ServerRPC(queue, FLOOR_PORT), "FLOOR MESSAGE THREAD");
 		Thread elevatorThread = new Thread(new ServerRPC(queue, ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
+		Thread uiThread = new Thread(new ServerRPC(queue, UI_PORT), "UI MESSAGE THREAD");
 
 		floorThread.start();
 		elevatorThread.start();
+		uiThread.start();
 	}
 
 	/**

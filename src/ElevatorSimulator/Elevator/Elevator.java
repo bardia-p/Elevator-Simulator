@@ -141,7 +141,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -366,7 +366,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp || isDropoff) {
 			changeState(ElevatorState.OPEN);
 
-			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, floor, stopType, stopDirection,
+			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, this.getID(), floor, stopType, stopDirection,
 					numPickups, numDropoffs);
 			sendRequest(doorOpen);
 			Logger.printMessage(doorOpen, "SENT");
@@ -463,6 +463,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * boarding -> boorInterrupt
 	 */
 	private void doorInterrupt() {
+		
+		sendRequest(new DoorInterruptMessage(elevatorNumber, currentEventTime, MessageType.DOOR_INTERRUPT));
+		
 		try {
 			Thread.sleep(DOOR_INTERRUPT_DELAY);
 		} catch (InterruptedException e) {
@@ -580,7 +583,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		}
 		childState = newState;
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -593,6 +596,10 @@ public class Elevator extends ClientRPC implements Runnable {
 			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		}
 		this.parentState = newState;
+	}
+	
+	public ArrayList<ElevatorTrip> getTrips() {
+		return trips;
 	}
 
 }
