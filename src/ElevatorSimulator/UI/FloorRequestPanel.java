@@ -2,17 +2,13 @@ package ElevatorSimulator.UI;
 
 
 import java.awt.GridLayout;
-import java.util.Arrays;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.DirectionType;
 
-
-
+@SuppressWarnings("serial")
 public class FloorRequestPanel extends JPanel {
 	
 	private FloorButtonPanel[] floors;

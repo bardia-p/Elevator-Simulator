@@ -65,7 +65,7 @@ public class ElevatorIntegrationTest {
 
 		// Adds the elevator to the queue.
 		ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(), elevator.getState(),
-				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips());
+				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips(), elevator.getTrips());
 		queue.addElevator(ELEVATOR_ID, info);
 	}
 

@@ -4,9 +4,10 @@ import java.util.Date;
 
 /**
  * transient error message class
- * @author guymorgenshtern
+ * @author Guy Morgenshtern
  *
  */
+@SuppressWarnings("serial")
 public class DoorInterruptMessage extends Message {
 
 	private int elevatorID;

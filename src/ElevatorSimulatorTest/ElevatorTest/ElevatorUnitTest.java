@@ -63,7 +63,7 @@ public class ElevatorUnitTest {
 
 		// Adds the elevator to the queue.
 		ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(), elevator.getState(),
-				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips());
+				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips(), elevator.getTrips());
 		queue.addElevator(ELEVATOR_ID, info);
 	}
 
@@ -350,12 +350,8 @@ public class ElevatorUnitTest {
 						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
 						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
 					}
-				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
-					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-					
-					if (elevatorInfo.getState() == ElevatorState.BOARDING) {
-						shouldRun = false; // Boarded the faulty request.
-					}
+				} else if (newMessage.getType() == MessageType.DOOR_INTERRUPT) {
+					shouldRun = false;
 				}
 			}
 		}
@@ -367,25 +363,11 @@ public class ElevatorUnitTest {
 		assertEquals(MessageType.UPDATE_ELEVATOR_INFO, newMessage.getType());
 		
 		ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-		assertEquals(ElevatorState.DOOR_INTERRUPT, elevatorInfo.getState());
+		assertEquals(ElevatorState.BOARDING, elevatorInfo.getState());
 
 		long endTime = System.currentTimeMillis();
 
 		// Confirm the door was interrupted within 1 second of picking up the faulty request.
-		assertEquals(1000, endTime - startTime, 1000);
-		
-		startTime = System.currentTimeMillis();
-		
-		// Confirm the elevator went back to boarding.
-		newMessage = serverRPC.getCurrentMessage();
-		assertEquals(MessageType.UPDATE_ELEVATOR_INFO, newMessage.getType());
-		
-		elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-		assertEquals(ElevatorState.BOARDING, elevatorInfo.getState());
-		
-		endTime = System.currentTimeMillis();
-		
-		// Confirm the door was interrupted within the interrupt delay of picking up the faulty request.
 		assertEquals(Elevator.DOOR_INTERRUPT_DELAY, endTime - startTime, 1000);
 		
 		// Kills the elevator thread.

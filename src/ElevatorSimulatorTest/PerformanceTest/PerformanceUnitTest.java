@@ -59,7 +59,7 @@ public class PerformanceUnitTest {
 
 		// Adds the elevator to the queue.
 		ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(), elevator.getState(),
-				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips());
+				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips(), elevator.getTrips());
 		queue.addElevator(ELEVATOR_ID, info);
 		
 		// Assigns requests to the elevator to stop at EVERY floor.

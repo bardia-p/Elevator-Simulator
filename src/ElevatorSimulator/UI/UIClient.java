@@ -9,6 +9,7 @@ import ElevatorSimulator.Messages.RequestElevatorMessage;
 import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -20,8 +21,8 @@ public class UIClient extends ClientRPC implements Runnable{
 
 	private ElevatorUI ui;
 	
-	public UIClient(ElevatorUI ui) {
-		super(Scheduler.UI_PORT);
+	public UIClient(ElevatorUI ui, ConnectionType connectionType) {
+		super(Scheduler.UI_PORT, connectionType);
 		this.ui = ui;
 	}
 	
@@ -50,7 +51,7 @@ public class UIClient extends ClientRPC implements Runnable{
 			ui.updateElevatorInfo(updateElevatorMessage.getInfo(), updateElevatorMessage.getDirection(), updateElevatorMessage.getTimestamp());
 		} else if (m.getType() == MessageType.DOOR_INTERRUPT) {
 			DoorInterruptMessage doorInterruptMessage = (DoorInterruptMessage) m;
-			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp());
+			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp(), doorInterruptMessage.getDirection());
 		}
 	}
 	

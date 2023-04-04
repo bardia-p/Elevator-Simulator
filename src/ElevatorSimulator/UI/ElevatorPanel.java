@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,18 +13,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Elevator.ElevatorTrip;
+import ElevatorSimulator.Messages.DirectionType;
 
 /**
  * each panel represents 1 elevator moving up and down the shaft
- * @author guymorgenshtern
+ * @author Guy Morgenshtern
  *
  */
+@SuppressWarnings("serial")
 public class ElevatorPanel extends JPanel {
 	
 	private JPanel headerJPanel;
@@ -42,12 +44,11 @@ public class ElevatorPanel extends JPanel {
 	private JTextArea stateArea;
 	private JTextArea currArea;
 	private JPanel midPanel;
-	private JTextField elevatorAction;
+	private JTextPane elevatorAction;
 	private JPanel logPanel;
 	
 	private boolean elevatorLights[];
 	
-	private int id;
 	public ElevatorPanel(int id) {
 		super();
 		
@@ -59,9 +60,7 @@ public class ElevatorPanel extends JPanel {
 		logFont = new Font("Helvetica", Font.PLAIN, 14);
 		stateFont = new Font("Helvetica", Font.PLAIN, 18);
 		actionFont = new Font("Helvetica", Font.PLAIN, 32);
-		
-		this.id = id;
-		
+				
         this.setLayout(new BorderLayout());
         setSize(1200/Simulator.NUM_ELEVATORS,1000);
         
@@ -95,11 +94,14 @@ public class ElevatorPanel extends JPanel {
         logPanel.setBackground(Color.WHITE);
  
         
-        elevatorAction = new JTextField();
+        elevatorAction = new JTextPane();
         elevatorAction.setFont(actionFont);
-        elevatorAction.setHorizontalAlignment(JTextField.CENTER);
+        StyledDocument doc = elevatorAction.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
         elevatorAction.setEditable(false);
-        setElevatorAction(ElevatorState.CLOSE);
+        setElevatorAction(ElevatorState.CLOSE, DirectionType.UP);
         
         midPanel.add(elevatorAction);
         
@@ -155,16 +157,30 @@ public class ElevatorPanel extends JPanel {
 	 * sets graphical state of elevator
 	 * @param state
 	 */
-	public void setElevatorAction(ElevatorState state) {
-		if (state == ElevatorState.OPEN) {
-			elevatorAction.setText("|      []  []      |");
-		} else if (state == ElevatorState.BOARDING) {
-			elevatorAction.setText("|     []    []     |");
-		} else if (state == ElevatorState.DOOR_INTERRUPT) {
-			elevatorAction.setText("|     []  |  []    |");
+	public void setElevatorAction(ElevatorState state, DirectionType direction) {
+		String elevatorRopeString = "";
+		
+		if (state == ElevatorState.CLOSE) {
+			elevatorRopeString = (direction == DirectionType.DOWN) ? "\n|\n|\n|\n|\n|\n" : "\n|\n|\n|\n";
 		} else {
-			elevatorAction.setText("|       [][]       |");
+			elevatorRopeString = "\n|\n|\n|\n|\n";
 		}
+		
+		String elevatorTextString = "--------------\n";
+		
+		if (state == ElevatorState.OPEN) {
+			elevatorTextString += "|     []  []     |\n|     []  []     |\n";
+		} else if (state == ElevatorState.BOARDING) {
+			elevatorTextString += "|    []    []    |\n|    []    []    |\n";
+		} else if (state == ElevatorState.DOOR_INTERRUPT) {
+			elevatorTextString += "|   []  |  []   |\n|   []  |  []   |\n";
+		} else {
+			elevatorTextString += "|      [][]      |\n|      [][]      |\n";
+		}
+		
+		elevatorTextString += "--------------\n";
+		
+		elevatorAction.setText(elevatorRopeString + elevatorTextString);
 	}
 	
 	/**
