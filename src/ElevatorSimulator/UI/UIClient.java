@@ -9,6 +9,7 @@ import ElevatorSimulator.Messages.RequestElevatorMessage;
 import ElevatorSimulator.Messages.StopType;
 import ElevatorSimulator.Messages.UpdateElevatorInfoMessage;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -20,8 +21,8 @@ public class UIClient extends ClientRPC implements Runnable{
 
 	private ElevatorUI ui;
 	
-	public UIClient(ElevatorUI ui) {
-		super(Scheduler.UI_PORT);
+	public UIClient(ElevatorUI ui, ConnectionType connectionType) {
+		super(Scheduler.UI_PORT, connectionType);
 		this.ui = ui;
 	}
 	

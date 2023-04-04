@@ -4,17 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
  * each instance represents the state of the up and down buttons of the given floor
- * @author guymorgenshtern
+ * @author Guy Morgenshtern
  *
  */
+@SuppressWarnings("serial")
 public class FloorButtonPanel extends JPanel{
 	private JTextField upLight;
 	private JTextField downLight;

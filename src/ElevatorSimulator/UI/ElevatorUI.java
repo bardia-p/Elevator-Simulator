@@ -6,39 +6,28 @@ import java.util.Date;
 import javax.swing.JFrame;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
-import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.DirectionType;
-import ElevatorSimulator.Messages.DoorInterruptMessage;
 import ElevatorSimulator.Messages.StopType;
 
 /**
  * main graphical class for the Elevator Simulator UI, made up of more components
- * @author guymorgenshtern
+ * @author Guy Morgenshtern
  *
  */
 public class ElevatorUI {
 	
 	private JFrame frame;
-	private JButton button;
 	
 	
-	private BoxLayout boxlayout;
     private JPanel mainPanel;
     
-    private JPanel elevator;
-    private JPanel elevatorShaft;
     private FloorRequestPanel requestJPanel;
     
     private ArrayList<ElevatorPanel> elevators;

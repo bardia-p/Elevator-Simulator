@@ -25,21 +25,17 @@ public class DoorOpenedMessage extends Message{
 	 * @param type the type of message
 	 */
 	public DoorOpenedMessage(Date timestamp, int elevatorID, int arrivedFloor, StopType type, DirectionType direction, int numPickups, int numDropoffs){
-		this(timestamp, arrivedFloor, type, direction,numPickups, numDropoffs);
-		this.elevatorID = elevatorID;
-		
-	}
-	
-	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction, int numPickups, int numDropoffs){
 		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;
 		this.direction = direction;
 		this.numPickups = numPickups;
 		this.numDropoffs = numDropoffs;
-		this.elevatorID = -1;
+		this.elevatorID = elevatorID;
 		
 	}
+	
+
 	/**
 	 * Gets the stop type
 	 * 

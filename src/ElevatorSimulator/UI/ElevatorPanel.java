@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.lang.System.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -16,7 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorState;
@@ -24,9 +21,10 @@ import ElevatorSimulator.Elevator.ElevatorTrip;
 
 /**
  * each panel represents 1 elevator moving up and down the shaft
- * @author guymorgenshtern
+ * @author Guy Morgenshtern
  *
  */
+@SuppressWarnings("serial")
 public class ElevatorPanel extends JPanel {
 	
 	private JPanel headerJPanel;
@@ -47,7 +45,6 @@ public class ElevatorPanel extends JPanel {
 	
 	private boolean elevatorLights[];
 	
-	private int id;
 	public ElevatorPanel(int id) {
 		super();
 		
@@ -59,9 +56,7 @@ public class ElevatorPanel extends JPanel {
 		logFont = new Font("Helvetica", Font.PLAIN, 14);
 		stateFont = new Font("Helvetica", Font.PLAIN, 18);
 		actionFont = new Font("Helvetica", Font.PLAIN, 32);
-		
-		this.id = id;
-		
+				
         this.setLayout(new BorderLayout());
         setSize(1200/Simulator.NUM_ELEVATORS,1000);
         

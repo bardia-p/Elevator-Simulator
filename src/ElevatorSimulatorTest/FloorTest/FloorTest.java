@@ -115,13 +115,13 @@ public class FloorTest{
 			if (newMessage.getType() == MessageType.REQUEST) {
 				assertEquals(0, floor.getElevatorRequestsList().size());
 
-				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
+				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), 0, PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
 				
 				queue.replyToFloor(pickupMessage);
 				
 				assertEquals(0, floor.getElevatorRequestsList().size());
 				
-				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
+				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(), 0, DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
 
 				queue.replyToFloor(dropoffMessage);
 				
