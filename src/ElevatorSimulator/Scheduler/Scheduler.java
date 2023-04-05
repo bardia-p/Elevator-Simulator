@@ -125,7 +125,8 @@ public class Scheduler implements Runnable {
 		
 		// tries to find an empty elevator.
 		for (ElevatorInfo elevator : availableElevators) {
-			if (elevator.getNumRequest() == 0) {
+			// The elevator has no requests and no pending trips.
+			if (elevator.getNumRequest() == 0 && queue.numPendingElevatorRequest(elevator.getElevatorId()) == 0) {
 				possibleCandidates.add(elevator);
 			}
 		}
@@ -177,9 +178,13 @@ public class Scheduler implements Runnable {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
+				if (Simulator.DEBUG_MODE) {
+					System.out.println("PICKED ELEVATOR " + id);
+				}
 				queue.replyToElevator(currentRequest, id);
 			} else {
-				return;
+				// Send the message to the back of the queue.
+				queue.send(currentRequest);
 			}
 
 		} else if (currentRequest.getType() == MessageType.ELEVATOR_STUCK) {
@@ -240,8 +245,9 @@ public class Scheduler implements Runnable {
 				processMessage();
 			}
 
+			// Avoids busy looping.
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
