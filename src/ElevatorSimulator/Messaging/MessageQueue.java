@@ -120,7 +120,6 @@ public class MessageQueue {
 	 */
 	public void updateUI(Message m) {
 		toUI.offer(m);
-		Logger.printMessage(m, "SENT");
 	}
 	
 	public Message receiveFromUI() {

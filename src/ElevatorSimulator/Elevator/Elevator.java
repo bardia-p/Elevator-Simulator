@@ -596,6 +596,8 @@ public class Elevator extends ClientRPC implements Runnable {
 			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
 		}
 		this.parentState = newState;
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 	
 	public ArrayList<ElevatorTrip> getTrips() {

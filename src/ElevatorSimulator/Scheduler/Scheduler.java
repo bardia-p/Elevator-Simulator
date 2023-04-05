@@ -122,6 +122,22 @@ public class Scheduler implements Runnable {
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
+		
+		// tries to find an empty elevator.
+		for (ElevatorInfo elevator : availableElevators) {
+			if (elevator.getNumRequest() == 0) {
+				possibleCandidates.add(elevator);
+			}
+		}
+
+		if (possibleCandidates.size() != 0) {
+			// return the closest elevator.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
+		}
 
 		// Tries to find an elevator in going the same direction.
 		// Going up and elevator is below request floor OR
@@ -145,22 +161,7 @@ public class Scheduler implements Runnable {
 					.getElevatorId();
 		}
 
-		// tries to find an empty elevator.
-		for (ElevatorInfo elevator : availableElevators) {
-			if (elevator.getNumRequest() == 0) {
-				possibleCandidates.add(elevator);
-			}
-		}
-
-		if (possibleCandidates.size() != 0) {
-			// return the closest elevator.
-			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(
-							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
-							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
-					.get().getElevatorId();
-		}
-
+	
 		// Could not find a suitable elevator.
 		return -1;
 	}
