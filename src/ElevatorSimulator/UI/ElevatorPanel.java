@@ -147,6 +147,9 @@ public class ElevatorPanel extends JPanel {
         setVisible(true);
 	}
 	
+	/**
+	 * initializes elevator lamps
+	 */
 	private void initElevatorLamps() {
 		for (int i = 0; i < elevatorLamps.length; i++) {
 			elevatorLamps[i] = new ElevatorLamp(i + 1);
@@ -227,6 +230,10 @@ public class ElevatorPanel extends JPanel {
 		}
 	}
 	
+	/**
+	 * turns off lamp on elevator after dropoff
+	 * @param floor
+	 */
 	public void dropoffAtFloor(int floor) {
 		elevatorLamps[floor-1].updateLampStatus(false);
 	}

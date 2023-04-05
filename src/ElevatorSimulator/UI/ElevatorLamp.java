@@ -11,6 +11,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+/**
+ * represents a floor button lamp on an elevator
+ * @author guymorgenshtern
+ *
+ */
 public class ElevatorLamp extends JPanel {
 	
 	private Font boldFont;
@@ -43,6 +48,10 @@ public class ElevatorLamp extends JPanel {
 		this.setVisible(true);
 	}
 	
+	/**
+	 * updates the status of the elevator lamp
+	 * @param status
+	 */
 	public void updateLampStatus(boolean status) {
 		lampStatus.setText(status ? "ON" : "OFF");
 		lampStatus.setForeground(status ? ON_COLOUR : Color.BLACK);

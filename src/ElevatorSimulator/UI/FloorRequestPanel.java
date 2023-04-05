@@ -9,6 +9,12 @@ import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.DirectionType;
 
 @SuppressWarnings("serial")
+
+/**
+ * Represents UP DOWN elevator request buttons on a floor 
+ * @author Guy Morgenshtern
+ *
+ */
 public class FloorRequestPanel extends JPanel {
 	
 	private FloorButtonPanel[] floors;
@@ -33,6 +39,12 @@ public class FloorRequestPanel extends JPanel {
         setVisible(true);
 	}
 	
+	/**
+	 * adds request to outstanding requests, helps keep light on until every request is picked up
+	 * @param floor
+	 * @param direction
+	 */
+	
 	public void addRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
 			upRequests[floor-1]++;
@@ -43,6 +55,11 @@ public class FloorRequestPanel extends JPanel {
 		updateLights();
 	}
 	
+	/**
+	 * removes request from outstanding requests, helps keep light on until every request is picked up
+	 * @param floor
+	 * @param direction
+	 */
 	public void removeRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
 			upRequests[floor-1]--;
@@ -53,6 +70,9 @@ public class FloorRequestPanel extends JPanel {
 		updateLights();
 	}
 	
+	/**
+	 * updates floor request lamps
+	 */
 	private void updateLights() {
 		
 		for (int i = 0; i < Simulator.NUM_ELEVATORS; i++) {
