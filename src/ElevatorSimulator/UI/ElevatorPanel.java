@@ -177,10 +177,10 @@ public class ElevatorPanel extends JPanel {
 	public void setElevatorAction(ElevatorState state, DirectionType direction) {
 		String elevatorRopeString = "";
 		
-		if (state == ElevatorState.CLOSE) {
-			elevatorRopeString = (direction == DirectionType.DOWN) ? "\n|\n|\n|\n|\n|\n" : "\n|\n|\n|\n";
+		if (state == ElevatorState.MOVING) {
+			elevatorRopeString = (direction == DirectionType.DOWN) ? "\nO\n|\n|\n|\n|\n|\n" : "\nO\n|\n|\n|\n";
 		} else {
-			elevatorRopeString = "\n|\n|\n|\n|\n";
+			elevatorRopeString = "\nO\n|\n|\n|\n|\n";
 		}
 		
 		String elevatorTextString = "--------------\n";

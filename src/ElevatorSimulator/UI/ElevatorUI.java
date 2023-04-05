@@ -124,10 +124,7 @@ public class ElevatorUI {
 		elevatorPanel.setState(info.getState());
 		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + " DIR: " + info.getDirection());
 		elevatorPanel.addTripsLights(info.getElevatorTrips());
-		
-		if (info.getState() == ElevatorState.OPEN || info.getState() == ElevatorState.BOARDING || info.getState() == ElevatorState.CLOSE) {
-			elevatorPanel.setElevatorAction(info.getState(), info.getDirection());
-		}
+		elevatorPanel.setElevatorAction(info.getState(), info.getDirection());
 	}
 	
 	/**
