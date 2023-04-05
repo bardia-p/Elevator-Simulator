@@ -1,9 +1,7 @@
 package ElevatorSimulator.UI;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 
 import javax.swing.JLabel;
@@ -16,6 +14,7 @@ import javax.swing.SwingConstants;
  * @author guymorgenshtern
  *
  */
+@SuppressWarnings("serial")
 public class ElevatorLamp extends JPanel {
 	
 	private Font boldFont;

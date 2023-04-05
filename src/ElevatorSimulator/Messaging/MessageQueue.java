@@ -120,7 +120,6 @@ public class MessageQueue {
 	 */
 	public void updateUI(Message m) {
 		toUI.offer(m);
-		Logger.printMessage(m, "SENT");
 	}
 	
 	public Message receiveFromUI() {
@@ -159,5 +158,16 @@ public class MessageQueue {
 			return new EmptyMessage();
 		}
 		return m;	
+	}
+	
+	
+	/**
+	 * Returns the number of pending requests for the elevator.
+	 * @param id, the elevator id.
+	 * 
+	 * @return
+	 */
+	public int numPendingElevatorRequest(int id) {
+		return toElevator.get(id).size();
 	}
 }

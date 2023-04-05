@@ -2,6 +2,7 @@ package ElevatorSimulator.UI;
 
 
 import java.awt.GridLayout;
+import java.util.Arrays;
 
 import javax.swing.JPanel;
 
@@ -35,6 +36,8 @@ public class FloorRequestPanel extends JPanel {
 			this.add(floors[i]);
 		}
 		
+		Arrays.fill(upRequests, 0);
+		Arrays.fill(downRequests, 0);
         
         setVisible(true);
 	}
@@ -59,12 +62,13 @@ public class FloorRequestPanel extends JPanel {
 	 * removes request from outstanding requests, helps keep light on until every request is picked up
 	 * @param floor
 	 * @param direction
+	 * @param numPickups
 	 */
-	public void removeRequest(int floor, DirectionType direction) {
+	public void removeRequest(int floor, DirectionType direction, int numPickups) {
 		if (direction == DirectionType.UP) {
-			upRequests[floor-1]--;
+			upRequests[floor-1] -= numPickups;
 		} else {
-			downRequests[floor-1]--;
+			downRequests[floor-1] -= numPickups;
 		}	
 		
 		updateLights();
@@ -75,7 +79,7 @@ public class FloorRequestPanel extends JPanel {
 	 */
 	private void updateLights() {
 		
-		for (int i = 0; i < Simulator.NUM_ELEVATORS; i++) {
+		for (int i = 0; i < Simulator.NUM_FLOORS; i++) {
 			if (upRequests[i] > 0) {
 				floors[i].setUpLight(true);
 			} else {

@@ -107,9 +107,10 @@ public class ElevatorUI {
 	 * edits floor request panel when passenger is picked up in order to turn off request light
 	 * @param floor
 	 * @param direction
+	 * @param numPickups
 	 */
-	public void pickupPerformed(int floor, DirectionType direction) {
-		this.requestJPanel.removeRequest(floor, direction);
+	public void pickupPerformed(int floor, DirectionType direction, int numPickups) {
+		this.requestJPanel.removeRequest(floor, direction, numPickups);
 	}
 	
 	/**
@@ -146,7 +147,6 @@ public class ElevatorUI {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			

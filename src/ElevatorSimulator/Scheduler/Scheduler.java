@@ -122,6 +122,23 @@ public class Scheduler implements Runnable {
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
+		
+		// tries to find an empty elevator.
+		for (ElevatorInfo elevator : availableElevators) {
+			// The elevator has no requests and no pending trips.
+			if (elevator.getNumRequest() == 0 && queue.numPendingElevatorRequest(elevator.getElevatorId()) == 0) {
+				possibleCandidates.add(elevator);
+			}
+		}
+
+		if (possibleCandidates.size() != 0) {
+			// return the closest elevator.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
+		}
 
 		// Tries to find an elevator in going the same direction.
 		// Going up and elevator is below request floor OR
@@ -145,22 +162,7 @@ public class Scheduler implements Runnable {
 					.getElevatorId();
 		}
 
-		// tries to find an empty elevator.
-		for (ElevatorInfo elevator : availableElevators) {
-			if (elevator.getNumRequest() == 0) {
-				possibleCandidates.add(elevator);
-			}
-		}
-
-		if (possibleCandidates.size() != 0) {
-			// return the closest elevator.
-			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(
-							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
-							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
-					.get().getElevatorId();
-		}
-
+	
 		// Could not find a suitable elevator.
 		return -1;
 	}
@@ -176,9 +178,13 @@ public class Scheduler implements Runnable {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
+				if (Simulator.DEBUG_MODE) {
+					System.out.println("PICKED ELEVATOR " + id);
+				}
 				queue.replyToElevator(currentRequest, id);
 			} else {
-				return;
+				// Send the message to the back of the queue.
+				queue.send(currentRequest);
 			}
 
 		} else if (currentRequest.getType() == MessageType.ELEVATOR_STUCK) {
@@ -239,8 +245,9 @@ public class Scheduler implements Runnable {
 				processMessage();
 			}
 
+			// Avoids busy looping.
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

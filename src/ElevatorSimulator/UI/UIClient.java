@@ -44,7 +44,7 @@ public class UIClient extends ClientRPC implements Runnable{
 			DoorOpenedMessage openMessage = (DoorOpenedMessage) m;
 			ui.doorOpened(openMessage.getID(), openMessage.getArrivedFloor(), openMessage.getNumPickups(), openMessage.getNumDropoffs(), openMessage.getStopType(), openMessage.getTimestamp());
 			if (openMessage.getStopType() == StopType.PICKUP || openMessage.getStopType() == StopType.PICKUP_AND_DROPOFF) {
-				ui.pickupPerformed(openMessage.getArrivedFloor(), openMessage.getDirection());
+				ui.pickupPerformed(openMessage.getArrivedFloor(), openMessage.getDirection(), openMessage.getNumPickups());
 			}
 		} else if (m.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
 			UpdateElevatorInfoMessage updateElevatorMessage = (UpdateElevatorInfoMessage) m;
@@ -52,7 +52,7 @@ public class UIClient extends ClientRPC implements Runnable{
 		} else if (m.getType() == MessageType.DOOR_INTERRUPT) {
 			DoorInterruptMessage doorInterruptMessage = (DoorInterruptMessage) m;
 			ui.doorInterrupted(doorInterruptMessage.getElevatorID(), doorInterruptMessage.getTimestamp(), doorInterruptMessage.getDirection());
-		}
+		}		
 	}
 	
 
