@@ -5,15 +5,20 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.border.Border;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -47,19 +52,19 @@ public class ElevatorPanel extends JPanel {
 	private JTextPane elevatorAction;
 	private JPanel logPanel;
 	
-	private boolean elevatorLights[];
+	private ElevatorLamp elevatorLamps[];
 	
 	public ElevatorPanel(int id) {
 		super();
+	
 		
-		elevatorLights = new boolean[Simulator.NUM_FLOORS];
-		Arrays.fill(elevatorLights, false);
 		titleFont = new Font("Helvetica", Font.PLAIN, 24);
 		this.setFont(titleFont);
 		headerFont = new Font("Helvetica", Font.PLAIN, 18);
 		logFont = new Font("Helvetica", Font.PLAIN, 14);
 		stateFont = new Font("Helvetica", Font.PLAIN, 18);
 		actionFont = new Font("Helvetica", Font.PLAIN, 32);
+		Border border =  BorderFactory.createLineBorder(Color.GRAY);
 				
         this.setLayout(new BorderLayout());
         setSize(1200/Simulator.NUM_ELEVATORS,1000);
@@ -88,8 +93,12 @@ public class ElevatorPanel extends JPanel {
         midPanel = new JPanel(new GridLayout(2, 1));
         midPanel.setSize(this.getSize());
         
-        logPanel = new JPanel(new BorderLayout());
-        logPanel.add(log, BorderLayout.WEST);
+        logPanel = new JPanel();
+        logPanel.setLayout(new GridLayout((int) Math.ceil(Simulator.NUM_FLOORS/2.0), 2));
+        
+		elevatorLamps = new ElevatorLamp[Simulator.NUM_FLOORS];
+		initElevatorLamps();
+       
         
         logPanel.setBackground(Color.WHITE);
  
@@ -118,10 +127,13 @@ public class ElevatorPanel extends JPanel {
         eventLogJPanel.add(midPanel, BorderLayout.CENTER);
         
         stateArea = new JTextArea("BOARDING");
+        
+        stateArea.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(0, 10, 10, 10)));
         eventLogJPanel.add(stateArea, BorderLayout.SOUTH);
         stateArea.setFont(stateFont);
         
         currArea = new JTextArea("");
+        currArea.setBorder(border);
         eventLogJPanel.add(currArea, BorderLayout.NORTH);
         currArea.setFont(headerFont);
         
@@ -133,6 +145,16 @@ public class ElevatorPanel extends JPanel {
         this.add(filler, BorderLayout.SOUTH);
         filler.setPreferredSize(new Dimension(0, 0));
         setVisible(true);
+	}
+	
+	/**
+	 * initializes elevator lamps
+	 */
+	private void initElevatorLamps() {
+		for (int i = 0; i < elevatorLamps.length; i++) {
+			elevatorLamps[i] = new ElevatorLamp(i + 1);
+			logPanel.add(elevatorLamps[i]);
+		}
 	}
 	
 	/**
@@ -148,7 +170,6 @@ public class ElevatorPanel extends JPanel {
 	 * @param message
 	 */
 	public void addEvent(String message) {
-		log.setText(getLightStatus());
 		currArea.setText(">" + message);
 
 	}
@@ -201,26 +222,20 @@ public class ElevatorPanel extends JPanel {
 	 * @param trips
 	 */
 	public void addTripsLights(ArrayList<ElevatorTrip> trips) {
-		Arrays.fill(elevatorLights, false);
 		for (ElevatorTrip trip : trips) {
 			if (trip.isPickedUp()) {
-				elevatorLights[trip.getDropoff()-1] = true;
+				elevatorLamps[trip.getDropoff()-1].updateLampStatus(true);
 			}
 			
 		}
 	}
 	
 	/**
-	 * returns a formatted string of all elevator lights with their statuses 
-	 * @return
+	 * turns off lamp on elevator after dropoff
+	 * @param floor
 	 */
-	private String getLightStatus() {
-		String m = "";
-		
-		for (int i=0; i < elevatorLights.length; i++) {
-			m += "f" + (i+1) + " ";
-			m += elevatorLights[i] ? "ON\n" : "OFF\n";
-		}
-		return m;
+	public void dropoffAtFloor(int floor) {
+		elevatorLamps[floor-1].updateLampStatus(false);
 	}
+
 }

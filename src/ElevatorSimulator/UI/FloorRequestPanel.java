@@ -9,15 +9,25 @@ import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.DirectionType;
 
 @SuppressWarnings("serial")
+
+/**
+ * Represents UP DOWN elevator request buttons on a floor 
+ * @author Guy Morgenshtern
+ *
+ */
 public class FloorRequestPanel extends JPanel {
 	
 	private FloorButtonPanel[] floors;
+	private int upRequests[];
+	private int downRequests[];
 	
 	public FloorRequestPanel() {
 		super();
 		
 		this.setLayout(new GridLayout(Simulator.NUM_FLOORS, 1));
         
+		upRequests = new int[Simulator.NUM_FLOORS];
+		downRequests = new int[Simulator.NUM_FLOORS];
 		floors = new FloorButtonPanel[Simulator.NUM_FLOORS];
 		
 		for (int i = 0; i < floors.length; i++) {
@@ -29,20 +39,55 @@ public class FloorRequestPanel extends JPanel {
         setVisible(true);
 	}
 	
+	/**
+	 * adds request to outstanding requests, helps keep light on until every request is picked up
+	 * @param floor
+	 * @param direction
+	 */
+	
 	public void addRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
-			floors[floor-1].setUpLight(true);
+			upRequests[floor-1]++;
 		} else {
-			floors[floor-1].setDownLight(true);
+			downRequests[floor-1]++;
 		}	
+		
+		updateLights();
 	}
 	
+	/**
+	 * removes request from outstanding requests, helps keep light on until every request is picked up
+	 * @param floor
+	 * @param direction
+	 */
 	public void removeRequest(int floor, DirectionType direction) {
 		if (direction == DirectionType.UP) {
-			floors[floor-1].setUpLight(false);
+			upRequests[floor-1]--;
 		} else {
-			floors[floor-1].setDownLight(false);
+			downRequests[floor-1]--;
 		}	
+		
+		updateLights();
+	}
+	
+	/**
+	 * updates floor request lamps
+	 */
+	private void updateLights() {
+		
+		for (int i = 0; i < Simulator.NUM_ELEVATORS; i++) {
+			if (upRequests[i] > 0) {
+				floors[i].setUpLight(true);
+			} else {
+				floors[i].setUpLight(false);
+			}
+			
+			if (downRequests[i] > 0) {
+				floors[i].setDownLight(true);
+			} else {
+				floors[i].setDownLight(false);
+			}
+		}
 	}
 
 }

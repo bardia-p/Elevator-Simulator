@@ -96,6 +96,11 @@ public class ElevatorUI {
 		String message = "AT: " + arrivedFloor + " PICK: " + numPickups + " DROP: " + numDropoffs;
 		
 		elevatorPanel.addEvent(message);
+		
+		if (stopType == StopType.DROPOFF || stopType == StopType.PICKUP_AND_DROPOFF) {
+			elevatorPanel.dropoffAtFloor(arrivedFloor);
+		}
+
 	}
 	
 	/**
@@ -116,7 +121,7 @@ public class ElevatorUI {
 	public void updateElevatorInfo(ElevatorInfo info, DirectionType direction, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(info.getElevatorId());
 		elevatorPanel.setState(info.getState());
-		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + "\n DIR: " + info.getDirection());
+		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + " DIR: " + info.getDirection());
 		elevatorPanel.addTripsLights(info.getElevatorTrips());
 		
 		if (info.getState() == ElevatorState.OPEN || info.getState() == ElevatorState.BOARDING || info.getState() == ElevatorState.CLOSE) {
