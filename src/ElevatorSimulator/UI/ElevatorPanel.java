@@ -122,7 +122,7 @@ public class ElevatorPanel extends JPanel {
         scrollPane.setAutoscrolls(true);
         eventLogJPanel.add(midPanel, BorderLayout.CENTER);
         
-        stateArea = new JTextArea("BOARDING");
+        stateArea = new JTextArea("POLL");
         
         stateArea.setBorder(BorderFactory.createCompoundBorder(border, BorderFactory.createEmptyBorder(0, 10, 10, 10)));
         eventLogJPanel.add(stateArea, BorderLayout.SOUTH);

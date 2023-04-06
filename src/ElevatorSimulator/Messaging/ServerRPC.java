@@ -42,7 +42,7 @@ public class ServerRPC implements Runnable {
 	public static final int TIMEOUT = 30000;
 	
 	// The public ip for the server.
-	public static final String PUBLIC_IP = "172.17.71.148";
+	public static final String PUBLIC_IP = "xx.xx.xx.xx";
 
 	/**
 	 * The constructor for the class.

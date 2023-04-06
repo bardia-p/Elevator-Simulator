@@ -11,6 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
+/**
+ * The elevator log panel for displaying the elevator messages. 
+ * 
+ * @author Guy Morgenshtern
+ *
+ */
+@SuppressWarnings("serial")
 public class ElevatorMessageLogPanel extends JPanel{
 	
 	private JTextPane log;
@@ -29,6 +36,12 @@ public class ElevatorMessageLogPanel extends JPanel{
 		this.add(scrollPane, BorderLayout.CENTER);
 	}
 	
+	/**
+	 * Displays a given event for the elevator.
+	 * 
+	 * @param timestamp
+	 * @param message
+	 */
 	public void addEvent(Date timestamp, String message) {
 		String m = "";
 		if (timestamp != null) {
