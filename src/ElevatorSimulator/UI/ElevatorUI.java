@@ -2,17 +2,16 @@ package ElevatorSimulator.UI;
 
 import java.util.ArrayList;
 import java.util.Date;
-
-import javax.swing.JFrame;
-
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 
 import javax.swing.*;
 
 import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
+import ElevatorSimulator.Elevator.ElevatorTrip;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.StopType;
 
@@ -31,17 +30,20 @@ public class ElevatorUI {
     private FloorRequestPanel requestJPanel;
     
     private ArrayList<ElevatorPanel> elevators;
+    private ElevatorMessageLogPanel[] elevatorLogs;
+
     
 
 	public ElevatorUI() {
 		frame = new JFrame("Console System");//creating instance of JFrame  
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(1200, 1000);
+		frame.setSize(Toolkit.getDefaultToolkit(). getScreenSize());
 
-
+		elevatorLogs = new ElevatorMessageLogPanel[Simulator.NUM_ELEVATORS];
 		
+		JPanel messageLogPanel = new JPanel(new GridLayout(Simulator.NUM_ELEVATORS, 1));
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(1, Simulator.NUM_ELEVATORS + 1));
+		mainPanel.setLayout(new GridLayout(1, Simulator.NUM_ELEVATORS + 2));
 		
 		elevators = new ArrayList<>();
 		
@@ -50,11 +52,16 @@ public class ElevatorUI {
 			ElevatorPanel e = new ElevatorPanel(i + 1);
 			elevators.add(e);
 			mainPanel.add(e);
+			
+			elevatorLogs[i] = new ElevatorMessageLogPanel(i+1);
+			messageLogPanel.add(elevatorLogs[i]);
 		}
 		
 		
 		requestJPanel = new FloorRequestPanel();
 		mainPanel.add(requestJPanel);
+		
+		mainPanel.add(messageLogPanel);
         
 		mainPanel.setBackground(Color.gray);
 
@@ -80,6 +87,7 @@ public class ElevatorUI {
 	 */
 	public void elevatorStuck(int id, Date timestamp) {
 		elevators.get(id).elevatorStuck();
+		elevatorLogs[id].addEvent(timestamp, "ELEVATOR STUCK");
 	}
 	
 	/**
@@ -91,7 +99,7 @@ public class ElevatorUI {
 	 * @param stopType
 	 * @param timestamp
 	 */
-	public void doorOpened(int elevatorID, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
+	public void doorOpened(int elevatorID, DirectionType direction, int arrivedFloor, int numPickups, int numDropoffs, StopType stopType, Date timestamp) {
 		ElevatorPanel elevatorPanel = this.elevators.get(elevatorID);
 		String message = "AT: " + arrivedFloor + " PICK: " + numPickups + " DROP: " + numDropoffs;
 		
@@ -99,6 +107,11 @@ public class ElevatorUI {
 		
 		if (stopType == StopType.DROPOFF || stopType == StopType.PICKUP_AND_DROPOFF) {
 			elevatorPanel.dropoffAtFloor(arrivedFloor);
+			dropoffPerformed(elevatorID, arrivedFloor, direction, numDropoffs, timestamp);
+		}
+		
+		if (stopType == StopType.PICKUP || stopType == StopType.PICKUP_AND_DROPOFF) {
+			pickupPerformed(elevatorID, arrivedFloor, direction,  numPickups, timestamp);
 		}
 
 	}
@@ -109,8 +122,13 @@ public class ElevatorUI {
 	 * @param direction
 	 * @param numPickups
 	 */
-	public void pickupPerformed(int floor, DirectionType direction, int numPickups) {
+	private void pickupPerformed(int id, int floor, DirectionType direction, int numPickups, Date timestamp) {
+		this.elevatorLogs[id].addEvent(timestamp, numPickups + " PICKUP(s) at: " + floor + " " + direction);
 		this.requestJPanel.removeRequest(floor, direction, numPickups);
+	}
+	
+	private void dropoffPerformed(int id, int floor, DirectionType direction, int numDropoffs, Date timestamp) {
+		this.elevatorLogs[id].addEvent(timestamp, numDropoffs + " DROPOFF(s) at: " + floor + " " + direction);
 	}
 	
 	/**
@@ -125,6 +143,11 @@ public class ElevatorUI {
 		elevatorPanel.addEvent("AT: " + info.getFloorNumber() + " DIR: " + info.getDirection());
 		elevatorPanel.addTripsLights(info.getElevatorTrips());
 		elevatorPanel.setElevatorAction(info.getState(), info.getDirection());
+		
+		for (ElevatorTrip trip : info.getElevatorTrips()) {
+			elevatorLogs[info.getElevatorId()].addEvent(timestamp, "REQUEST at " + trip.getPickup() + " to " + trip.getDropoff());
+		}
+		
 	}
 	
 	/**
@@ -134,6 +157,7 @@ public class ElevatorUI {
 	 */
 	public void doorInterrupted(int id, Date timestamp, DirectionType directionType) {
 		elevators.get(id).setElevatorAction(ElevatorState.DOOR_INTERRUPT, directionType);
+		elevatorLogs[id].addEvent(timestamp, "DOOR INTERRUPT");
 	}
 	
 	
