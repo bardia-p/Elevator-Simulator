@@ -38,7 +38,7 @@ public class PerformanceUnitTest {
 	// Test constants
 	public static int ELEVATOR_ID = 0;
 
-	public static int NUM_FLOORS = 5;
+	public static int NUM_FLOORS = 7;
 
 	/**
 	 * Initializes the server RPC thread in the background.
@@ -63,13 +63,21 @@ public class PerformanceUnitTest {
 		queue.addElevator(ELEVATOR_ID, info);
 		
 		// Assigns requests to the elevator to stop at EVERY floor.
-		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.UP, 5, 0, null);
+		Message message = new RequestElevatorMessage(new Date(), 1, DirectionType.UP, 7, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
-		message = new RequestElevatorMessage(new Date(), 2, DirectionType.UP, 5, 0, null);
+		message = new RequestElevatorMessage(new Date(), 2, DirectionType.UP, 7, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
-		message = new RequestElevatorMessage(new Date(), 3, DirectionType.UP, 5, 0, null);
+		message = new RequestElevatorMessage(new Date(), 3, DirectionType.UP, 7, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
-		message = new RequestElevatorMessage(new Date(), 4, DirectionType.UP, 5, 0, null);
+		message = new RequestElevatorMessage(new Date(), 4, DirectionType.UP, 7, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		message = new RequestElevatorMessage(new Date(), 5, DirectionType.UP, 7, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		message = new RequestElevatorMessage(new Date(), 6, DirectionType.UP, 7, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		message = new RequestElevatorMessage(new Date(), 6, DirectionType.DOWN, 1, 0, null);
+		queue.replyToElevator(message, ELEVATOR_ID);
+		message = new RequestElevatorMessage(new Date(), 5, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);
 		message = new RequestElevatorMessage(new Date(), 4, DirectionType.DOWN, 1, 0, null);
 		queue.replyToElevator(message, ELEVATOR_ID);

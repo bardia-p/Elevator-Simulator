@@ -55,32 +55,9 @@ public class PerformanceIntegrationTest {
 
 		numFloors = 4;
 		numElevators = 1;
-		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-one_request.csv";
 		
-		Thread schedulerThread = new Thread(new Scheduler(queue, false), "SCHEDULER THREAD");
-		Thread elevatorControllerThread = new Thread(
-				new ElevatorController(numElevators, numFloors, ConnectionType.LOCAL), "ELEVATOR CONTROLLER");
-		Thread  floorThread = new Thread(new Floor(inputFileName, numFloors, ConnectionType.LOCAL), "FLOOR THREAD");
-		
-		schedulerThread.start();
-		
-		Thread.sleep(1000);
-		
-		elevatorControllerThread.start();
-		
-		Thread.sleep(1000);
-		
-		long startTime = System.currentTimeMillis();
-		floorThread.start();
-		
-		floorThread.join();
-		
-		long endTime = System.currentTimeMillis();
-
-		System.out.println("Time to complete 1 request with 1 elevator: " + (endTime - startTime));
-
-		floorServerRPC.join();
-		elevatorServerRPC.join();
+		startSimulator();
 	}
 	
 	/**
@@ -92,34 +69,11 @@ public class PerformanceIntegrationTest {
 	public void testOneElevatorMultipleRequests() throws InterruptedException {
 		System.out.println("\n----------IntegrationTest.testOneElevatorMultipleRequests----------\n");
 
-		numFloors = 4;
+		numFloors = 5;
 		numElevators = 1;
-		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-2.csv";
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-multiple_requests.csv";
 		
-		Thread schedulerThread = new Thread(new Scheduler(queue, false), "SCHEDULER THREAD");
-		Thread elevatorControllerThread = new Thread(
-				new ElevatorController(numElevators, numFloors, ConnectionType.LOCAL), "ELEVATOR CONTROLLER");
-		Thread  floorThread = new Thread(new Floor(inputFileName, numFloors, ConnectionType.LOCAL), "FLOOR THREAD");
-		
-		schedulerThread.start();
-		
-		Thread.sleep(1000);
-		
-		elevatorControllerThread.start();
-		
-		Thread.sleep(1000);
-		
-		long startTime = System.currentTimeMillis();
-		floorThread.start();
-		
-		floorThread.join();
-		
-		long endTime = System.currentTimeMillis();
-
-		System.out.println("Time to complete 3 requests with 1 elevator: " + (endTime - startTime));
-
-		floorServerRPC.join();
-		elevatorServerRPC.join();
+		startSimulator();
 	}
 	
 	/**
@@ -131,38 +85,33 @@ public class PerformanceIntegrationTest {
 	public void testMultipleElevatorsMultipleRequests() throws InterruptedException {
 		System.out.println("\n----------IntegrationTest.testMultipleElevatorsMultipleRequests----------\n");
 
-		numFloors = 4;
+		numFloors = 5;
 		numElevators = 2;
-		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-2.csv";
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-multiple_requests.csv";
 		
-		Thread schedulerThread = new Thread(new Scheduler(queue, false), "SCHEDULER THREAD");
-		Thread elevatorControllerThread = new Thread(
-				new ElevatorController(numElevators, numFloors, ConnectionType.LOCAL), "ELEVATOR CONTROLLER");
-		Thread  floorThread = new Thread(new Floor(inputFileName, numFloors, ConnectionType.LOCAL), "FLOOR THREAD");
-		
-		schedulerThread.start();
-		
-		Thread.sleep(1000);
-		
-		elevatorControllerThread.start();
-		
-		Thread.sleep(1000);
-		
-		long startTime = System.currentTimeMillis();
-		floorThread.start();
-		
-		floorThread.join();
-		
-		long endTime = System.currentTimeMillis();
-
-		System.out.println("Time to complete 3 requests with 2 elevators: " + (endTime - startTime));
-
-		floorServerRPC.join();
-		elevatorServerRPC.join();
+		startSimulator();
 	}
 	
 	/**
-	 * Measures how long it takes to complete 5 requests with 2 elevators.
+	 * Measures how long it takes to run multiple requests with multiple elevators.
+	 * With different error cases.
+	 * 
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testMultipleElevatorsMultipleRequestsWithError() throws InterruptedException {
+		System.out.println("\n----------IntegrationTest.testMultipleElevatorsMultipleRequestsWithError----------\n");
+
+		numFloors = 5;
+		numElevators = 2;
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-multiple_requests_with_error.csv";
+		
+		startSimulator();
+	}
+	
+	
+	/**
+	 * Measures how long it takes to complete 22 requests with 4 elevators.
 	 * 
 	 * @throws InterruptedException
 	 */
@@ -170,10 +119,36 @@ public class PerformanceIntegrationTest {
 	public void testOverloadSystem() throws InterruptedException {
 		System.out.println("\n----------IntegrationTest.testOverloadSystem----------\n");
 
-		numFloors = 5;
-		numElevators = 2;
-		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-3.csv";
+		numFloors = 22;
+		numElevators = 4;
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-stress.csv";
 		
+		startSimulator();
+	}
+	
+	/**
+	 * Measures how long it takes to complete 22 requests with 4 elevators.
+	 * With different error cases.
+	 * 
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void testOverloadSystemWithError() throws InterruptedException {
+		System.out.println("\n----------IntegrationTest.testOverloadSystemWithError----------\n");
+
+		numFloors = 22;
+		numElevators = 4;
+		inputFileName = "src/ElevatorSimulatorTest/TestFiles/elevator_test-stress_with_error.csv";
+		
+		startSimulator();
+	}
+	
+	/**
+	 * Starts the simulator and waits for it to finish.
+	 * 
+	 * @throws InterruptedException
+	 */
+	private void startSimulator() throws InterruptedException{
 		Thread schedulerThread = new Thread(new Scheduler(queue, false), "SCHEDULER THREAD");
 		Thread elevatorControllerThread = new Thread(
 				new ElevatorController(numElevators, numFloors, ConnectionType.LOCAL), "ELEVATOR CONTROLLER");
@@ -194,7 +169,7 @@ public class PerformanceIntegrationTest {
 		
 		long endTime = System.currentTimeMillis();
 
-		System.out.println("Time to complete 5 requests with 2 elevators: " + (endTime - startTime));
+		System.out.println("Time to complete all the requests: " + (endTime - startTime));
 
 		floorServerRPC.join();
 		elevatorServerRPC.join();
