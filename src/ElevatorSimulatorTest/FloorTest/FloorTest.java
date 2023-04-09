@@ -45,7 +45,7 @@ public class FloorTest{
 	// Test constants.
 	public static int NUM_FLOORS = 4;
 	
-	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
+	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-one_request.csv";
 	
 	private int PICKUP_FLOOR = 1;
 	
