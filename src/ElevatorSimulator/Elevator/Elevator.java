@@ -5,8 +5,10 @@ import java.util.Date;
 
 import ElevatorSimulator.ErrorGenerator;
 import ElevatorSimulator.Logger;
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Messages.*;
 import ElevatorSimulator.Messaging.ClientRPC;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Scheduler.Scheduler;
 
 /**
@@ -64,10 +66,12 @@ public class Elevator extends ClientRPC implements Runnable {
 	/**
 	 * Constructor for the elevator.
 	 * 
-	 * @param queue, the message queue.
+	 * @param id, the elevator id,
+	 * @param numFloors, the number of floors on the elevator.
+	 * @param connectionType, used to indicate which mode the device is running on.
 	 */
-	public Elevator(int id, int numFloors) {
-		super(Scheduler.ELEVATOR_PORT);
+	public Elevator(int id, int numFloors, ConnectionType connectionType) {
+		super(Scheduler.ELEVATOR_PORT, connectionType);
 		this.childState = null;
 		this.parentState = ElevatorState.OPERATIONAL;
 		this.floor = 1;
@@ -137,7 +141,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		this.direction = direction == DirectionType.UP ? DirectionType.DOWN : DirectionType.UP;
 
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -362,7 +366,7 @@ public class Elevator extends ClientRPC implements Runnable {
 		if (isPickUp || isDropoff) {
 			changeState(ElevatorState.OPEN);
 
-			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, floor, stopType, stopDirection,
+			DoorOpenedMessage doorOpen = new DoorOpenedMessage(currentEventTime, this.getID(), floor, stopType, stopDirection,
 					numPickups, numDropoffs);
 			sendRequest(doorOpen);
 			Logger.printMessage(doorOpen, "SENT");
@@ -459,6 +463,9 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * boarding -> boorInterrupt
 	 */
 	private void doorInterrupt() {
+		
+		sendRequest(new DoorInterruptMessage(elevatorNumber, currentEventTime, MessageType.DOOR_INTERRUPT));
+		
 		try {
 			Thread.sleep(DOOR_INTERRUPT_DELAY);
 		} catch (InterruptedException e) {
@@ -571,10 +578,12 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @param newState
 	 */
 	private synchronized void changeState(ElevatorState newState) {
-		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		}
 		childState = newState;
 		sendRequest(new UpdateElevatorInfoMessage(
-				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size())));
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
 	}
 
 	/**
@@ -583,8 +592,16 @@ public class Elevator extends ClientRPC implements Runnable {
 	 * @param newState, the new state for the elevator.
 	 */
 	private void changeParentState(ElevatorState newState) {
-		System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nELEVATOR " + (elevatorNumber + 1) + " STATE: --------- " + newState + " ---------");
+		}
 		this.parentState = newState;
+		sendRequest(new UpdateElevatorInfoMessage(
+				new ElevatorInfo(direction, parentState, childState, floor, elevatorNumber, trips.size(), trips)));
+	}
+	
+	public ArrayList<ElevatorTrip> getTrips() {
+		return trips;
 	}
 
 }

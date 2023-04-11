@@ -25,6 +25,9 @@ public class MessageQueue {
 	// All the messages sent to the floor.
 	private ConcurrentLinkedDeque<Message> toFloor;
 	
+	// All the messages sent to the floor.
+	private ConcurrentLinkedDeque<Message> toUI;
+	
 	// Keeps track of all the elevator statuses.
 	private HashMap<Integer, ElevatorInfo> elevatorInfos; 
 	
@@ -38,6 +41,7 @@ public class MessageQueue {
 		this.toElevator = new HashMap<Integer, ConcurrentLinkedDeque<Message>>();
 		this.toFloor = new ConcurrentLinkedDeque<Message>();
 		this.elevatorInfos = new HashMap<>();
+		this.toUI = new ConcurrentLinkedDeque<Message>();
 	}
 	
 	/**
@@ -112,6 +116,22 @@ public class MessageQueue {
 	}
 	
 	/**
+	 * 
+	 */
+	public void updateUI(Message m) {
+		toUI.offer(m);
+	}
+	
+	public Message receiveFromUI() {
+		Message m = toUI.poll();
+		if (m == null) {
+			return new EmptyMessage();
+		}
+		
+		return m;
+	}
+	
+	/**
 	 * Receive message from elevator 
 	 * @return The message in the elevator queue
 	 */
@@ -138,5 +158,16 @@ public class MessageQueue {
 			return new EmptyMessage();
 		}
 		return m;	
+	}
+	
+	
+	/**
+	 * Returns the number of pending requests for the elevator.
+	 * @param id, the elevator id.
+	 * 
+	 * @return
+	 */
+	public int numPendingElevatorRequest(int id) {
+		return toElevator.get(id).size();
 	}
 }

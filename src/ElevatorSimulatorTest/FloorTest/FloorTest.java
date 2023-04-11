@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Floor.Floor;
 import ElevatorSimulator.Messages.DirectionType;
 import ElevatorSimulator.Messages.DoorOpenedMessage;
@@ -15,6 +16,7 @@ import ElevatorSimulator.Messages.Message;
 import ElevatorSimulator.Messages.MessageType;
 import ElevatorSimulator.Messages.StartMessage;
 import ElevatorSimulator.Messages.StopType;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 import ElevatorSimulatorTest.MockServerRPC;
@@ -43,7 +45,7 @@ public class FloorTest{
 	// Test constants.
 	public static int NUM_FLOORS = 4;
 	
-	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-1.csv";
+	public static String FILEPATH = "src/ElevatorSimulatorTest/TestFiles/elevator_test-one_request.csv";
 	
 	private int PICKUP_FLOOR = 1;
 	
@@ -56,12 +58,13 @@ public class FloorTest{
 	@BeforeEach
 	void init() {	
 		Thread.currentThread().setName("FLOOR TEST THREAD");
+		Simulator.DEBUG_MODE = false;
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.FLOOR_PORT);		
 		
 		// Creates a floor.
-		floor = new Floor(FILEPATH, NUM_FLOORS);
+		floor = new Floor(FILEPATH, NUM_FLOORS, ConnectionType.LOCAL);
 
 		serverRPCThread = new Thread(serverRPC, "SERVER RPC THREAD");
 		serverRPCThread.start();
@@ -112,13 +115,13 @@ public class FloorTest{
 			if (newMessage.getType() == MessageType.REQUEST) {
 				assertEquals(0, floor.getElevatorRequestsList().size());
 
-				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
+				DoorOpenedMessage pickupMessage = new DoorOpenedMessage(new Date(), 0, PICKUP_FLOOR, StopType.PICKUP, DirectionType.UP, 1, 0);
 				
 				queue.replyToFloor(pickupMessage);
 				
 				assertEquals(0, floor.getElevatorRequestsList().size());
 				
-				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(), DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
+				DoorOpenedMessage dropoffMessage = new DoorOpenedMessage(new Date(), 0, DESTINATION_FLOOR, StopType.DROPOFF, DirectionType.UP, 0, 1);
 
 				queue.replyToFloor(dropoffMessage);
 				

@@ -1,8 +1,11 @@
 package ElevatorSimulator.Scheduler;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import ElevatorSimulator.Logger;
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Elevator.ElevatorTrip;
@@ -31,10 +34,13 @@ public class Scheduler implements Runnable {
 	// Keeps track of whether the scheduler should keep running or not.
 	private boolean shouldRun;
 	
+	// Keeps track of whether or not the servers are started externally or not.
+	private boolean initializeServers;
+	
 	// The scheduler ports used for UDP.
 	public static final int ELEVATOR_PORT = 23;
 	public static final int FLOOR_PORT = 69;
-
+	public static final int UI_PORT = 4445;
 
 
 	/**
@@ -42,10 +48,21 @@ public class Scheduler implements Runnable {
 	 * 
 	 */
 	public Scheduler() {
-		this.queue = new MessageQueue();
+		this(new MessageQueue(), true);
+	}
+	
+	/**
+	 * Scheduler constructor with the option of an external queue.
+	 * 
+	 * @param external message queue.
+	 * 
+	 */
+	public Scheduler(MessageQueue queue, boolean initializeServers) {
+		this.queue = queue;
 		this.shouldRun = true;
 		this.currentRequest = null;
 		this.state = null;
+		this.initializeServers = initializeServers;
 
 		changeState(SchedulerState.POLL);
 	}
@@ -56,9 +73,11 @@ public class Scheduler implements Runnable {
 	private void initializeServerRPCs() {
 		Thread floorThread = new Thread(new ServerRPC(queue, FLOOR_PORT), "FLOOR MESSAGE THREAD");
 		Thread elevatorThread = new Thread(new ServerRPC(queue, ELEVATOR_PORT), "ELEVATOR MESSAGE THREAD");
+		Thread uiThread = new Thread(new ServerRPC(queue, UI_PORT), "UI MESSAGE THREAD");
 
 		floorThread.start();
 		elevatorThread.start();
+		uiThread.start();
 	}
 
 	/**
@@ -103,6 +122,23 @@ public class Scheduler implements Runnable {
 		if (availableElevators.size() == 0) {
 			return -1;
 		}
+		
+		// tries to find an empty elevator.
+		for (ElevatorInfo elevator : availableElevators) {
+			// The elevator has no requests and no pending trips.
+			if (elevator.getNumRequest() == 0 && queue.numPendingElevatorRequest(elevator.getElevatorId()) == 0) {
+				possibleCandidates.add(elevator);
+			}
+		}
+
+		if (possibleCandidates.size() != 0) {
+			// return the closest elevator.
+			return possibleCandidates.stream()
+					.min((first, second) -> Integer.compare(
+							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
+							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
+					.get().getElevatorId();
+		}
 
 		// Tries to find an elevator in going the same direction.
 		// Going up and elevator is below request floor OR
@@ -126,22 +162,7 @@ public class Scheduler implements Runnable {
 					.getElevatorId();
 		}
 
-		// tries to find an empty elevator.
-		for (ElevatorInfo elevator : availableElevators) {
-			if (elevator.getNumRequest() == 0) {
-				possibleCandidates.add(elevator);
-			}
-		}
-
-		if (possibleCandidates.size() != 0) {
-			// return the closest elevator.
-			return possibleCandidates.stream()
-					.min((first, second) -> Integer.compare(
-							Math.abs(first.getFloorNumber() - requestMessage.getFloor()),
-							Math.abs(second.getNumRequest() - requestMessage.getFloor())))
-					.get().getElevatorId();
-		}
-
+	
 		// Could not find a suitable elevator.
 		return -1;
 	}
@@ -157,9 +178,13 @@ public class Scheduler implements Runnable {
 			int id = this.getClosestElevator((RequestElevatorMessage) currentRequest);
 
 			if (id != -1) {
+				if (Simulator.DEBUG_MODE) {
+					System.out.println("PICKED ELEVATOR " + id);
+				}
 				queue.replyToElevator(currentRequest, id);
 			} else {
-				return;
+				// Send the message to the back of the queue.
+				queue.send(currentRequest);
 			}
 
 		} else if (currentRequest.getType() == MessageType.ELEVATOR_STUCK) {
@@ -205,7 +230,9 @@ public class Scheduler implements Runnable {
 	 */
 	@Override
 	public void run() {
-		initializeServerRPCs();
+		if (initializeServers) {
+			initializeServerRPCs();
+		}
 
 		while (this.shouldRun) {
 			if (state == SchedulerState.POLL) {
@@ -218,8 +245,9 @@ public class Scheduler implements Runnable {
 				processMessage();
 			}
 
+			// Avoids busy looping.
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -232,17 +260,10 @@ public class Scheduler implements Runnable {
 	 * @param newState
 	 */
 	private void changeState(SchedulerState newState) {
-		System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
+		if (Simulator.DEBUG_MODE) {
+			System.out.println("\nSCHEDULER STATE: --------- " + newState + " ---------");
+		}
 		state = newState;
-	}
-
-	/**
-	 * Updates the message queue for the scheduler. Used for testing.
-	 * 
-	 * @param queue
-	 */
-	public void updateQueue(MessageQueue queue) {
-		this.queue = queue;
 	}
 
 	/**
@@ -258,6 +279,13 @@ public class Scheduler implements Runnable {
 	}
 
 	public static void main(String[] args) {
+		if (Simulator.DEBUG_MODE) {
+			try {
+				System.out.println("The scheduler IP is: " + InetAddress.getLocalHost());
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+		}
 		Thread schedulerThread = new Thread(new Scheduler(), "SCHEDULER THREAD");
 		schedulerThread.start();
 	}

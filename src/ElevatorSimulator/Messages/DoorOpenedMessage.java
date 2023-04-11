@@ -16,6 +16,7 @@ public class DoorOpenedMessage extends Message{
 	private DirectionType direction;
 	private int numPickups;
 	private int numDropoffs;
+	private int elevatorID;
 	
 	/**
 	 * The constructor 
@@ -23,15 +24,18 @@ public class DoorOpenedMessage extends Message{
 	 * @param arrivedFloor the floor it arrived at
 	 * @param type the type of message
 	 */
-	public DoorOpenedMessage(Date timestamp, int arrivedFloor, StopType type, DirectionType direction, int numPickups, int numDropoffs){
+	public DoorOpenedMessage(Date timestamp, int elevatorID, int arrivedFloor, StopType type, DirectionType direction, int numPickups, int numDropoffs){
 		super(SenderType.ELEVATOR, timestamp, MessageType.DOORS_OPENED);
 		this.type = type;
 		this.arrivedFloor = arrivedFloor;
 		this.direction = direction;
 		this.numPickups = numPickups;
 		this.numDropoffs = numDropoffs;
+		this.elevatorID = elevatorID;
 		
 	}
+	
+
 	/**
 	 * Gets the stop type
 	 * 
@@ -65,6 +69,15 @@ public class DoorOpenedMessage extends Message{
 	 */
 	public int getNumDropoffs(){
 		return numDropoffs;
+	}
+	
+	/**
+	 * Getter for elevatorID.
+	 * 
+	 * @return elevatorID value
+	 */
+	public int getID(){
+		return elevatorID;
 	}
 	
 	/**

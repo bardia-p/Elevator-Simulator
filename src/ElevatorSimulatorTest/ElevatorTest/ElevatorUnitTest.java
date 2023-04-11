@@ -9,10 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;
 
+import ElevatorSimulator.Simulator;
 import ElevatorSimulator.Elevator.Elevator;
 import ElevatorSimulator.Elevator.ElevatorInfo;
 import ElevatorSimulator.Elevator.ElevatorState;
 import ElevatorSimulator.Messages.*;
+import ElevatorSimulator.Messaging.ConnectionType;
 import ElevatorSimulator.Messaging.MessageQueue;
 import ElevatorSimulator.Scheduler.Scheduler;
 import ElevatorSimulatorTest.MockServerRPC;
@@ -48,6 +50,7 @@ public class ElevatorUnitTest {
 	@BeforeEach
 	public void init() {
 		Thread.currentThread().setName("ELEVATOR UNIT TEST THREAD");
+		Simulator.DEBUG_MODE = false;
 
 		queue = new MessageQueue();
 		serverRPC = new MockServerRPC(queue, Scheduler.ELEVATOR_PORT);
@@ -56,11 +59,11 @@ public class ElevatorUnitTest {
 		serverRPCThread.start();
 		
 		// Creates an elevator.
-		elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS);
+		elevator = new Elevator(ELEVATOR_ID, NUM_FLOORS, ConnectionType.LOCAL);
 
 		// Adds the elevator to the queue.
 		ElevatorInfo info = new ElevatorInfo(elevator.getDirection(), elevator.getParentState(), elevator.getState(),
-				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips());
+				elevator.getFloorNumber(), elevator.getID(), elevator.getNumTrips(), elevator.getTrips());
 		queue.addElevator(ELEVATOR_ID, info);
 	}
 
@@ -347,12 +350,8 @@ public class ElevatorUnitTest {
 						assertEquals(DirectionType.DOWN, doorsOpenMessage.getDirection());
 						assertEquals(expectedFloors[floorIterator], doorsOpenMessage.getArrivedFloor());
 					}
-				} else if (newMessage.getType() == MessageType.UPDATE_ELEVATOR_INFO) {
-					ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-					
-					if (elevatorInfo.getState() == ElevatorState.BOARDING) {
-						shouldRun = false; // Boarded the faulty request.
-					}
+				} else if (newMessage.getType() == MessageType.DOOR_INTERRUPT) {
+					shouldRun = false;
 				}
 			}
 		}
@@ -364,25 +363,11 @@ public class ElevatorUnitTest {
 		assertEquals(MessageType.UPDATE_ELEVATOR_INFO, newMessage.getType());
 		
 		ElevatorInfo elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-		assertEquals(ElevatorState.DOOR_INTERRUPT, elevatorInfo.getState());
+		assertEquals(ElevatorState.BOARDING, elevatorInfo.getState());
 
 		long endTime = System.currentTimeMillis();
 
 		// Confirm the door was interrupted within 1 second of picking up the faulty request.
-		assertEquals(1000, endTime - startTime, 1000);
-		
-		startTime = System.currentTimeMillis();
-		
-		// Confirm the elevator went back to boarding.
-		newMessage = serverRPC.getCurrentMessage();
-		assertEquals(MessageType.UPDATE_ELEVATOR_INFO, newMessage.getType());
-		
-		elevatorInfo = ((UpdateElevatorInfoMessage) newMessage).getInfo();
-		assertEquals(ElevatorState.BOARDING, elevatorInfo.getState());
-		
-		endTime = System.currentTimeMillis();
-		
-		// Confirm the door was interrupted within the interrupt delay of picking up the faulty request.
 		assertEquals(Elevator.DOOR_INTERRUPT_DELAY, endTime - startTime, 1000);
 		
 		// Kills the elevator thread.
