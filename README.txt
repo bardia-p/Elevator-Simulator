@@ -1,4 +1,4 @@
-Elevator Simulator Project - Iteration 4
+Elevator Simulator Project - Iteration 5
 
 Authors (Group L1G3)
  - Andre Hazim - 101141843
@@ -16,20 +16,21 @@ Iteration 0: Measure a Real Elevator (completed)
 Iteration 1: Establish Connections between the three subsystems (completed)
 Iteration 2: Adding the scheduler and Elevator Subsystem (completed)
 Iteration 3: Multiple Cars and System Distribution (completed)
-Iteration 4: Adding Error detection and correction (current version)
- - Adding Error detection and correction.
-Iteration 5: Measuring the Scheduler and predicting the performance
+Iteration 4: Adding Error detection and correction (completed)
+Iteration 5: Measuring the Scheduler and predicting the performance (current version)
 
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
  - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter4.png".
  - The sequence diagrams is located in "./diagram/sequence_diagrams" labeled: "iter4_sequence_diagram.jpg".
- - The state diagrams are located in "./diagrams/state_diagrams/Iteration4" as follows:
+ - The state diagrams are located in "./diagrams/state_diagrams/Iteration5" as follows:
       - "elevator_state_machine.jpg"
       - "scheduler_state_machine.jpg"
 - The timing diagrams are located in "./diagrams/timing_diagrams" as follows:
       - "transient_fault_timing_diagram.jpg"
       - "system_fault_timing-diagram.jpg"
+- The final report is located in "./documents"
+- Iteration 0 measurements is located in "./documents"
 
 Contents:
  - Package ElevatorSimulator
@@ -50,6 +51,7 @@ Contents:
       - ACKMessage.java : Acknowledgment message.
       - ArrivedElevatorMessage.java : Message to indicate the elevator has arrived.
       - DirectionType.java : Enum for the possible directions of the elevator.
+      - DoorInterruptMessage : Transient error message class.
       - DoorOpenedMessage.java : Message to indicate that the doors have opened.
       - ElevatorStuckMessage.java : Depicts when an elevator is stuck.
       - EmptyMessage.java : The empty message returned when there are no requests to send to the subsystem.
@@ -66,6 +68,7 @@ Contents:
       - UpdateElevatorInfoMessage.java : Message to update the elevator information.
  - Package ElevatorSimulator.Messaging
       - ClientRPC.java : Client RPC to send and receive packets.
+      - ConnectionType.java : The connection type for the system.
       - MessageQueue.java : File representing the MessageQueue class.
       - ServerRPC.java : Server RPC to send and receive packets.
  - Package ElevatorSimulator.resources
@@ -89,9 +92,16 @@ Contents:
       - FloorParserTest.java : The unit tests to validate the parsing aspect of the floor.
  - Package ElevatorSimulatorTest.SchedulerTest
       - SchedulerTest.java : The unit tests for the scheduler subsystem.
+ - Package ElevatorSimulatorTest.PerformanceTest
+      - PerformanceIntegrationTest.java : Measuring the performance of different parts of the system.
+      - PerformanceUnitTest.java : Measuring specific elevator events.
  - Package ElevatorSimulator.TestFiles
-      - elevator_test-1.csv : csv file with commands for testing purposes.
       - elevator_test-interrupt.csv : csv file with commands for testing door interrupt.
+      - elevator_test-multiple_requests_with_error.csv : csv file with commands for testing multiple requests with error.
+      - elevator_test-multiple_requests.csv : csv file with commands for testing multiple requests.
+      - elevator_test-one_request.csv : csv file with commands for testing one request.
+      - elevator_test-stress_with_error.csv : csv file with commands for testing stress with an error.
+      - elevator_test-stress.csv : csv file with commands for testing stress.
       - elevator_test-stuck.csv : csv file with commands for testing elevator stuck.
 
 
@@ -157,6 +167,23 @@ Iteration 4:
 	- Added unit tests for the scheduler.
  - Sarah Chow:
  	- Updated the floor to handle sending files with error.
+
+Iteration 5:
+ - Andre Hazim:
+	- Developed the UI for the system.
+      - Contributed to the project report.
+ - Bardia Parmoun:
+	- Added performance tests to measure various aspects of the system.
+      - Contributed to the project report.
+ - Guy Morgenshtern:
+ 	- Developed the UI for the system.
+      - Contributed to the project report.
+ - Kyra Lothrop:
+	- Added performance tests to measure various aspects of the system.
+      - Contributed to the project report.
+ - Sarah Chow:
+ 	- Developed the UI for the system.
+      - Contributed to the project report and prepared the demo video.
 
 
 Setup instructions:
