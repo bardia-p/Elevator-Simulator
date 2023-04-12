@@ -21,16 +21,18 @@ Iteration 5: Measuring the Scheduler and predicting the performance (current ver
 
 Design:
 For better understanding the design of the project please navigate to the "./diagrams" folder.
- - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter4.png".
- - The sequence diagrams is located in "./diagram/sequence_diagrams" labeled: "iter4_sequence_diagram.jpg".
- - The state diagrams are located in "./diagrams/state_diagrams/Iteration5" as follows:
+ - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter5.png".
+ - The sequence diagrams is located in "./diagram/sequence_diagrams".
+ - The state diagrams are located in "./diagrams/state_diagrams/iteration4" as follows:
       - "elevator_state_machine.jpg"
       - "scheduler_state_machine.jpg"
 - The timing diagrams are located in "./diagrams/timing_diagrams" as follows:
       - "transient_fault_timing_diagram.jpg"
       - "system_fault_timing-diagram.jpg"
-- The final report is located in "./documents"
+
+- The final report is located in "./documents" named "Final Report.pdf".
 - Iteration 0 measurements is located in "./documents"
+- The video demo for the project is located in "./demo".
 
 Contents:
  - Package ElevatorSimulator
@@ -170,19 +172,19 @@ Iteration 4:
 
 Iteration 5:
  - Andre Hazim:
-	- Developed the UI for the system.
+      - Developed the UI for the system.
       - Contributed to the project report.
  - Bardia Parmoun:
 	- Added performance tests to measure various aspects of the system.
       - Contributed to the project report.
  - Guy Morgenshtern:
- 	- Developed the UI for the system.
+      - Developed the UI for the system.
       - Contributed to the project report.
  - Kyra Lothrop:
-	- Added performance tests to measure various aspects of the system.
+      - Added performance tests to measure various aspects of the system.
       - Contributed to the project report.
  - Sarah Chow:
- 	- Developed the UI for the system.
+      - Developed the UI for the system.
       - Contributed to the project report and prepared the demo video.
 
 
@@ -195,9 +197,17 @@ Setup instructions:
 6. Click the "Finish button".
 7. Select the project folder. 
 8. Once the project folder is open navigate to the "./src/ElevatorSimulator/" and run these files in the following order.
-   - Scheduler.java
-   - ElevatorController.java
-   - Floor.java
+   - Scheduler/Scheduler.java
+   - Elevator/ElevatorController.java
+   - UI/UIGenerator.java
+   - Floor/Floor.java
+
+To run the system with multiple devices:
+1. Run the Scheduler.java on your machine to find your IP address.
+2. On every other machine, update the PUBLIC_IP parameter of “Message/ServerRPC.java” file with the IP address that you obtained.
+3. Update the main function for “UIGenerator”, “Floor”, and “ElevatorController” by changing their connection type to “ConnectionType.REMOTE”.
+4. Start the subsystems on each machine with the same order as before.
+
 
 Test Instructions:
 The ElevatorSimulator.Test package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
@@ -207,6 +217,8 @@ For each subsystem there is a dedicated test class to test them separately.
 - ElevatorUnitTest: Unit Tests for the elevator.
 - FloorTest: testing the floor subsystem alone.
 - SchedulerTest: testing the scheduler subsystem alone.
+- PerformanceUnitTest: measuring specific elevator events.
+- PerformanceIntegrationTest: measuring the system as a whole.
 
 Navigate to any of these classes and run them as a JUnit test to confirm that the system is
 working as expected. 
