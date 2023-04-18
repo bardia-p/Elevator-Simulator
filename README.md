@@ -1,41 +1,38 @@
-Elevator Simulator Project - Iteration 5
+# Elevator Simulator Project
 
-Authors (Group L1G3)
- - Andre Hazim - 101141843
- - Bardia Parmoun - 101143006
- - Guy Morgenshtern - 101151430
- - Kyra Lothrop - 101145872
- - Sarah Chow - 101143033
+## Authors (Group L1G3)
+[@Andre Hazim](https://github.com/andre-Hazim) \
+[@Bardia Parmoun](https://github.com/bardia-p) \
+[@Guy Morgenshtern](https://github.com/guymorgenshtern) \
+[@Kyra Lothrop](https://github.com/kyralothrop) \
+[@Sarah Chow](https://github.com/sarahchoww)
 
-Description:
+## Description
 The purpose of this project is to simulate the behaviour of an elevator system in real time. 
 The Elevator Simulator is composed of the Scheduler, Elevator, and Floor subsystems, that are constantly interacting with each other.
 
-Deliverables:
-Iteration 0: Measure a Real Elevator (completed)
-Iteration 1: Establish Connections between the three subsystems (completed)
-Iteration 2: Adding the scheduler and Elevator Subsystem (completed)
-Iteration 3: Multiple Cars and System Distribution (completed)
-Iteration 4: Adding Error detection and correction (completed)
-Iteration 5: Measuring the Scheduler and predicting the performance (current version)
+## Deliverables
+- **Iteration 0:** Measure a Real Elevator **(completed)**
+- **Iteration 1:** Establish Connections between the three subsystems **(completed)**
+- **Iteration 2:** Adding the scheduler and Elevator Subsystem **(completed)**
+- **Iteration 3:** Multiple Cars and System Distribution **(completed)**
+- **Iteration 4:** Adding Error detection and correction **(completed)**
+- **Iteration 5:** Measuring the Scheduler and predicting the performance **(current version)**
 
-Design:
-For better understanding the design of the project please navigate to the "./diagrams" folder.
- - The UML class diagram for this iteration is located in "./diagrams/class_diagrams" labeled "class_diagram_iter5.png".
- - The sequence diagrams is located in "./diagram/sequence_diagrams".
- - The state diagrams are located in "./diagrams/state_diagrams/iteration4" as follows:
-      - "elevator_state_machine.jpg"
-      - "scheduler_state_machine.jpg"
-- The timing diagrams are located in "./diagrams/timing_diagrams" as follows:
-      - "transient_fault_timing_diagram.jpg"
-      - "system_fault_timing-diagram.jpg"
+## Design
+- All the design diagrams for the project can be found at [diagrams](https://github.com/bardia-p/Elevator-Simulator/tree/main/diagrams). This folder contains:
+     - The latest [UML class diagram](https://github.com/bardia-p/Elevator-Simulator/blob/main/diagrams/class_diagrams/class_diagram_iter5.jpg) for the system.
+     - The [sequence diagrams](https://github.com/bardia-p/Elevator-Simulator/tree/main/diagrams/sequence_diagrams) showing the interactions between the components.
+     - The [state machines](https://github.com/bardia-p/Elevator-Simulator/tree/main/diagrams/state_diagrams/Iteration4) for the elevator and scheduler subsystems.
+     - The [timing diagrams](https://github.com/bardia-p/Elevator-Simulator/tree/main/diagrams/timing_diagrams) showing the behaviour of the system during error cases.
 
-- The final report is located in "./documents" named "Final Report.pdf".
-- Iteration 0 measurements is located in "./documents"
-- The video demo for the project is located in "./demo".
+- You can also review the [design report](https://github.com/bardia-p/Elevator-Simulator/blob/main/documents/Final%20Report.pdf) describing various aspects of the project in detail. 
+- Here is also the [elevator measurements](https://github.com/bardia-p/Elevator-Simulator/blob/main/documents/L1G3_milestone_0.pdf) collected in the first iteration of the project.
+- And don't forget to check out [project demo!](https://www.youtube.com/watch?v=WC1NvLRQY9o)
 
-Contents:
- - Package ElevatorSimulator
+## File Breakdown
+```
+ Package ElevatorSimulator
       - ErrorGenerator.java : The class in charge of generating an elevator for the elevator.
       - Logger.java : Format the message to print to the console.
       - Serializer.java : serialize or deserialize a given message.
@@ -105,12 +102,13 @@ Contents:
       - elevator_test-stress_with_error.csv : csv file with commands for testing stress with an error.
       - elevator_test-stress.csv : csv file with commands for testing stress.
       - elevator_test-stuck.csv : csv file with commands for testing elevator stuck.
+```
 
 
 * Note: if you notice any ".DS_STORE" files, they are automatically created and are related to the internal file structure of macOS. 
 
-Individual Contributions: 
-Iteration 1:
+## Individual Contributions
+### Iteration 1
  - Andre Hazim: Elevator and Scheduler subsystem + testing
 	- ElevatorSimulator: Elevator.java, Scheduler.java, ArrivedElevatorMessage.java
 	- ElevatorSimulatorTest: SimulatorTest.java
@@ -127,7 +125,7 @@ Iteration 1:
 	- ElevatorSimulator: Floor.java, Simulator.java, RequestElevatorMessage.java
 	- ElevatorSimulatorTest: ElevatorTest.java, FloorTest.java, MockScheduler.java, SchedulerTest.java
 
-Iteration 2:
+### Iteration 2
  - Andre Hazim:
 	- ElevatorSimulator: Elevator.java, OpenDoorsMessage.java, MessageQueue.java
  - Bardia Parmoun:
@@ -142,7 +140,7 @@ Iteration 2:
 	- ElevatorSimulator: MessageQueue.java, Scheduler.java, ElevatorController.java
 	- ElevatorSimulatorTest: ElevatorTest.java, FloorTest.java, SchedulerTest.java
 
-Iteration 3:
+### Iteration 3
  - Andre Hazim:
 	- Elevator updates and UDP implementation.
  - Bardia Parmoun:
@@ -154,7 +152,7 @@ Iteration 3:
  - Sarah Chow:
     - JUnit testing and Scheduler updates.
 
-Iteration 4:
+### Iteration 4
  - Andre Hazim:
 	- Updating the elevator to handle door interrupts and elevator stuck.
 	- Added regression and unit tests for the tests.
@@ -170,7 +168,7 @@ Iteration 4:
  - Sarah Chow:
  	- Updated the floor to handle sending files with error.
 
-Iteration 5:
+### Iteration 5
  - Andre Hazim:
       - Developed the UI for the system.
       - Contributed to the project report.
@@ -188,37 +186,42 @@ Iteration 5:
       - Contributed to the project report and prepared the demo video.
 
 
-Setup instructions:
+## Setup instructions
+### Setting up the project
 1. Unzip the submission file.
 2. Navigate the eclipse IDE.
 3. Navigate the File menu.
-4. Open the "Open Project from File System.." option.
-5. Select the root folder for the project "ElevatorSimulator".
-6. Click the "Finish button".
+4. Open the `Open Project from File System..` option.
+5. Select the root folder for the project `ElevatorSimulator`.
+6. Click the `Finish button`.
 7. Select the project folder. 
-8. Once the project folder is open navigate to the "./src/ElevatorSimulator/" and run these files in the following order.
-   - Scheduler/Scheduler.java
-   - Elevator/ElevatorController.java
-   - UI/UIGenerator.java
-   - Floor/Floor.java
 
-To run the system with multiple devices:
+### Running the project on one system using localhost
+Once the project folder is open navigate to the `./src/ElevatorSimulator/` and run these files in the following order.
+   - `Scheduler/Scheduler.java`
+   - `Elevator/ElevatorController.java`
+   - `UI/UIGenerator.java`
+   - `Floor/Floor.java`
+
+### Running the system on multiple devices:
 1. Run the Scheduler.java on your machine to find your IP address.
-2. On every other machine, update the PUBLIC_IP parameter of “Message/ServerRPC.java” file with the IP address that you obtained.
-3. Update the main function for “UIGenerator”, “Floor”, and “ElevatorController” by changing their connection type to “ConnectionType.REMOTE”.
+2. On every other machine, update the PUBLIC_IP parameter of `Message/ServerRPC.java` file with the IP address that you obtained.
+3. Update the main function for `UIGenerator`, `Floor`, and `ElevatorController` by changing their connection type to `ConnectionType` to `REMOTE`.
 4. Start the subsystems on each machine with the same order as before.
 
 
-Test Instructions:
-The ElevatorSimulator.Test package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
+## Test Instructions
+The `ElevatorSimulatorTest` package has been dedicated to testing. The testing framework that was used in this project is JUnit 5.
 
 For each subsystem there is a dedicated test class to test them separately.
+
+```
 - ElevatorIntegrationTest: Tests the general flow for the elevator.
 - ElevatorUnitTest: Unit Tests for the elevator.
 - FloorTest: testing the floor subsystem alone.
 - SchedulerTest: testing the scheduler subsystem alone.
 - PerformanceUnitTest: measuring specific elevator events.
 - PerformanceIntegrationTest: measuring the system as a whole.
+```
 
-Navigate to any of these classes and run them as a JUnit test to confirm that the system is
-working as expected. 
+Navigate to any of these classes and run them as a JUnit test to confirm that the system is working as expected. 
