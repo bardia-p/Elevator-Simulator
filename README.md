@@ -1,5 +1,9 @@
 # Elevator Simulator Project
 
+<p align="center">
+<img src="demo/demo.png" />
+</p>
+
 ## Authors (Group L1G3)
 [@Andre Hazim](https://github.com/andre-Hazim) \
 [@Bardia Parmoun](https://github.com/bardia-p) \
